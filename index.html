@@ -1779,6 +1779,40 @@
       font-weight: 600;
     }
 
+    .total-line.sub-line .lbl {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .total-line.sub-line .val {
+      font-size: 12px;
+      color: #aaa;
+      font-weight: 500;
+    }
+
+    .total-line.us-sub-line .lbl {
+      color: #0369a1;
+    }
+
+    .total-line.us-sub-line .val {
+      color: #0369a1;
+    }
+
+    .total-line.senior-info-line .lbl {
+      font-size: 12px;
+      color: #b45309;
+    }
+
+    .senior-tag {
+      font-size: 11px;
+      font-weight: 700;
+      background: #fef3c7;
+      color: #92400e;
+      border-radius: 6px;
+      padding: 2px 8px;
+      border: 1px solid #fde68a;
+    }
+
     .total-line.disc .val {
       color: #d63031;
       font-weight: 700;
@@ -2746,8 +2780,68 @@
     }
 
     /* ══════════════════════════════════════════
-     LOCK MOBILE TO PORTRAIT
+     BIRTHDAY + AUTO-AGE
   ══════════════════════════════════════════ */
+    .bday-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .bday-wrap input[type="date"] {
+      width: 100%;
+      padding: 11px 80px 11px 13px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: #1a1a1a;
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .bday-wrap input[type="date"]:focus {
+      border-color: #6F2DBD;
+      box-shadow: 0 0 0 3px rgba(111, 45, 189, 0.1);
+      background: #fff;
+    }
+
+    .bday-age-badge {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #6F2DBD;
+      color: #fff;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      pointer-events: none;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .bday-age-unit {
+      font-size: 10px;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    /* Operation Type is now a standard dropdown select — no special CSS needed */
+
+    /* ══════════════════════════════════════════
+     AUTOCOMPLETE ARROW-KEY HIGHLIGHT
+  ══════════════════════════════════════════ */
+    .ac-item.ac-focused {
+      background: #f0e8ff;
+      color: #6F2DBD;
+    }
+
+
     @media (max-width: 767px) and (orientation: landscape) {
       html {
         transform: rotate(-90deg);
@@ -2841,7 +2935,82 @@
         min-height: 52px;
       }
     }
-  </style>
+  
+    /* ══════════════════════════════════════════════════
+       POS PAGE  —  macOS style, compact
+    ══════════════════════════════════════════════════ */
+    #page-pos { display:none; flex-direction:column; background:#f0eef7; min-height:100vh; }
+    #page-pos.active { display:flex; }
+    .pos-body { display:grid; grid-template-columns:1fr 370px; height:calc(100vh - 62px); overflow:hidden; }
+
+    .pos-left { padding:18px 22px; overflow-y:auto; border-right:1px solid #ddd8ee; background:#f7f5fc; }
+    .pos-section-lbl { font-size:10px; font-weight:700; letter-spacing:1.4px; color:#9B72D0; text-transform:uppercase; margin-bottom:8px; }
+    .pos-patient-card { background:#fff; border:1px solid #e5dff5; border-radius:11px; padding:11px 14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(111,45,189,.06); }
+    .pos-patient-name { font-size:16px; font-weight:700; color:#1a1a1a; margin-bottom:2px; }
+    .pos-patient-meta { font-size:12px; color:#999; }
+    .pos-items-card { background:#fff; border:1px solid #e5dff5; border-radius:11px; padding:8px 12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(111,45,189,.06); }
+    .pos-item-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #f3effe; font-size:13px; color:#2a2a2a; }
+    .pos-item-row:last-child { border-bottom:none; }
+    .pos-item-name { flex:1; padding-right:10px; }
+    .pos-item-cat { font-size:10px; color:#bbb; font-weight:500; text-transform:uppercase; letter-spacing:.4px; display:block; }
+    .pos-item-price { font-weight:600; color:#6F2DBD; font-size:13px; white-space:nowrap; }
+    .pos-totals-card { background:#fff; border:1px solid #e5dff5; border-radius:11px; padding:8px 12px; box-shadow:0 1px 3px rgba(111,45,189,.06); }
+    .pos-total-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px; color:#555; }
+    .pos-total-row.disc { color:#e53935; font-size:12px; }
+    .pos-total-row.grand { border-top:1.5px solid #6F2DBD; margin-top:6px; padding-top:9px; font-size:17px; font-weight:800; color:#6F2DBD; }
+    .pos-senior-badge { display:inline-block; background:#ede8ff; color:#6F2DBD; font-size:10px; font-weight:700; padding:1px 6px; border-radius:20px; margin-left:5px; }
+
+    .pos-right { background:#fff; display:flex; flex-direction:column; padding:14px 16px 12px; overflow-y:auto; border-left:1px solid #ddd8ee; }
+    .pos-right-title { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:11px; }
+    .pos-charged-banner { display:none; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:600; color:#2e7d32; margin-bottom:10px; text-align:center; }
+    .pos-charged-banner.show { display:block; }
+
+    .pos-fields-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:9px; }
+    .pos-field label { display:block; font-size:10px; font-weight:700; letter-spacing:.9px; color:#9B72D0; text-transform:uppercase; margin-bottom:4px; }
+    .pos-field select { width:100%; padding:7px 9px; border:1.5px solid #d4c8f0; border-radius:8px; font-size:13px; font-family:inherit; background:#faf8ff; color:#1a1a1a; outline:none; }
+    .pos-field select:focus { border-color:#6F2DBD; }
+    .pos-field select:disabled { background:#f2eff9; color:#bbb; cursor:not-allowed; }
+
+    .pos-amount-wrap { margin-bottom:7px; }
+    .pos-amount-lbl { font-size:10px; font-weight:700; letter-spacing:.9px; color:#9B72D0; text-transform:uppercase; margin-bottom:4px; }
+    .pos-amount-display { width:100%; padding:9px 12px; border:2px solid #6F2DBD; border-radius:9px; font-size:22px; font-weight:800; font-family:'SF Mono','DM Mono','Fira Mono',monospace; background:#faf8ff; color:#6F2DBD; text-align:right; box-sizing:border-box; }
+    .pos-amount-display.locked { background:#f2eff9; color:#bbb; border-color:#d4c8f0; }
+
+    .pos-balance-row { display:flex; justify-content:space-between; align-items:center; background:#f7f5fc; border:1px solid #e5dff5; border-radius:8px; padding:7px 11px; margin-bottom:9px; }
+    .pos-balance-lbl { font-size:11px; font-weight:600; color:#888; }
+    .pos-balance-val { font-size:16px; font-weight:800; font-family:'SF Mono','DM Mono','Fira Mono',monospace; color:#1a1a1a; }
+    .pos-balance-val.zero { color:#2e7d32; }
+    .pos-balance-val.overpaid { color:#1565c0; }
+
+    .pos-keyboard { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-bottom:9px; }
+    .pos-key { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#f0eef7; border:1px solid #ddd8ee; border-radius:9px; font-size:17px; font-weight:600; color:#1a1a1a; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; box-shadow:0 1px 0 #c8c2e0,0 2px 3px rgba(0,0,0,.07); transition:background .07s,transform .06s,box-shadow .06s; }
+    .pos-key:hover { background:#e8e4f5; }
+    .pos-key:active { background:#ddd8f0; transform:scale(0.93); box-shadow:none; }
+    .pos-key.wide { aspect-ratio:auto; grid-column:span 3; padding:8px; font-size:11px; font-weight:700; letter-spacing:1px; background:#f7f5fc; color:#9B72D0; text-transform:uppercase; }
+    .pos-key.del { background:#fff0f0; border-color:#f5c6c6; color:#e53935; font-size:15px; }
+    .pos-key.del:active { background:#fddada; }
+
+    .pos-confirm-btn { width:100%; padding:11px; background:linear-gradient(135deg,#6F2DBD,#4a0fa0); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 2px 8px rgba(111,45,189,.3); margin-bottom:6px; transition:opacity .15s,transform .08s; }
+    .pos-confirm-btn:active { transform:scale(0.98); }
+    .pos-confirm-btn:disabled { opacity:.45; cursor:not-allowed; }
+    .pos-actions-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .pos-back-btn { padding:9px; background:#fff; color:#555; border:1px solid #ddd; border-radius:9px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
+    .pos-back-btn:hover { background:#f5f5f5; }
+    .pos-cancel-btn { padding:9px; background:#fff0f0; color:#e53935; border:1px solid #f5c6c6; border-radius:9px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; }
+    .pos-cancel-btn:hover { background:#fddada; }
+
+    .pos-cancel-overlay { display:none; position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.35); backdrop-filter:blur(6px); align-items:center; justify-content:center; }
+    .pos-cancel-overlay.show { display:flex; }
+    .pos-cancel-dialog { background:rgba(248,246,255,.97); border:1px solid rgba(180,160,220,.4); border-radius:15px; padding:26px 26px 20px; width:300px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.22),0 4px 16px rgba(111,45,189,.1); }
+    .pos-cancel-icon { width:44px; height:44px; border-radius:50%; background:#fff0f0; border:1.5px solid #f5c6c6; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
+    .pos-cancel-title { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:6px; }
+    .pos-cancel-body { font-size:12px; color:#666; line-height:1.5; margin-bottom:18px; }
+    .pos-cancel-btns { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+    .pos-cancel-keep { padding:9px; background:#fff; border:1px solid #d4c8f0; border-radius:8px; font-size:13px; font-weight:600; color:#6F2DBD; font-family:inherit; cursor:pointer; }
+    .pos-cancel-keep:hover { background:#f4f1fa; }
+    .pos-cancel-confirm { padding:9px; background:#e53935; border:none; border-radius:8px; font-size:13px; font-weight:700; color:#fff; font-family:inherit; cursor:pointer; }
+    .pos-cancel-confirm:hover { opacity:.88; }
+</style>
 </head>
 
 <body>
@@ -3024,8 +3193,16 @@
           <div class="sec-label" style="margin-top:4px;">Patient Details</div>
           <div class="patient-grid">
             <div class="field c4"><label>Full Name</label><input type="text" id="f-name"
-                placeholder="Last Name, First Name M.I." /></div>
-            <div class="field"><label>Age</label><input type="text" id="f-age" placeholder="e.g. 35" /></div>
+                placeholder="Last Name, First Name M.I." autocomplete="off" oninput="enforceUpperCase(this)" /></div>
+            <div class="field"><label>Birthday</label>
+              <div class="bday-wrap">
+                <input type="date" id="f-birthday" max="" oninput="onBirthdayChange()" />
+                <div class="bday-age-badge" id="bday-age-badge" style="display:none;">
+                  <span id="bday-age-val">—</span> <span class="bday-age-unit">yrs</span>
+                </div>
+              </div>
+              <input type="hidden" id="f-age" />
+            </div>
             <div class="field"><label>Sex</label>
               <select id="f-sex">
                 <option value="" disabled selected>Select</option>
@@ -3033,29 +3210,33 @@
                 <option>Female</option>
               </select>
             </div>
-            <div class="field"><label>Status</label>
-              <select id="f-status">
-                <option value="" disabled selected>Select</option>
-                <option>Single</option>
-                <option>Married</option>
-                <option>Widowed</option>
+            <div class="field"><label>Operation Type</label>
+              <select id="f-optype">
+                <option value="" disabled selected>Select Type</option>
+                <option value="WALK-IN">Walk-In</option>
+                <option value="ON-SITE">On-Site</option>
+                <option value="HOMESERVICE">Home Service</option>
+                <option value="COLLAB PROJECT">Collab Project</option>
               </select>
             </div>
-            <div class="field"><label>Contact No.</label><input type="text" id="f-contact"
-                placeholder="09XX XXX XXXX" /></div>
+            <div class="field"><label>Contact No.</label><input type="text" id="f-contact" placeholder="09XX XXX XXXX"
+                oninput="enforceUpperCase(this)" /></div>
             <div class="field c2"><label>Address</label>
               <div class="autocomplete-wrap" id="addr-wrap">
                 <input type="text" id="f-address" placeholder="City / Municipality" autocomplete="off"
-                  oninput="onAddressInput()" onblur="closeDropdown('addr-wrap',300)"
-                  onfocus="closeAllDropdownsExcept('addr-dropdown'); onAddressInput();" />
+                  oninput="enforceUpperCase(this); onAddressInput();" onblur="closeDropdown('addr-wrap',300)"
+                  onfocus="closeAllDropdownsExcept('addr-dropdown'); onAddressInput();"
+                  onkeydown="acKeyNav(event,'addr-dropdown','addr-wrap')" />
                 <div class="ac-dropdown" id="addr-dropdown"></div>
               </div>
             </div>
             <div class="field c2"><label>Referred By</label>
               <div class="autocomplete-wrap" id="ref-wrap">
                 <input type="text" id="f-referred" placeholder="Physician / Clinic" autocomplete="off"
-                  oninput="onReferredInput()" onblur="closeDropdown('ref-wrap',300); applyReferralDiscount(this.value);"
-                  onfocus="closeAllDropdownsExcept('ref-dropdown'); onReferredInput();" />
+                  oninput="enforceUpperCase(this); onReferredInput();"
+                  onblur="closeDropdown('ref-wrap',300); applyReferralDiscount(this.value);"
+                  onfocus="closeAllDropdownsExcept('ref-dropdown'); onReferredInput();"
+                  onkeydown="acKeyNav(event,'ref-dropdown','ref-wrap')" />
                 <div class="ac-dropdown" id="ref-dropdown"></div>
               </div>
             </div>
@@ -3118,7 +3299,7 @@
             <div class="price-mode-bar">
               <label>Rate:</label>
               <div class="price-mode-badge" id="price-mode-badge">Regular</div>
-              <select id="price-mode" onchange="onPriceModeChange()" style="display:none;"></select>
+              <select id="price-mode" onchange="onPriceModeChange()" style="display:none;"><option value="r">Regular</option><option value="s">Senior</option></select>
             </div>
           </div>
 
@@ -3246,13 +3427,29 @@
 
         <!-- TOTALS -->
         <div class="totals-block">
-          <div class="total-line">
+          <div class="total-line sub-line" id="lab-subtotal-line">
+            <span class="lbl">Lab Subtotal</span>
+            <span class="val" id="lab-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line us-sub-line" id="us-subtotal-line" style="display:none;">
+            <span class="lbl">US Subtotal</span>
+            <span class="val" id="us-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line" id="combined-subtotal-line" style="display:none;">
             <span class="lbl">Subtotal</span>
             <span class="val" id="subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line" id="simple-subtotal-line">
+            <span class="lbl">Subtotal</span>
+            <span class="val" id="subtotal-val-simple">₱ 0.00</span>
           </div>
           <div class="total-line disc" id="discount-line" style="display:none;">
             <span class="lbl" id="discount-lbl">Discount</span>
             <span class="val" id="discount-val">— ₱ 0.00</span>
+          </div>
+          <div class="total-line senior-info-line" id="senior-pricing-line" style="display:none;">
+            <span class="lbl">🧓 Senior Pricing</span>
+            <span class="val senior-tag">Applied</span>
           </div>
           <div class="total-line grand">
             <span class="lbl">Total Amount</span>
@@ -3375,13 +3572,25 @@
         </div>
         <!-- Totals -->
         <div class="totals-block">
-          <div class="total-line">
+          <div class="total-line sub-line" id="mob-lab-subtotal-line">
+            <span class="lbl">Lab Subtotal</span>
+            <span class="val" id="mob-lab-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line us-sub-line" id="mob-us-subtotal-line" style="display:none;">
+            <span class="lbl">US Subtotal</span>
+            <span class="val" id="mob-us-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line" id="mob-simple-subtotal-line">
             <span class="lbl">Subtotal</span>
             <span class="val" id="mob-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line disc" id="mob-discount-line" style="display:none;">
             <span class="lbl" id="mob-discount-lbl">Discount</span>
             <span class="val" id="mob-discount-val">— ₱ 0.00</span>
+          </div>
+          <div class="total-line senior-info-line" id="mob-senior-pricing-line" style="display:none;">
+            <span class="lbl">🧓 Senior Pricing</span>
+            <span class="val senior-tag">Applied</span>
           </div>
           <div class="total-line grand">
             <span class="lbl">Total Amount</span>
@@ -3408,12 +3617,14 @@
       <div class="modal-sub">This doctor will be saved to the referral list.</div>
       <div class="modal-field">
         <label>Doctor's Name</label>
-        <input type="text" id="new-doctor-name" placeholder="e.g. Dr. Juan dela Cruz" />
+        <input type="text" id="new-doctor-name" placeholder="e.g. Dr. Juan dela Cruz"
+          oninput="enforceUpperCase(this)" />
       </div>
       <div class="modal-field" style="margin-top:14px;">
-        <label>Specialty <span
-            style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa;">(optional)</span></label>
-        <input type="text" id="new-doctor-spec" placeholder="e.g. Internal Medicine" />
+        <label>Details <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa;">(specialty,
+            clinic, etc. — optional)</span></label>
+        <input type="text" id="new-doctor-spec" placeholder="e.g. Internal Medicine — City Medical"
+          oninput="enforceUpperCase(this)" />
       </div>
       <div class="modal-btns">
         <button class="modal-btn-cancel" onclick="closeAddDoctorModal()">Cancel</button>
@@ -3429,7 +3640,8 @@
       <div class="modal-sub">Will be saved to the referral list as <strong>OTHER REFERRAL</strong>.</div>
       <div class="modal-field">
         <label>Referral Name</label>
-        <input type="text" id="other-referral-name" placeholder="e.g. Walk-in, Online, Flyer" />
+        <input type="text" id="other-referral-name" placeholder="e.g. Walk-in, Online, Flyer"
+          oninput="enforceUpperCase(this)" />
       </div>
       <div class="modal-btns">
         <button class="modal-btn-cancel" onclick="closeAddOtherReferralModal()">Cancel</button>
@@ -3442,7 +3654,7 @@
     /* ════════════════════════════════════════════════
        CONFIG
     ════════════════════════════════════════════════ */
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycnPKx2tfeYeS9u_oeYtE5PC8iT7i7F9_aO0BxPnvnE5bASLSyEMowB2IgYb58fIggwg/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqNuTX1_563gqIq8nZUti3YsRce7eXcXZuKEHyeDfAnvYnKdLvB5Se1hrDCq0kuBLN/exec';
 
     /* ════════════════════════════════════════════════
        STEP NAVIGATION
@@ -3451,11 +3663,11 @@
 
     function goToStep2() {
       const name = document.getElementById('f-name').value.trim();
+      const bday = document.getElementById('f-birthday').value;
       const age = document.getElementById('f-age').value.trim();
       const sex = document.getElementById('f-sex').value;
-      const status = document.getElementById('f-status').value;
-      if (!name || !age || !sex || !status) {
-        showToast('Please complete Name, Age, Sex and Status first.', 'err');
+      if (!name || !bday || !age || !sex) {
+        showToast('Please complete Name, Birthday and Sex first.', 'err');
         return;
       }
       currentStep = 2;
@@ -3491,105 +3703,86 @@
     }
 
     function autoSetPriceMode() {
-      const age     = parseInt(document.getElementById('f-age').value) || 0;
-      const pm      = document.getElementById('price-mode');
-      const badge   = document.getElementById('price-mode-badge');
+      const age = parseInt(document.getElementById('f-age').value) || 0;
+      const pm = document.getElementById('price-mode');
+      const badge = document.getElementById('price-mode-badge');
       const isSenior = age >= 60;
-      const newMode  = isSenior ? 's' : 'r';
-      pm.value  = newMode;
+      const newMode = isSenior ? 's' : 'r';
+      pm.value = newMode;
       priceMode = newMode;
       if (badge) {
         if (isSenior) {
           badge.textContent = 'Senior (60+)';
-          badge.className   = 'price-mode-badge senior';
+          badge.className = 'price-mode-badge senior';
         } else {
           badge.textContent = 'Regular';
-          badge.className   = 'price-mode-badge';
+          badge.className = 'price-mode-badge';
         }
       }
       onPriceModeChange();
 
-      // ── Apply / remove Senior auto-discount ──────────────────────
-      _applyOrRemoveSeniorDiscount(isSenior);
-
-      if (isSenior) showToast('Senior pricing + 20% discount applied (age 60+)', 'ok');
-    }
-
-    // Senior auto-discount key — used to identify the auto-added option
-    const SENIOR_DISC_VALUE = '0.2|SENIOR (20%)';
-    const SENIOR_DISC_LABEL = 'SENIOR (20%) (20%)';
-
-    function _applyOrRemoveSeniorDiscount(isSenior) {
-      _applyOrRemoveSeniorDiscountEl(
-        document.getElementById('discount-toggle'),
-        document.getElementById('toggle-text'),
-        document.getElementById('discount-select-wrap'),
-        document.getElementById('discount-select'),
-        isSenior
-      );
-      _applyOrRemoveSeniorDiscountEl(
-        document.getElementById('mob-discount-toggle'),
-        document.getElementById('mob-toggle-text'),
-        document.getElementById('mob-discount-select-wrap'),
-        document.getElementById('mob-discount-select'),
-        isSenior
-      );
-      _filterPWDFromDiscountSelect(isSenior);
+      // ── Senior: switch prices only, no extra discount applied ────
+      // Senior rates from PRICE LOOKUP already reflect the discounted price.
+      // We just show an informational note in the totals and hide the
+      // Senior option from the discount dropdown (it's redundant).
+      _filterSeniorFromDiscountSelect(isSenior);
       recalcTotal();
+
+      if (isSenior) showToast('Senior pricing applied — rates reflect senior prices.', 'ok');
     }
 
-    function _applyOrRemoveSeniorDiscountEl(toggle, toggleTx, wrap, sel, isSenior) {
-      if (!sel) return;
-      // Remove any old senior-auto option first
-      const oldOpt = sel.querySelector('[data-senior-auto]');
-      if (oldOpt) sel.removeChild(oldOpt);
-
-      if (isSenior) {
-        // Add SENIOR (20%) at top of list (after placeholder)
-        const opt = document.createElement('option');
-        opt.value = SENIOR_DISC_VALUE;
-        opt.textContent = 'SENIOR (20%) (20%)';
-        opt.setAttribute('data-senior-auto', '1');
-        // Insert after index 0 (the placeholder)
-        if (sel.options.length > 1) {
-          sel.insertBefore(opt, sel.options[1]);
-        } else {
-          sel.appendChild(opt);
-        }
-        sel.value = SENIOR_DISC_VALUE;
-        if (toggle) toggle.checked = true;
-        if (toggleTx) toggleTx.textContent = 'On';
-        if (wrap) wrap.classList.remove('hidden');
-      } else {
-        // Not senior — if SENIOR was the selected discount, clear it
-        if (sel.value === SENIOR_DISC_VALUE) {
-          sel.selectedIndex = 0;
-          if (toggle) toggle.checked = false;
-          if (toggleTx) toggleTx.textContent = 'Off';
-          if (wrap) wrap.classList.add('hidden');
-        }
-      }
-    }
-
-    // Hide PWD option when patient is senior, restore when not senior
-    function _filterPWDFromDiscountSelect(isSenior) {
+    // Remove/hide the SENIOR option from discount dropdowns when senior is detected
+    // (senior rates are already the discounted price from PRICE LOOKUP)
+    function _filterSeniorFromDiscountSelect(isSenior) {
       ['discount-select', 'mob-discount-select'].forEach(id => {
         const sel = document.getElementById(id);
         if (!sel) return;
         Array.from(sel.options).forEach(opt => {
           const v = opt.value.toUpperCase();
-          // PWD option: hide when senior
+          // Hide SENIOR discount option — price mode handles it already
+          if (v.includes('|SENIOR')) {
+            opt.disabled = true;
+            opt.style.display = 'none';
+            // If it was selected, deselect it
+            if (opt.selected) {
+              sel.selectedIndex = 0;
+              const toggle = document.getElementById(id === 'discount-select' ? 'discount-toggle' : 'mob-discount-toggle');
+              const toggleTx = document.getElementById(id === 'discount-select' ? 'toggle-text' : 'mob-toggle-text');
+              const wrap = document.getElementById(id === 'discount-select' ? 'discount-select-wrap' : 'mob-discount-select-wrap');
+              if (toggle) toggle.checked = false;
+              if (toggleTx) toggleTx.textContent = 'Off';
+              if (wrap) wrap.classList.add('hidden');
+            }
+          }
+          // PWD option: also hide when senior (mutually exclusive)
           if (v.includes('|PWD')) {
             opt.disabled = isSenior;
             opt.style.display = isSenior ? 'none' : '';
+            if (isSenior && opt.selected) {
+              sel.selectedIndex = 0;
+            }
           }
-          // SENIOR option in DISCOUNTS list: hide when NOT senior (auto-discount handles it)
-          if (v.includes('|SENIOR') && !opt.hasAttribute('data-senior-auto')) {
-            opt.disabled = !isSenior;
-            opt.style.display = !isSenior ? 'none' : '';
+          // Restore non-senior options when switching back to regular
+          if (!v.includes('|SENIOR') && !v.includes('|PWD') && !isSenior) {
+            opt.disabled = false;
+            opt.style.display = '';
+          }
+          if (!isSenior && v.includes('|SENIOR')) {
+            opt.disabled = false;
+            opt.style.display = '';
+          }
+          if (!isSenior && v.includes('|PWD')) {
+            opt.disabled = false;
+            opt.style.display = '';
           }
         });
       });
+    }
+
+    // Keep for backward compat — no-op now
+    function _applyOrRemoveSeniorDiscount(isSenior) {
+      _filterSeniorFromDiscountSelect(isSenior);
+      recalcTotal();
     }
 
     function goToStep1() {
@@ -3605,7 +3798,7 @@
       const name = document.getElementById('f-name').value.trim();
       const age = document.getElementById('f-age').value.trim();
       const sex = document.getElementById('f-sex').value;
-      const status = document.getElementById('f-status').value;
+      const optype = document.getElementById('f-optype').value;
       const referred = document.getElementById('f-referred').value.trim();
       const wrap = document.getElementById('patient-summary-wrap');
 
@@ -3615,7 +3808,7 @@
 
         // Line 2: age/sex · status
         document.getElementById('ps-detail').textContent =
-          [age && sex ? `${age} yrs, ${sex}` : '', status].filter(Boolean).join(' · ');
+          [age && sex ? `${age} yrs, ${sex}` : '', optype || ''].filter(Boolean).join(' · ');
 
         // Line 3: Referred by — shown whenever referred is filled
         const psRef = document.getElementById('ps-ref');
@@ -3648,55 +3841,13 @@
        PRICE KEY ALIASES
     ════════════════════════════════════════════════ */
     const KEY_ALIAS = {
-      '2 HRS. PPBS': '2 HRS. PPBS',
-      'OGCT (50/75 GMS.)': 'OGCT (50/75 GMS.)',
-      'OGTT (50/75 GMS.)': 'OGTT (50/75 GMS.)',
-      'OGTT (100 GMS.)': 'OGTT (100 GMS.)',
-      'HDL (DIRECT)/LDL (EACH)': 'HDL (DIRECT)/LDL (EACH)',
-      'BILIRUBIN (TB, DB, IB)': 'BILIRUBIN (TB, DB, IB)',
-      'ELECTROLYTES (NA, K, CL EACH)': 'ELECTROLYTES (NA, K, CL EACH)',
-      'CHEM 5': 'CHEM 5 — FBS, BUN, CREA, BUA, TC',
-      'CHEM 6': 'CHEM 6 — FBS, BUN, CREA, BUA, TC, TG',
-      'CHEM 8': 'CHEM 8 — CHEM 5, TG, HDL, LDL',
-      'CHEM 10': 'CHEM 10 — CHEM 8, SGOT, SGPT',
-      'CHEM 12': 'CHEM 12 — CHEM 10, NA, K',
-      'LIPID PROFILE': 'LIPID PROFILE — TC, TG, HDL, LDL',
-      'LIVER PROFILE': 'LIVER PROFILE — SGOT, SGPT, ALK PHOS, TPAG, BILIRUBIN',
-      'KIDNEY PROFILE': 'KIDNEY PROFILE — BUN, CREATININE, BUA',
-      'BODY FLUIDS CELL & DIFF. COUNT': 'BODY FLUIDS — CELL & DIFF. COUNT',
-      'BODY FLUIDS PROTEIN': 'BODY FLUIDS — PROTEIN',
-      'BODY FLUIDS SUGAR': 'BODY FLUIDS — SUGAR',
-      'AST/SGOT': 'AST SGOT',
-      'C3/C4 (EACH)': 'C3/C4 (EACH)',
-      'DENGUE IGM/IGG (EACH) WITH NS1': 'DENGUE IGM/IGG (EACH) WITH NS1',
-      'DENGUE IGM/IGG (EACH)': 'DENGUE IGM/IGG (EACH)',
-      'RUBELLA IGM/IGG (EACH)': 'RUBELLA IGM/IGG (EACH)',
-      'TOXOPLASMA IGG': 'TOXOPLASMA IGG',
-      'TOXOPLASMA IGM': 'TOXOPLASMA IGM',
-      '(A) HBSAG SCREENING': '(A) HBSAG SCREENING',
-      '(B) HBSAG W/ TITER': '(B) HBSAG W/ TITER',
-      '(C) ANTI-HBS W/ TITER': '(C) ANTI-HBS W/ TITER',
-      '(D) HBEAG': '(D) HBEAG',
-      '(E) ANTI-HBE': '(E) ANTI-HBE',
-      '(F) ANTI-HBC IGM': '(F) ANTI-HBC IGM',
-      '(G) ANTI-HBC IGG': '(G) ANTI-HBC IGG',
-      '(H) ANTI-HAV IGM': '(H) ANTI-HAV IGM',
-      '(I) ANTI-HAV IGG': '(I) ANTI-HAV IGG',
-      '(J) ANTI-HCV': '(J) ANTI-HCV',
-      'HEPATITIS A PROFILE': 'HEPATITIS A PROFILE (FROM H-I)',
-      'HEPATITIS B PROFILE': 'HEPATITIS B PROFILE (FROM B-G)',
-      'HEPATITIS A & B & C PROFILE': 'HEPATITIS A & B & C PROFILE (FROM B-I)',
-      'CULTURE & SENSITIVITY – URINE': 'CULTURE & SENSITIVITY — URINE',
-      'CULTURE & SENSITIVITY – BLOOD': 'CULTURE & SENSITIVITY — BLOOD',
-      'FNAB SMALL': 'FNAB — SMALL',
-      'FNAB MEDIUM': 'FNAB — MEDIUM',
-      'FNAB LARGE': 'FNAB — LARGE',
-      'FNAB XL': 'FNAB — XL',
-      'FNAB XXLARGE': 'FNAB — XXLARGE',
-      'UB PROSTATE WITH POST VOID': 'UB, PROSTATE WITH POST VOID',
-      'MEDICAL BASIC 5': 'MEDICAL — BASIC 5',
-      'MEDICAL BASIC 5 + DRUG TEST': 'MEDICAL — BASIC 5 + DRUG TEST',
-      'MEDICAL CXR UA FA': 'MEDICAL — CXR UA FA',
+      // Special character normalization (en-dash vs hyphen, etc.)
+      'CULTURE & SENSITIVITY – URINE':    'CULTURE & SENSITIVITY - URINE',
+      'CULTURE & SENSITIVITY – BLOOD':    'CULTURE & SENSITIVITY - BLOOD',
+      // Common abbreviation variants
+      'AST/SGOT':                         'AST/SGOT',
+      'ALT/SGPT':                         'ALT/SGPT',
+      // Aliases for sheet name variations — add your own here if needed
     };
 
     /* ════════════════════════════════════════════════
@@ -3749,79 +3900,47 @@
        CATEGORIES
     ════════════════════════════════════════════════ */
     const CATEGORIES = [
-      {
-        id: 'hema', name: 'Hematology',
-        tests: ['CBC with Platelet Count', 'Platelet Count', 'HGB and HCT', 'Reticulocyte Count', 'ESR', 'Clotting Time (CT)/Bleeding Time', 'ABO Typing', 'RH Typing', 'ABO Typing W/ RH', 'Peripheral Blood Smear', 'Malarial Smear', 'Protime', 'APTT', 'Coombs Test']
-      },
-      {
-        id: 'bchem', name: 'Blood Chemistry',
-        tests: ['FBS', 'RBS', '2 Hrs. PPBS', 'OGCT (50/75 gms.)', 'OGTT (50/75 gms.)', 'OGTT (100 gms.)', 'BUN', 'Creatinine', 'Blood Uric Acid', 'Total Cholesterol', 'Triglycerides', 'Lipid Profile', 'HDL (Direct)/LDL (each)', 'Bilirubin (TB, DB, IB)', 'Total Protein', 'Albumin', 'TPAG', 'HBA1C']
-      },
-      {
-        id: 'cpkg', name: 'Chemistry Packages',
-        tests: ['Electrolytes (Na, K, Cl each)', 'Chem 5', 'Chem 6', 'Chem 8', 'Chem 10', 'Chem 12', 'Lipid Profile', 'Liver Profile', 'Kidney Profile']
-      },
-      {
-        id: 'cm', name: 'Clinical Microscopy',
-        tests: ['Urinalysis', 'Fecalysis', 'Occult Blood', 'Pregnancy Test (Urine)', 'Pregnancy Test (Serum)', 'Ketone/Acetone', 'Urobilinogen', 'Bile/Nitrates/Bilirubin', 'Sugar', 'Micro-Albumin Test', 'Concentration Technique', 'Body Fluids Cell & Diff. Count', 'Body Fluids Protein', 'Body Fluids Sugar']
-      },
-      {
-        id: 'enz', name: 'Enzymes',
-        tests: ['ALT/SGPT', 'AST/SGOT', 'GGTP', 'Alkaline Phosphatase', 'Acid Phosphatase', 'Amylase', 'Lipase', 'Total CPK', 'CPK-MB', 'CPK-MM', 'Troponin I (Qualitative)', 'Troponin I (Quantitative)', 'Troponin T', 'LDH']
-      },
-      {
-        id: 'urine24', name: '24Hr Urine Test',
-        tests: ['Creatinine Total', 'Creatinine Clearance', 'Protein', 'Sodium', 'Potassium', 'Chloride', 'Calcium', 'Magnesium', 'Uric Acid', 'Amylase', 'Glucose']
-      },
-      {
-        id: 'elec', name: 'Electrolytes',
-        tests: ['Sodium', 'Potassium', 'Chloride', 'Calcium Total', 'Magnesium', 'Ionized Calcium', 'Inorganic Phosphorus', 'Total Iron', 'TIBC Total Iron']
-      },
-      {
-        id: 'sero', name: 'Serology',
-        tests: ['RPR/VDRL', 'TPHA Screening', 'TPHA W/ Titer', 'Widal Test', 'Typhidot', 'ASO Titer', 'CRP', 'RA/RF Latex', 'C3/C4 (each)', 'ANA Screening', 'ANA W/ Titer', 'Dengue IgM/IgG (each) with NS1', 'Dengue IgM/IgG (each)', 'Dengue Antigen (NS1)', 'Leptospiral Test', 'H. Pylori', 'Rubella IgM/IgG (each)', 'Toxoplasma IgG', 'Toxoplasma IgM', 'HIV Screening']
-      },
-      {
-        id: 'hep', name: 'Hepatitis',
-        tests: ['(A) HBsAg Screening', '(B) HBsAg W/ Titer', '(C) Anti-HBS W/ Titer', '(D) HBeAg', '(E) Anti-HBE', '(F) Anti-HBC IgM', '(G) Anti-HBC IgG', '(H) Anti-HAV IgM', '(I) Anti-HAV IgG', '(J) Anti-HCV', 'Hepatitis A Profile', 'Hepatitis B Profile', 'Hepatitis A & B & C Profile']
-      },
-      {
-        id: 'horm', name: 'Hormones',
-        tests: ['FSH', 'LH', 'Prolactin', 'Progesterone', 'Testosterone', 'Cortisol', 'Ferritin', 'Estrogen/Estradiol']
-      },
-      {
-        id: 'thy', name: 'Thyroid Function Tests',
-        tests: ['TSH', 'T3', 'T4', 'FT3', 'FT4', 'TSH IRMA', 'Parathyroid Hormone', 'FT3 RIA', 'FT4 RIA']
-      },
-      {
-        id: 'tm', name: 'Tumor Markers',
-        tests: ['AFP', 'CEA', 'PSA', 'B-HCG', 'CA-125 (Ovary)', 'CA-153 (Breast)', 'CA-19-9 (Pancreas)']
-      },
-      {
-        id: 'bact', name: 'Bacteriology',
-        tests: ['Gramstain', 'AFB', 'KOH', 'Culture & Sensitivity – Urine', 'Culture & Sensitivity – Blood', 'Culture & Sensitivity with ARD-Pedia', 'Culture & Sensitivity with ARD-Adult']
-      },
-      {
-        id: 'hist', name: 'Histopathology',
-        tests: ["Pap's Smear", 'Cell Block', 'Cell Cytology', 'FNAB Small', 'FNAB Medium', 'FNAB Large', 'FNAB XL', 'FNAB XXLarge', 'Estrogen-Progesterone Receptor Assay']
-      },
-      {
-        id: 'us', name: 'Ultrasound',
-        tests: ['Whole Abdomen', 'Upper Abdomen', 'Lower Abdomen', 'KUB', 'KUB with Prostate', 'UB Prostate with Post Void', 'Transvaginal', 'Breast (each)', 'HBT', 'HBT Pancreas', 'Pelvic', 'BPS', 'Single Organ', 'Prostate Only', 'Thyroid', 'KUB Prostate with Post Void']
-      },
-      {
-        id: 'pkg', name: 'Packages 2026',
-        tests: ['OBPack 1', 'OBPack 2', 'OBPack 3', 'Medical Basic 5', 'Medical Basic 5 + Drug Test', 'Medical CXR UA FA', 'Drug Test']
-      },
-      {
-        id: 'xray', name: 'X-Ray',
-        tests: ['Chest PA', 'Apico Lordotic View / Spot Film', 'Chest PA & Apico Lordotic View', 'Chest PA & Lateral View (Adult)', 'Chest PA & Lateral View (Pedia)', 'Skull AP/Lateral View', 'Skull Series', "Water's View/Towne's View/Caldwell", 'Paranasal Sinuses (PNS)', 'Mastoid Series', 'Temporomandibular Joint (TMJ)', 'Cervical AP/Lateral View', 'Cervical AP/Lateral/Oblique View', 'Thoracic Cage (AP)/Chest Bucky', 'Thoracic AP/Lateral View', 'Plain KUB/Plain Abdomen (AP)', 'Plain Abdomen Upright & Supine', 'Plain Abdomen AP/Lateral (Pedia)', 'Thoracolumbar AP/Lateral View', 'Lumbo-Sacral AP/Lateral View', 'Lumbo-Sacral AP/Lateral/Oblique', 'Coccyx AP/Lateral View', 'Coccyx Lateral View', 'Pelvic AP/Hip Joint', 'Shoulder AP', 'Shoulder AP (Internal/External)', 'Clavicle AP', 'Finger AP/Lateral View', 'Hand AP/Lateral View', 'Wrist AP/Lateral View', 'Forearm AP/Lateral View', 'Arm AP/Lateral View', 'Elbow AP/Lateral View', 'Foot AP/Oblique', 'Ankle AP/Lateral View', 'Leg AP/Lateral View', 'Knee AP/Lateral View', 'Femur/Thigh (AP/Lateral View)']
-      },
-      {
-        id: 'others', name: 'Others',
-        tests: ['ECG', 'TVS Kit']
-      },
+      { id: 'hema', name: 'Hematology', tests: [] },
+      { id: 'bchem', name: 'Blood Chemistry', tests: [] },
+      { id: 'cpkg', name: 'Chemistry Packages', tests: [] },
+      { id: 'cm', name: 'Clinical Microscopy', tests: [] },
+      { id: 'enz', name: 'Enzymes', tests: [] },
+      { id: 'urine24', name: '24Hr Urine Test', tests: [] },
+      { id: 'elec', name: 'Electrolytes', tests: [] },
+      { id: 'sero', name: 'Serology', tests: [] },
+      { id: 'hep', name: 'Hepatitis', tests: [] },
+      { id: 'horm', name: 'Hormones', tests: [] },
+      { id: 'thy', name: 'Thyroid Function Tests', tests: [] },
+      { id: 'tm', name: 'Tumor Markers', tests: [] },
+      { id: 'bact', name: 'Bacteriology', tests: [] },
+      { id: 'hist', name: 'Histopathology', tests: [] },
+      { id: 'us', name: 'Ultrasound', tests: [] },
+      { id: 'pkg', name: 'Packages 2026', tests: [] },
+      { id: 'xray', name: 'X-Ray', tests: [] },
+      { id: 'others', name: 'Others', tests: [] }
     ];
+
+    /* Fallback test lists — used when sheet has no category data */
+    const FALLBACK_TESTS = {
+      'hema': ['CBC with Platelet Count', 'Platelet Count', 'HGB and HCT', 'Reticulocyte Count', 'ESR', 'Clotting Time (CT)/Bleeding Time', 'ABO Typing', 'RH Typing', 'ABO Typing W/ RH', 'Peripheral Blood Smear', 'Malarial Smear', 'Protime', 'APTT', 'Coombs Test'],
+      'bchem': ['FBS', 'RBS', '2 Hrs. PPBS', 'OGCT (50/75 gms.)', 'OGTT (50/75 gms.)', 'OGTT (100 gms.)', 'BUN', 'Creatinine', 'Blood Uric Acid', 'Total Cholesterol', 'Triglycerides', 'Lipid Profile', 'HDL (Direct)/LDL (each)', 'Bilirubin (TB, DB, IB)', 'Total Protein', 'Albumin', 'TPAG', 'HBA1C'],
+      'cpkg': ['Electrolytes (Na, K, Cl each)', 'Chem 5', 'Chem 6', 'Chem 8', 'Chem 10', 'Chem 12', 'Lipid Profile', 'Liver Profile', 'Kidney Profile'],
+      'cm': ['Urinalysis', 'Fecalysis', 'Occult Blood', 'Pregnancy Test (Urine)', 'Pregnancy Test (Serum)', 'Ketone/Acetone', 'Urobilinogen', 'Bile/Nitrates/Bilirubin', 'Sugar', 'Micro-Albumin Test', 'Concentration Technique', 'Body Fluids Cell & Diff. Count', 'Body Fluids Protein', 'Body Fluids Sugar'],
+      'enz': ['ALT/SGPT', 'AST/SGOT', 'GGTP', 'Alkaline Phosphatase', 'Acid Phosphatase', 'Amylase', 'Lipase', 'Total CPK', 'CPK-MB', 'CPK-MM', 'Troponin I (Qualitative)', 'Troponin I (Quantitative)', 'Troponin T', 'LDH'],
+      'urine24': ['Creatinine Total', 'Creatinine Clearance', 'Protein', 'Sodium', 'Potassium', 'Chloride', 'Calcium', 'Magnesium', 'Uric Acid', 'Amylase', 'Glucose'],
+      'elec': ['Sodium', 'Potassium', 'Chloride', 'Calcium Total', 'Magnesium', 'Ionized Calcium', 'Inorganic Phosphorus', 'Total Iron', 'TIBC Total Iron'],
+      'sero': ['RPR/VDRL', 'TPHA Screening', 'TPHA W/ Titer', 'Widal Test', 'Typhidot', 'ASO Titer', 'CRP', 'RA/RF Latex', 'C3/C4 (each)', 'ANA Screening', 'ANA W/ Titer', 'Dengue IgM/IgG (each) with NS1', 'Dengue IgM/IgG (each)', 'Dengue Antigen (NS1)', 'Leptospiral Test', 'H. Pylori', 'Rubella IgM/IgG (each)', 'Toxoplasma IgG', 'Toxoplasma IgM', 'HIV Screening'],
+      'hep': ['(A) HBsAg Screening', '(B) HBsAg W/ Titer', '(C) Anti-HBS W/ Titer', '(D) HBeAg', '(E) Anti-HBE', '(F) Anti-HBC IgM', '(G) Anti-HBC IgG', '(H) Anti-HAV IgM', '(I) Anti-HAV IgG', '(J) Anti-HCV', 'Hepatitis A Profile', 'Hepatitis B Profile', 'Hepatitis A & B & C Profile'],
+      'horm': ['FSH', 'LH', 'Prolactin', 'Progesterone', 'Testosterone', 'Cortisol', 'Ferritin', 'Estrogen/Estradiol'],
+      'thy': ['TSH', 'T3', 'T4', 'FT3', 'FT4', 'TSH IRMA', 'Parathyroid Hormone', 'FT3 RIA', 'FT4 RIA'],
+      'tm': ['AFP', 'CEA', 'PSA', 'B-HCG', 'CA-125 (Ovary)', 'CA-153 (Breast)', 'CA-19-9 (Pancreas)'],
+      'bact': ['Gramstain', 'AFB', 'KOH', 'Culture & Sensitivity – Urine', 'Culture & Sensitivity – Blood', 'Culture & Sensitivity with ARD-Pedia', 'Culture & Sensitivity with ARD-Adult'],
+      'hist': ["Pap's Smear", 'Cell Block', 'Cell Cytology', 'FNAB Small', 'FNAB Medium', 'FNAB Large', 'FNAB XL', 'FNAB XXLarge', 'Estrogen-Progesterone Receptor Assay'],
+      'us': ['Whole Abdomen', 'Upper Abdomen', 'Lower Abdomen', 'KUB', 'KUB with Prostate', 'UB Prostate with Post Void', 'Transvaginal', 'Breast (each)', 'HBT', 'HBT Pancreas', 'Pelvic', 'BPS', 'Single Organ', 'Prostate Only', 'Thyroid', 'KUB Prostate with Post Void'],
+      'pkg': ['OBPack 1', 'OBPack 2', 'OBPack 3', 'Medical Basic 5', 'Medical Basic 5 + Drug Test', 'Medical CXR UA FA', 'Drug Test'],
+      'xray': ['Chest PA', 'Apico Lordotic View / Spot Film', 'Chest PA & Apico Lordotic View', 'Chest PA & Lateral View (Adult)', 'Chest PA & Lateral View (Pedia)', 'Skull AP/Lateral View', 'Skull Series', "Water's View/Towne's View/Caldwell", 'Paranasal Sinuses (PNS)', 'Mastoid Series', 'Temporomandibular Joint (TMJ)', 'Cervical AP/Lateral View', 'Cervical AP/Lateral/Oblique View', 'Thoracic Cage (AP)/Chest Bucky', 'Thoracic AP/Lateral View', 'Plain KUB/Plain Abdomen (AP)', 'Plain Abdomen Upright & Supine', 'Plain Abdomen AP/Lateral (Pedia)', 'Thoracolumbar AP/Lateral View', 'Lumbo-Sacral AP/Lateral View', 'Lumbo-Sacral AP/Lateral/Oblique', 'Coccyx AP/Lateral View', 'Coccyx Lateral View', 'Pelvic AP/Hip Joint', 'Shoulder AP', 'Shoulder AP (Internal/External)', 'Clavicle AP', 'Finger AP/Lateral View', 'Hand AP/Lateral View', 'Wrist AP/Lateral View', 'Forearm AP/Lateral View', 'Arm AP/Lateral View', 'Elbow AP/Lateral View', 'Foot AP/Oblique', 'Ankle AP/Lateral View', 'Leg AP/Lateral View', 'Knee AP/Lateral View', 'Femur/Thigh (AP/Lateral View)'],
+      'others': ['ECG', 'TVS Kit']
+    };
 
     /* ════════════════════════════════════════════════
        STATE
@@ -3846,10 +3965,22 @@
     }
 
     function getPrice(testName) {
+      // Try full name first, then strip everything after ' — ' or ' - ' (sheet descriptions)
       const key = normalizeKey(testName);
-      const p = PRICES[key];
+      let p = PRICES[key];
+
+      if (!p) {
+        // Strip description suffix: "Chem 5 — FBS, BUN..." → "CHEM 5"
+        const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
+        if (stripped !== key) p = PRICES[stripped];
+      }
+
       if (!p) return null;
-      if (priceMode === 's' && p.s !== null && p.s !== undefined) return p.s;
+
+      if (priceMode === 's') {
+        if (p.s !== null && p.s !== undefined && typeof p.s === 'number') return p.s;
+        return p.r;
+      }
       return p.r;
     }
 
@@ -3902,6 +4033,7 @@
 
       if (demoMode || APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         PRICES = Object.assign({}, BUILTIN_PRICES);
+        _populateCategoriesFromFallback();
         showRegPage('demo');
         return;
       }
@@ -3946,6 +4078,7 @@
             splash.classList.remove('show');
             splash.classList.remove('fade-out');
             PRICES = Object.assign({}, BUILTIN_PRICES);
+            _populateCategoriesFromFallback();
             showRegPage('error');
           }, 500);
         });
@@ -3997,10 +4130,83 @@
           if (d.success && d.prices) {
             PRICES = Object.assign({}, BUILTIN_PRICES, d.prices);
             pricesLoaded = true;
+
+            // Populate test lists from sheet category data
+            if (d.categories && Object.keys(d.categories).length > 0) {
+              _populateCategoriesFromSheet(d.categories);
+              console.log('[LIS] Tests loaded from sheet:', Object.keys(d.categories).length, 'categories');
+            } else {
+              _populateCategoriesFromFallback();
+              console.log('[LIS] Using built-in test lists (sheet has no category data)');
+            }
           } else {
-            throw new Error(d.message || 'Failed to load prices');
+            console.warn('[LIS] Price fetch issue:', d.message || 'no prices');
+            PRICES = Object.assign({}, BUILTIN_PRICES);
+            _populateCategoriesFromFallback();
           }
+        })
+        .catch(err => {
+          console.warn('[LIS] Price fetch error:', err);
+          PRICES = Object.assign({}, BUILTIN_PRICES);
+          _populateCategoriesFromFallback();
         });
+    }
+
+    /* Maps sheet category names → our category ids */
+    const CAT_NAME_TO_ID = {
+      'hematology':             'hema',
+      'blood chemistry':        'bchem',
+      'chemistry packages':     'cpkg',
+      'clinical microscopy':    'cm',
+      'enzymes':                'enz',
+      '24hr urine test':        'urine24',
+      '24 hr urine test':       'urine24',
+      'electrolytes':           'elec',
+      'serology':               'sero',
+      'hepatitis':              'hep',
+      'hormones':               'horm',
+      'thyroid function tests': 'thy',
+      'thyroid':                'thy',
+      'tumor markers':          'tm',
+      'bacteriology':           'bact',
+      'histopathology':         'hist',
+      'ultrasound':             'us',
+      'packages':               'pkg',
+      'packages 2026':          'pkg',
+      'x-ray':                  'xray',
+      'xray':                   'xray',
+      'others':                 'others',
+      'other':                  'others',
+    };
+
+    function _populateCategoriesFromSheet(sheetCats) {
+      /* sheetCats = { 'Hematology': ['CBC with Platelet Count', ...], ... } */
+      CATEGORIES.forEach(c => { c.tests = []; if (!sel[c.id]) sel[c.id] = new Set(); });
+
+      Object.entries(sheetCats).forEach(([catName, tests]) => {
+        const key   = catName.trim().toLowerCase();
+        const catId = CAT_NAME_TO_ID[key];
+        if (catId) {
+          const cat = CATEGORIES.find(c => c.id === catId);
+          if (cat) cat.tests = tests.filter(t => t && t.trim());
+        } else {
+          console.log('[LIS] Unrecognized sheet category:', catName);
+        }
+      });
+
+      // Any category still empty falls back to built-in list
+      CATEGORIES.forEach(c => {
+        if (c.tests.length === 0 && FALLBACK_TESTS[c.id]) {
+          c.tests = [...FALLBACK_TESTS[c.id]];
+        }
+      });
+    }
+
+    function _populateCategoriesFromFallback() {
+      CATEGORIES.forEach(c => {
+        c.tests = FALLBACK_TESTS[c.id] ? [...FALLBACK_TESTS[c.id]] : [];
+        if (!sel[c.id]) sel[c.id] = new Set();
+      });
     }
 
     function fetchDiscounts() {
@@ -4030,22 +4236,22 @@
     }
 
     function populateDiscountSelect() {
-      ['discount-select','mob-discount-select'].forEach(id => {
+      ['discount-select', 'mob-discount-select'].forEach(id => {
         const sel = document.getElementById(id);
         if (!sel) return;
         sel.innerHTML = '<option value="">— Select Discount Type —</option>';
         DISCOUNTS.forEach(d => {
-          const pct   = Math.round(d.rate * 100);
+          const pct = Math.round(d.rate * 100);
           const label = pct === 100 ? `${d.name} (Free / Charged)` : `${d.name} (${pct}%)`;
-          const opt   = document.createElement('option');
-          opt.value       = `${d.rate}|${d.name}`;
+          const opt = document.createElement('option');
+          opt.value = `${d.rate}|${d.name}`;
           opt.textContent = label;
           sel.appendChild(opt);
         });
       });
       // Re-apply senior filter based on current age
       const age = parseInt(document.getElementById('f-age').value) || 0;
-      _filterPWDFromDiscountSelect(age >= 60);
+      _filterSeniorFromDiscountSelect(age >= 60);
     }
 
     /* ════════════════════════════════════════════════
@@ -4059,7 +4265,8 @@
       if (status === 'live') {
         showPriceReadyNotif(updated);
       } else if (status === 'error') {
-        showToast('Price lookup failed — check Apps Script URL', 'err');
+        // Built-in prices are loaded as fallback — show a soft warning only
+        showToast('Using built-in price list — live rates unavailable', 'err');
       } else {
         // demo mode — populate fallback discounts
         fetchDiscounts();
@@ -4184,11 +4391,17 @@
        TOTALS
     ════════════════════════════════════════════════ */
     function recalcTotal() {
-      let subtotal = 0;
+      let labSubtotal = 0, usSubtotal = 0;
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
-        if (p !== null) subtotal += p;
+        if (p !== null) {
+          if (cat.id === 'us') usSubtotal += p;
+          else labSubtotal += p;
+        }
       }));
+      const subtotal = labSubtotal + usSubtotal;
+      const hasUS = usSubtotal > 0;
+      const isSenior = priceMode === 's';
 
       const discOn = document.getElementById('discount-toggle').checked;
       const discVal = document.getElementById('discount-select').value;
@@ -4202,11 +4415,32 @@
       }
 
       const grand = subtotal - discAmt;
-      document.getElementById('subtotal-val').textContent = fmtPeso(subtotal);
+
+      // Desktop: show separate lines if US tests present
+      document.getElementById('lab-subtotal-line').style.display = hasUS ? 'flex' : 'none';
+      document.getElementById('us-subtotal-line').style.display = hasUS ? 'flex' : 'none';
+      document.getElementById('simple-subtotal-line').style.display = hasUS ? 'none' : 'flex';
+      document.getElementById('combined-subtotal-line').style.display = 'none';
+
+      document.getElementById('lab-subtotal-val').textContent = fmtPeso(labSubtotal);
+      document.getElementById('us-subtotal-val').textContent = fmtPeso(usSubtotal);
+      document.getElementById('subtotal-val-simple').textContent = fmtPeso(subtotal);
+      const stv = document.getElementById('subtotal-val');
+      if (stv) stv.textContent = fmtPeso(subtotal);
+
       document.getElementById('discount-lbl').textContent = discLabel;
       document.getElementById('discount-val').textContent = '— ' + fmtPeso(discAmt);
       document.getElementById('grand-total-val').textContent = fmtPeso(grand);
       document.getElementById('discount-line').style.display = (discOn && discVal && discAmt > 0) ? 'flex' : 'none';
+
+      // Senior pricing info line — purely informational, no extra deduction
+      const seniorLine = document.getElementById('senior-pricing-line');
+      if (seniorLine) seniorLine.style.display = isSenior ? 'flex' : 'none';
+      const mobSeniorLine = document.getElementById('mob-senior-pricing-line');
+      if (mobSeniorLine) mobSeniorLine.style.display = isSenior ? 'flex' : 'none';
+
+      // Store for syncMobTotals
+      recalcTotal._last = { labSubtotal, usSubtotal, subtotal, hasUS, isSenior };
     }
 
     function onDiscountToggle() {
@@ -4223,22 +4457,37 @@
     function submitReg() {
       const name = document.getElementById('f-name').value.trim();
       const age = document.getElementById('f-age').value.trim();
+      const bday = document.getElementById('f-birthday').value;
       const sex = document.getElementById('f-sex').value;
-      const status = document.getElementById('f-status').value;
       const contact = document.getElementById('f-contact').value.trim();
       const address = document.getElementById('f-address').value.trim();
       const referred = document.getElementById('f-referred').value.trim();
 
-      if (!name || !age || !sex || !status) {
+      if (!name || !bday || !age || !sex) {
         showToast('Please complete all required patient fields.', 'err'); return;
       }
 
-      const allTests = [];
-      CATEGORIES.forEach(cat => sel[cat.id].forEach(t => allTests.push(t)));
+      const labTests = [];
+      const usTests = [];
+      CATEGORIES.forEach(cat => {
+        if (cat.id === 'us') {
+          sel[cat.id].forEach(t => usTests.push(t));
+        } else {
+          sel[cat.id].forEach(t => labTests.push(t));
+        }
+      });
+      const allTests = [...labTests, ...usTests];
       if (!allTests.length) { showToast('Please select at least one procedure.', 'err'); return; }
 
-      let subtotal = 0;
-      CATEGORIES.forEach(cat => sel[cat.id].forEach(t => { const p = getPrice(t); if (p !== null) subtotal += p; }));
+      let labSubtotal = 0, usSubtotal = 0;
+      CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
+        const p = getPrice(t);
+        if (p !== null) {
+          if (cat.id === 'us') usSubtotal += p;
+          else labSubtotal += p;
+        }
+      }));
+      let subtotal = labSubtotal + usSubtotal;
 
       const discOn = document.getElementById('discount-toggle').checked;
       const discVal = document.getElementById('discount-select').value;
@@ -4255,72 +4504,66 @@
       const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${now.getFullYear()}`;
 
       // Build discount label: "Name – XX%" or blank
-      // Also include senior auto-discount if active
       const isSeniorPt = parseInt(age) >= 60;
       let discountLabel = '';
       if (discType && discRate) {
         discountLabel = `${discType} – ${Math.round(discRate * 100)}%`;
       }
-      // If senior auto-discount is active but not already captured via the select
-      // (e.g. recalcTotal used it), ensure the label includes SENIOR (20%)
-      if (isSeniorPt && !discountLabel.toUpperCase().includes('SENIOR')) {
+      // For senior patients, note that senior pricing was used (rates already reflect discount)
+      // Do NOT add an extra percentage — the price list s-column IS the discounted price
+      if (isSeniorPt) {
         discountLabel = discountLabel
-          ? `SENIOR (20%), ${discountLabel}`
-          : 'SENIOR (20%) – 20%';
+          ? `Senior Pricing + ${discountLabel}`
+          : 'Senior Pricing';
       }
 
       // Company from accredited toggle
       const company = (acctMode && acctCompany) ? acctCompany : '';
 
       const payload = {
-        action:       'register',
-        date:          dateStr,
+        action: 'register',
+        date: dateStr,
         name,
-        ageSex:        `${age} / ${sex}`,
-        civilStatus:   status,             // CIVIL STATUS
+        ageSex: `${age} / ${sex}`,
         address,
+        opType: document.getElementById('f-optype').value || '',
         contact,
         referred,
         company,                           // COMPANY column (I)
-        procedures:    allTests.join(', '),
-        discountLabel,                     // DISCOUNT column (K)
-        discountAmt:   discAmt,            // DIS. TOTAL column (M)
-        amount:        grand,              // AMOUNT column (N)
-        subtotal,                          // SUBTOTAL column (L)
+        procedures: labTests.join(', '),// J  LAB PROCEDURES (lab only)
+        usTests: usTests.join(', '), // K  US TEST
+        discountLabel,                     // L  DISCOUNT
+        discountAmt: discAmt,            // O  DIS. TOTAL
+        amount: grand,              // P  AMOUNT
+        subtotal: labSubtotal,        // M  SUBTOTAL (lab only)
+        usSubtotal,                        // N  US TOTAL
       };
 
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Submitting…';
+      // Build itemsDetail for POS display
+      const itemsDetail = [];
+      CATEGORIES.forEach(cat => {
+        sel[cat.id].forEach(t => {
+          const p = getPrice(t);
+          if (p !== null) itemsDetail.push({ name: t, cat: cat.name, price: p });
+        });
+      });
 
-      const resetBtn = () => {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Submit Registration';
-      };
-
-      if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-        setTimeout(() => {
-          resetBtn();
-          showSuccessNotif('0000', name);
-        }, 1200);
-        return;
-      }
-
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload),
-      })
-        .then(r => r.json())
-        .then(d => {
-          resetBtn();
-          if (d.success) {
-            showSuccessNotif(d.number, name);
-          } else {
-            showToast('Error: ' + (d.message || 'Submission failed.'), 'err');
-          }
-        })
-        .catch(() => { resetBtn(); showToast('Network error. Check your connection.', 'err'); });
+      // Pass all computed data to POS page
+      showPosPage({
+        name,
+        ageSex: `${age} / ${sex}`,
+        opType: document.getElementById('f-optype').value || '',
+        referred,
+        subtotal: labSubtotal,
+        usSubtotal,
+        discAmt,
+        discRate,
+        discountLabel,
+        grand,
+        isSenior: parseInt(age) >= 60,
+        itemsDetail,
+        rawPayload: payload,
+      });
     }
 
     /* ════════════════════════════════════════════════
@@ -4346,11 +4589,130 @@
     }
 
     /* ════════════════════════════════════════════════
+       BIRTHDAY → AUTO-AGE
+    ════════════════════════════════════════════════ */
+    (function () {
+      // Set max date to today to prevent future dates
+      const bdayInput = document.getElementById('f-birthday');
+      if (bdayInput) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        bdayInput.setAttribute('max', `${yyyy}-${mm}-${dd}`);
+      }
+    })();
+
+    function onBirthdayChange() {
+      const val = document.getElementById('f-birthday').value;
+      const badge = document.getElementById('bday-age-badge');
+      const ageVal = document.getElementById('bday-age-val');
+      const ageHidden = document.getElementById('f-age');
+      if (!val) {
+        badge.style.display = 'none';
+        ageHidden.value = '';
+        _filterSeniorFromDiscountSelect(false);
+        return;
+      }
+      const bday = new Date(val);
+      const now = new Date();
+      let age = now.getFullYear() - bday.getFullYear();
+      const m = now.getMonth() - bday.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < bday.getDate())) age--;
+      age = Math.max(0, age);
+      ageHidden.value = String(age);
+      ageVal.textContent = age;
+      badge.style.display = 'flex';
+      // Auto-switch price mode based on age (senior = 60+)
+      const isSeniorAge = age >= 60;
+      priceMode = isSeniorAge ? 's' : 'r';
+      const pmEl = document.getElementById('price-mode');
+      if (pmEl) pmEl.value = priceMode;
+      const pmBadge = document.getElementById('price-mode-badge');
+      if (pmBadge) {
+        pmBadge.textContent = isSeniorAge ? 'Senior (60+)' : 'Regular';
+        pmBadge.className = isSeniorAge ? 'price-mode-badge senior' : 'price-mode-badge';
+      }
+      _filterSeniorFromDiscountSelect(isSeniorAge);
+      // Refresh displayed prices and totals if on step 2
+      if (typeof currentStep !== 'undefined' && currentStep === 2) {
+        CATEGORIES.forEach(cat => {
+          cat.tests.forEach(t => {
+            const el = document.getElementById('tp-' + cat.id + '-' + slug(t));
+            if (el) { const p = getPrice(t); el.textContent = p !== null ? fmtPeso(p) : ''; }
+          });
+        });
+        recalcTotal();
+        renderOrders();
+      }
+      // If acct mode is active, re-apply package (age affects package selection)
+      if (typeof acctMode !== 'undefined' && acctMode && typeof acctCompany !== 'undefined' && acctCompany) {
+        clearAllSelections();
+        applyCompanyPackage();
+        if (currentStep === 2) _buildStep2AcctSummary();
+        renderOrders();
+      }
+    }
+
+    /* ════════════════════════════════════════════════
+       ENFORCE UPPERCASE ON TEXT INPUTS
+    ════════════════════════════════════════════════ */
+    function enforceUpperCase(input) {
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = input.value.toUpperCase();
+      try { input.setSelectionRange(start, end); } catch (e) { }
+    }
+
+    /* ════════════════════════════════════════════════
+       ARROW-KEY NAVIGATION FOR AUTOCOMPLETE DROPDOWNS
+    ════════════════════════════════════════════════ */
+    function acKeyNav(event, dropdownId, wrapId) {
+      const dd = document.getElementById(dropdownId);
+      if (!dd || !dd.classList.contains('open')) return;
+      const items = Array.from(dd.querySelectorAll('.ac-item'));
+      if (!items.length) return;
+      const focused = dd.querySelector('.ac-item.ac-focused');
+      let idx = focused ? items.indexOf(focused) : -1;
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        items.forEach(i => i.classList.remove('ac-focused'));
+        idx = (idx + 1) % items.length;
+        items[idx].classList.add('ac-focused');
+        items[idx].scrollIntoView({ block: 'nearest' });
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        items.forEach(i => i.classList.remove('ac-focused'));
+        idx = idx <= 0 ? items.length - 1 : idx - 1;
+        items[idx].classList.add('ac-focused');
+        items[idx].scrollIntoView({ block: 'nearest' });
+      } else if (event.key === 'Enter') {
+        if (focused) {
+          event.preventDefault();
+          focused.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        }
+      } else if (event.key === 'Escape') {
+        dd.classList.remove('open');
+        dd.innerHTML = '';
+        items.forEach(i => i.classList.remove('ac-focused'));
+      }
+    }
+
+    /* ════════════════════════════════════════════════
        CLEAR FORM
     ════════════════════════════════════════════════ */
     function clearForm() {
-      ['f-name', 'f-age', 'f-address', 'f-contact', 'f-referred'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
-      ['f-sex', 'f-status'].forEach(id => { const e = document.getElementById(id); if (e) e.selectedIndex = 0; });
+      ['f-name', 'f-address', 'f-contact', 'f-referred'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+      // Clear birthday + age badge
+      const bdEl = document.getElementById('f-birthday');
+      if (bdEl) bdEl.value = '';
+      document.getElementById('f-age').value = '';
+      const badge = document.getElementById('bday-age-badge');
+      if (badge) badge.style.display = 'none';
+      // Clear operation type
+      const opEl = document.getElementById('f-optype'); if (opEl) opEl.selectedIndex = 0;
+      ['f-sex'].forEach(id => { const e = document.getElementById(id); if (e) e.selectedIndex = 0; });
       CATEGORIES.forEach(cat => {
         sel[cat.id].clear();
         updateBadge(cat.id);
@@ -4626,7 +4988,8 @@
        AGE/SEX listeners for accredited package re-apply
     ════════════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('f-age').addEventListener('change', () => {
+      document.getElementById('f-birthday').addEventListener('change', () => {
+        onBirthdayChange();
         if (acctMode && acctCompany) {
           clearAllSelections();
           applyCompanyPackage();
@@ -4863,7 +5226,6 @@
     let DOCTORS_LIST = [];
 
     function fetchDoctors() {
-      if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') return;
       fetch(`${APPS_SCRIPT_URL}?action=getdoctors`)
         .then(r => r.json())
         .then(d => { if (d.success && d.doctors) DOCTORS_LIST = d.doctors; })
@@ -4877,12 +5239,12 @@
       const dd = document.getElementById('ref-dropdown');
       if (!q) { dd.classList.remove('open'); dd.innerHTML = ''; return; }
       const matches = DOCTORS_LIST.filter(d =>
-        d.name.toLowerCase().includes(q) || (d.spec || '').toLowerCase().includes(q)
+        d.name.toLowerCase().includes(q) || (d.details || '').toLowerCase().includes(q)
       ).slice(0, 7);
       let html = matches.map(d =>
         `<div class="ac-item" onmousedown="pickDoctor('${d.name.replace(/'/g, "\\'")}')">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8E44EC" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span><strong>${d.name}</strong>${d.spec ? ' <span style="color:#aaa;font-size:12px;">— ' + d.spec + '</span>' : ''}</span>
+      <span><strong>${d.name}</strong>${d.details ? ' <span style="color:#aaa;font-size:12px;">— ' + d.details + '</span>' : ''}</span>
     </div>`
       ).join('');
       html += `<div class="ac-item add-new" onmousedown="openAddDoctorModal()">
@@ -4985,13 +5347,13 @@
     function saveOtherReferral() {
       const name = document.getElementById('other-referral-name').value.trim();
       if (!name) { showToast('Please enter a name.', 'err'); return; }
-      const spec = 'OTHER REFERRAL';
-      DOCTORS_LIST.push({ name, spec });
+      const details = 'OTHER REFERRAL';
+      DOCTORS_LIST.push({ name, details });
       document.getElementById('f-referred').value = name;
       closeAddOtherReferralModal();
       showToast('Other referral saved!', 'ok');
       if (APPS_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-        fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&spec=${encodeURIComponent(spec)}`)
+        fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&details=${encodeURIComponent(details)}`)
           .then(r => r.json())
           .then(d => { if (!d.success) showToast('Saved locally but remote save failed.', 'err'); })
           .catch(() => showToast('Saved locally but could not reach server.', 'err'));
@@ -5000,16 +5362,16 @@
 
     function saveNewDoctor() {
       const name = document.getElementById('new-doctor-name').value.trim();
-      const spec = document.getElementById('new-doctor-spec').value.trim();
+      const details = document.getElementById('new-doctor-spec').value.trim();
       if (!name) { showToast('Please enter the doctor\'s name.', 'err'); return; }
 
-      DOCTORS_LIST.push({ name, spec });
+      DOCTORS_LIST.push({ name, details });
       document.getElementById('f-referred').value = name;
       closeAddDoctorModal();
       showToast('Doctor added! Saving to records…', 'ok');
 
       if (APPS_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-        fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&spec=${encodeURIComponent(spec)}`)
+        fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&details=${encodeURIComponent(details)}`)
           .then(r => r.json())
           .then(d => { if (!d.success) showToast('Saved locally but remote save failed.', 'err'); })
           .catch(() => showToast('Saved locally but could not reach server.', 'err'));
@@ -5145,7 +5507,8 @@
     }
 
     function onPriceModeChange() {
-      priceMode = document.getElementById('price-mode').value;
+      const _pmVal = document.getElementById('price-mode').value;
+      if (_pmVal) priceMode = _pmVal; // only update if select has a valid value
       CATEGORIES.forEach(cat => {
         cat.tests.forEach(t => {
           const el = document.getElementById('tp-' + cat.id + '-' + slug(t));
@@ -5182,11 +5545,10 @@
       } else if (tab === 'tests') {
         if (currentStep !== 2) {
           const name = document.getElementById('f-name').value.trim();
-          const age = document.getElementById('f-age').value.trim();
+          const bday = document.getElementById('f-birthday').value;
           const sex = document.getElementById('f-sex').value;
-          const status = document.getElementById('f-status').value;
-          if (!name || !age || !sex || !status) {
-            showToast('Complete Name, Age, Sex & Status first.', 'err'); return;
+          if (!name || !bday || !sex) {
+            showToast('Complete Name, Birthday & Sex first.', 'err'); return;
           }
           goToStep2();
         }
@@ -5216,11 +5578,10 @@
       const name = document.getElementById('f-name').value.trim();
       const age = document.getElementById('f-age').value.trim();
       const sex = document.getElementById('f-sex').value;
-      const status = document.getElementById('f-status').value;
       const wrap = document.getElementById('mob-patient-summary-wrap');
       if (name) {
         document.getElementById('mob-ps-name').textContent = name;
-        document.getElementById('mob-ps-detail').textContent = [age && sex ? `${age} yrs, ${sex}` : '', status].filter(Boolean).join(' · ');
+        document.getElementById('mob-ps-detail').textContent = [age && sex ? `${age} yrs, ${sex}` : ''].filter(Boolean).join(' · ');
         wrap.style.display = '';
       } else {
         wrap.style.display = 'none';
@@ -5240,13 +5601,27 @@
     }
 
     function syncMobTotals() {
-      document.getElementById('mob-subtotal-val').textContent = document.getElementById('subtotal-val').textContent;
+      const last = recalcTotal._last || {};
+      const hasUS = last.hasUS || false;
+      const isSenior = last.isSenior || false;
+
+      document.getElementById('mob-lab-subtotal-line').style.display = hasUS ? 'flex' : 'none';
+      document.getElementById('mob-us-subtotal-line').style.display = hasUS ? 'flex' : 'none';
+      document.getElementById('mob-simple-subtotal-line').style.display = hasUS ? 'none' : 'flex';
+
+      document.getElementById('mob-lab-subtotal-val').textContent = document.getElementById('lab-subtotal-val').textContent;
+      document.getElementById('mob-us-subtotal-val').textContent = document.getElementById('us-subtotal-val').textContent;
+      document.getElementById('mob-subtotal-val').textContent = document.getElementById('subtotal-val-simple').textContent;
+
       document.getElementById('mob-grand-total-val').textContent = document.getElementById('grand-total-val').textContent;
       const discLine = document.getElementById('discount-line');
       const mobDiscLine = document.getElementById('mob-discount-line');
       mobDiscLine.style.display = discLine.style.display;
       document.getElementById('mob-discount-lbl').textContent = document.getElementById('discount-lbl').textContent;
       document.getElementById('mob-discount-val').textContent = document.getElementById('discount-val').textContent;
+
+      const mobSeniorLine = document.getElementById('mob-senior-pricing-line');
+      if (mobSeniorLine) mobSeniorLine.style.display = isSenior ? 'flex' : 'none';
     }
 
     function syncMobDiscountOptions() {
@@ -5373,7 +5748,394 @@
         }
       }, 200);
     });
-  </script>
+  
+
+    /* ════════════════════════════════════════════════
+       POS STATE
+    ════════════════════════════════════════════════ */
+    let _posData = null;  // holds the full payload + computed values
+    let _posRawAmount = '';  // raw digit string for keyboard
+    let _posAmountLocked = false;
+    let _posIsCharged = false;
+
+    /* ════════════════════════════════════════════════
+       SHOW POS PAGE
+       Called after submit validation passes.
+       Receives the computed order data from submitReg.
+    ════════════════════════════════════════════════ */
+    function showPosPage(data) {
+      _posData = data;
+      _posRawAmount = '';
+      _posIsCharged = false;
+
+      // Populate patient info
+      document.getElementById('pos-patient-name').textContent = data.name;
+      const metaParts = [data.ageSex, data.opType, data.referred ? 'Ref: ' + data.referred : ''].filter(Boolean);
+      document.getElementById('pos-patient-meta').textContent = metaParts.join(' · ');
+
+      // Populate items list
+      const list = document.getElementById('pos-items-list');
+      list.innerHTML = '';
+      const allItems = data.itemsDetail || [];
+      allItems.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'pos-item-row';
+        row.innerHTML = `
+          <div class="pos-item-name">
+            <span class="pos-item-cat">${item.cat}</span>
+            ${item.name}
+          </div>
+          <div class="pos-item-price">${fmtPeso(item.price)}</div>`;
+        list.appendChild(row);
+      });
+
+      // Totals
+      document.getElementById('pos-subtotal').textContent = fmtPeso(data.subtotal + (data.usSubtotal || 0));
+      const discRow = document.getElementById('pos-disc-row');
+      if (data.discAmt > 0) {
+        discRow.style.display = 'flex';
+        document.getElementById('pos-disc-label').textContent = data.discountLabel || 'Discount';
+        document.getElementById('pos-disc-amt').textContent = '−' + fmtPeso(data.discAmt);
+      } else {
+        discRow.style.display = 'none';
+      }
+      document.getElementById('pos-senior-row').style.display = data.isSenior ? 'flex' : 'none';
+      document.getElementById('pos-grand').textContent = fmtPeso(data.grand);
+
+      // Detect 100% discount (charged)
+      _posIsCharged = data.discRate >= 1;
+      const banner = document.getElementById('pos-charged-banner');
+      const payTypeEl = document.getElementById('pos-payment-type');
+      const keyboard = document.getElementById('pos-keyboard');
+      const amtDisplay = document.getElementById('pos-amount-display');
+
+      if (_posIsCharged) {
+        banner.classList.add('show');
+        // Force CHARGED and lock payment type
+        payTypeEl.value = 'CHARGED';
+        payTypeEl.disabled = true;
+        // Force NO PAYMENT status and lock
+        document.getElementById('pos-status').value = 'NONE';
+        document.getElementById('pos-status').disabled = true;
+        _posRawAmount = '0';
+        _posAmountLocked = true;
+        amtDisplay.classList.add('locked');
+        keyboard.style.opacity = '0.3';
+        keyboard.style.pointerEvents = 'none';
+      } else {
+        banner.classList.remove('show');
+        payTypeEl.disabled = false;
+        payTypeEl.value = 'CASH';
+        document.getElementById('pos-status').disabled = false;
+        document.getElementById('pos-status').value = 'FULL';
+        _posAmountLocked = false;
+        amtDisplay.classList.remove('locked');
+        keyboard.style.opacity = '1';
+        keyboard.style.pointerEvents = '';
+        // Default: full payment
+        _posRawAmount = String(data.grand);
+        onPosStatusChange();
+      }
+
+      posUpdateDisplay();
+
+      // Switch pages
+      document.getElementById('page-reg').classList.remove('active');
+      document.getElementById('page-pos').classList.add('active');
+      document.getElementById('logout-btn').classList.remove('visible');
+    }
+
+    /* ════════════════════════════════════════════════
+       POS STATUS CHANGE
+    ════════════════════════════════════════════════ */
+    function onPosStatusChange() {
+      if (_posIsCharged) return;
+      const status = document.getElementById('pos-status').value;
+      const amtDisplay = document.getElementById('pos-amount-display');
+      const keyboard = document.getElementById('pos-keyboard');
+
+      if (status === 'FULL') {
+        _posRawAmount = String(_posData.grand);
+        _posAmountLocked = true;
+        amtDisplay.classList.add('locked');
+        keyboard.style.opacity = '0.35';
+        keyboard.style.pointerEvents = 'none';
+      } else if (status === 'NONE') {
+        _posRawAmount = '0';
+        _posAmountLocked = true;
+        amtDisplay.classList.add('locked');
+        keyboard.style.opacity = '0.35';
+        keyboard.style.pointerEvents = 'none';
+      } else {
+        // PARTIAL — let user type
+        _posRawAmount = '';
+        _posAmountLocked = false;
+        amtDisplay.classList.remove('locked');
+        keyboard.style.opacity = '1';
+        keyboard.style.pointerEvents = '';
+      }
+      posUpdateDisplay();
+    }
+
+    /* ════════════════════════════════════════════════
+       POS PAYMENT TYPE CHANGE
+    ════════════════════════════════════════════════ */
+    function onPosPaymentTypeChange() {
+      // No special logic needed unless CHARGED is forced
+    }
+
+    /* ════════════════════════════════════════════════
+       NUMBER KEYBOARD
+    ════════════════════════════════════════════════ */
+    function posKey(digit) {
+      if (_posAmountLocked) return;
+      if (digit === '.' && _posRawAmount.includes('.')) return;
+      // Max 2 decimal places
+      if (_posRawAmount.includes('.')) {
+        const decimals = _posRawAmount.split('.')[1] || '';
+        if (decimals.length >= 2) return;
+      }
+      // Prevent leading zeros (except before decimal)
+      if (digit !== '.' && _posRawAmount === '0') {
+        _posRawAmount = digit;
+      } else {
+        _posRawAmount += digit;
+      }
+      posUpdateDisplay();
+    }
+
+    function posKeyDel() {
+      if (_posAmountLocked) return;
+      _posRawAmount = _posRawAmount.slice(0, -1);
+      posUpdateDisplay();
+    }
+
+    function posKeyClear() {
+      if (_posAmountLocked) return;
+      _posRawAmount = '';
+      posUpdateDisplay();
+    }
+
+    /* ════════════════════════════════════════════════
+       UPDATE DISPLAY — format number with commas
+    ════════════════════════════════════════════════ */
+    function posUpdateDisplay() {
+      const raw = _posRawAmount;
+      const display = document.getElementById('pos-amount-display');
+      const balEl = document.getElementById('pos-balance-val');
+
+      let formatted = '0';
+      if (raw !== '' && raw !== '.') {
+        const parts = raw.split('.');
+        // Add commas to integer part
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        formatted = parts.join('.');
+        // Show trailing dot while typing decimal
+        if (raw.endsWith('.') && !formatted.includes('.')) formatted += '.';
+      }
+      display.textContent = formatted;
+
+      // Compute balance
+      const paid = parseFloat(raw) || 0;
+      const total = _posData ? _posData.grand : 0;
+      const balance = total - paid;
+      balEl.textContent = fmtPeso(Math.abs(balance));
+      balEl.className = 'pos-balance-val' + (balance <= 0 ? ' zero' : '') + (balance < 0 ? ' negative' : '');
+    }
+
+    /* ════════════════════════════════════════════════
+       POS CONFIRM — submit to sheet with payment info
+    ════════════════════════════════════════════════ */
+    function posConfirm() {
+      const btn = document.getElementById('pos-confirm-btn');
+      const payType = document.getElementById('pos-payment-type').value;
+      const statusVal = document.getElementById('pos-status').value;
+      const paid = parseFloat(_posRawAmount) || 0;
+      const total = _posData.grand;
+      const balance = total - paid;
+
+      // Map status
+      const statusMap = { FULL: 'FULLY PAID', PARTIAL: 'PARTLY PAID', NONE: 'UNPAID' };
+      const sheetStatus = _posIsCharged ? 'FULLY PAID' : (statusMap[statusVal] || 'PENDING');
+
+      const finalPayload = Object.assign({}, _posData.rawPayload, {
+        paymentType: payType,
+        paymentStatus: sheetStatus,
+        paymentAmount: _posIsCharged ? 0 : paid,
+        balance: _posIsCharged ? 0 : balance,
+      });
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Saving…';
+
+      const resetBtn = () => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirm & Save';
+      };
+
+      if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+        setTimeout(() => { resetBtn(); showSuccessAndReset(finalPayload.name, '0000'); }, 1000);
+        return;
+      }
+
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(finalPayload),
+      })
+        .then(r => r.json())
+        .then(d => {
+          resetBtn();
+          if (d.success) {
+            showSuccessAndReset(finalPayload.name, d.number);
+          } else {
+            showToast('Error: ' + (d.message || 'Save failed.'), 'err');
+          }
+        })
+        .catch(() => { resetBtn(); showToast('Network error.', 'err'); });
+    }
+
+    function showSuccessAndReset(name, num) {
+      document.getElementById('page-pos').classList.remove('active');
+      document.getElementById('page-reg').classList.add('active');
+      document.getElementById('logout-btn').classList.add('visible');
+      showSuccessNotif(num, name);
+      clearForm();
+      goToStep1();
+    }
+
+    function posBack() {
+      document.getElementById('page-pos').classList.remove('active');
+      document.getElementById('page-reg').classList.add('active');
+      document.getElementById('logout-btn').classList.add('visible');
+    }
+    function posCancelPrompt() { document.getElementById('pos-cancel-overlay').classList.add('show'); }
+    function posCancelDismiss() { document.getElementById('pos-cancel-overlay').classList.remove('show'); }
+    function posCancelConfirm() {
+      document.getElementById('pos-cancel-overlay').classList.remove('show');
+      document.getElementById('page-pos').classList.remove('active');
+      document.getElementById('page-reg').classList.add('active');
+      document.getElementById('logout-btn').classList.add('visible');
+      clearForm();
+      goToStep1();
+    }
+</script>
+
+  <!-- ═══════════════════════════════════════════════════
+       POS PAGE
+  ═══════════════════════════════════════════════════ -->
+  <!-- ═══════════ POS PAGE ═══════════ -->
+  <div id="page-pos">
+    <div class="pos-body">
+
+      <!-- LEFT: Order Summary -->
+      <div class="pos-left">
+        <div class="pos-section-lbl">Patient</div>
+        <div class="pos-patient-card">
+          <div class="pos-patient-name" id="pos-patient-name">—</div>
+          <div class="pos-patient-meta" id="pos-patient-meta">—</div>
+        </div>
+
+        <div class="pos-section-lbl">Procedures</div>
+        <div class="pos-items-card">
+          <div id="pos-items-list"></div>
+        </div>
+
+        <div class="pos-totals-card">
+          <div class="pos-total-row"><span>Subtotal</span><span id="pos-subtotal">&#8369;0.00</span></div>
+          <div class="pos-total-row disc" id="pos-disc-row" style="display:none;">
+            <span id="pos-disc-label">Discount</span><span id="pos-disc-amt">&#8722;&#8369;0.00</span>
+          </div>
+          <div class="pos-total-row" id="pos-senior-row" style="display:none;">
+            <span>Senior Pricing <span class="pos-senior-badge">Applied</span></span>
+            <span style="color:#9B72D0;font-size:11px;">Adjusted</span>
+          </div>
+          <div class="pos-total-row grand"><span>Total Amount</span><span id="pos-grand">&#8369;0.00</span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Payment -->
+      <div class="pos-right">
+        <div class="pos-right-title">&#128179; Payment</div>
+
+        <div class="pos-charged-banner" id="pos-charged-banner">
+          &#127873; 100% Discount &#8212; No Payment Required
+        </div>
+
+        <div class="pos-fields-row">
+          <div class="pos-field">
+            <label>Method</label>
+            <select id="pos-payment-type" onchange="onPosPaymentTypeChange()">
+              <option value="CASH">Cash</option>
+              <option value="GCASH">GCash</option>
+              <option value="CHARGED">Charged / Waived</option>
+            </select>
+          </div>
+          <div class="pos-field">
+            <label>Status</label>
+            <select id="pos-status" onchange="onPosStatusChange()">
+              <option value="FULL">Pay in Full</option>
+              <option value="PARTIAL">Pay Partially</option>
+              <option value="NONE">No Payment</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pos-amount-wrap">
+          <div class="pos-amount-lbl">Amount Received</div>
+          <div class="pos-amount-display" id="pos-amount-display">0</div>
+        </div>
+
+        <div class="pos-balance-row">
+          <span class="pos-balance-lbl">Balance</span>
+          <span class="pos-balance-val" id="pos-balance-val">&#8369;0.00</span>
+        </div>
+
+        <div class="pos-keyboard" id="pos-keyboard">
+          <div class="pos-key" onclick="posKey('7')">7</div>
+          <div class="pos-key" onclick="posKey('8')">8</div>
+          <div class="pos-key" onclick="posKey('9')">9</div>
+          <div class="pos-key" onclick="posKey('4')">4</div>
+          <div class="pos-key" onclick="posKey('5')">5</div>
+          <div class="pos-key" onclick="posKey('6')">6</div>
+          <div class="pos-key" onclick="posKey('1')">1</div>
+          <div class="pos-key" onclick="posKey('2')">2</div>
+          <div class="pos-key" onclick="posKey('3')">3</div>
+          <div class="pos-key" onclick="posKey('0')">0</div>
+          <div class="pos-key" onclick="posKey('.')">&#183;</div>
+          <div class="pos-key del" onclick="posKeyDel()">&#9003;</div>
+          <div class="pos-key wide" onclick="posKeyClear()">Clear</div>
+        </div>
+
+        <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm &amp; Save
+        </button>
+        <div class="pos-actions-row">
+          <button class="pos-back-btn" onclick="posBack()">&#8592; Back</button>
+          <button class="pos-cancel-btn" onclick="posCancelPrompt()">&#10005; Cancel Reg.</button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /#page-pos -->
+
+  <!-- Cancel Confirmation Dialog -->
+  <div class="pos-cancel-overlay" id="pos-cancel-overlay">
+    <div class="pos-cancel-dialog">
+      <div class="pos-cancel-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="pos-cancel-title">Cancel Registration?</div>
+      <div class="pos-cancel-body">This will discard the current patient and all selected procedures. This cannot be undone.</div>
+      <div class="pos-cancel-btns">
+        <button class="pos-cancel-keep" onclick="posCancelDismiss()">Keep</button>
+        <button class="pos-cancel-confirm" onclick="posCancelConfirm()">Yes, Cancel</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
