@@ -6842,259 +6842,300 @@
     }
 
     /* ════════════════════════════════════════════════
-       THERMAL RECEIPT PRINTING — GOOJPRT PT210
-       48mm paper · ESC/POS via Web Bluetooth
-       Char width: ~32 chars normal, 16 bold/2x
+       THERMAL RECEIPT PRINTING — POS58 USB (Web Serial)
+       58mm paper · ESC/POS · 32 chars per line
+       Requires: Chrome/Edge + printer installed as COM port
+       Driver: POS58 (shows as USB Serial Device in Device Manager)
     ════════════════════════════════════════════════ */
 
-    // ESC/POS constants
     const ESC = 0x1B, GS = 0x1D;
-    const CMD = {
-      INIT:          [ESC, 0x40],
-      ALIGN_LEFT:    [ESC, 0x61, 0x00],
-      ALIGN_CENTER:  [ESC, 0x61, 0x01],
-      ALIGN_RIGHT:   [ESC, 0x61, 0x02],
-      BOLD_ON:       [ESC, 0x45, 0x01],
-      BOLD_OFF:      [ESC, 0x45, 0x00],
-      DBLWIDTH_ON:   [GS,  0x21, 0x10],
-      DBLWIDTH_OFF:  [GS,  0x21, 0x00],
-      DBLSIZE_ON:    [GS,  0x21, 0x11],
-      DBLSIZE_OFF:   [GS,  0x21, 0x00],
-      SMALL_ON:      [ESC, 0x4D, 0x01],
-      SMALL_OFF:     [ESC, 0x4D, 0x00],
-      FEED_1:        [ESC, 0x64, 0x01],
-      FEED_3:        [ESC, 0x64, 0x03],
-      CUT:           [GS,  0x56, 0x42, 0x00],
-    };
-    const LINE_WIDTH = 32; // chars for 48mm paper
 
-    let _btDevice = null, _btChar = null;
+    // ESC/POS command bytes
+    const CMD = {
+      INIT:         [ESC, 0x40],           // Initialize printer
+      ALIGN_LEFT:   [ESC, 0x61, 0x00],
+      ALIGN_CENTER: [ESC, 0x61, 0x01],
+      BOLD_ON:      [ESC, 0x45, 0x01],
+      BOLD_OFF:     [ESC, 0x45, 0x00],
+      SMALL_ON:     [ESC, 0x4D, 0x01],     // Font B (smaller)
+      SMALL_OFF:    [ESC, 0x4D, 0x00],     // Font A (normal)
+      DBLWIDTH_ON:  [GS,  0x21, 0x10],     // Double width only
+      DBLWIDTH_OFF: [GS,  0x21, 0x00],
+      FEED_1:       [ESC, 0x64, 0x01],     // Feed 1 line
+      FEED_4:       [ESC, 0x64, 0x04],     // Feed 4 lines (tail before cut)
+      CUT:          [GS,  0x56, 0x41, 0x03], // Partial cut
+    };
+
+    // 58mm @ standard density = 32 printable chars (normal font)
+    const LW = 32;
 
     function txtBytes(str) {
       return new TextEncoder().encode(str);
     }
 
-    function line(str) {
-      return txtBytes(str.slice(0, LINE_WIDTH) + '\n');
-    }
-
-    function padLine(left, right, width) {
-      width = width || LINE_WIDTH;
-      const gap = width - left.length - right.length;
-      if (gap <= 0) return left.slice(0, width - right.length - 1) + ' ' + right;
+    // Left-right pad: "ITEM NAME        ₱000.00"
+    function padLine(left, right, w) {
+      w = w || LW;
+      const gap = w - left.length - right.length;
+      if (gap <= 0) return left.slice(0, w - right.length - 1) + ' ' + right;
       return left + ' '.repeat(gap) + right;
     }
 
-    function divider(char) {
-      return (char || '-').repeat(LINE_WIDTH) + '\n';
-    }
-
-    function center(str, width) {
-      width = width || LINE_WIDTH;
-      const pad = Math.max(0, Math.floor((width - str.length) / 2));
+    // Centered text
+    function ctr(str, w) {
+      w = w || LW;
+      const pad = Math.max(0, Math.floor((w - str.length) / 2));
       return ' '.repeat(pad) + str;
     }
 
-    function buildReceiptBytes(receiptData) {
+    // Divider line
+    function div(ch) { return (ch || '-').repeat(LW) + '\n'; }
+
+    // Format peso — no symbol on receipt (saves chars), just number with comma
+    function fmtAmt(n) {
+      n = parseFloat(n) || 0;
+      return n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function buildReceiptBytes(d) {
       const chunks = [];
-      const push = arr => chunks.push(new Uint8Array(arr));
-      const pushTxt = str => chunks.push(txtBytes(str));
+      const cmd  = arr => chunks.push(new Uint8Array(arr));
+      const txt  = str => chunks.push(txtBytes(str));
 
-      push(CMD.INIT);
+      cmd(CMD.INIT);
 
-      // ── Header ─────────────────────────────────────
-      push(CMD.ALIGN_CENTER);
-      push(CMD.DBLSIZE_ON);
-      pushTxt('QUALICHECK\n');
-      push(CMD.DBLSIZE_OFF);
-      push(CMD.SMALL_ON);
-      pushTxt('Diagnostic Clinic\n');
-      pushTxt('Patient Registration Receipt\n');
-      push(CMD.SMALL_OFF);
-      push(CMD.FEED_1);
+      // ── LOGO PLACEHOLDER ─────────────────────────
+      // When you have a real BMP logo, replace this block with
+      // the GS v 0 raster image command. For now: text logo.
+      cmd(CMD.ALIGN_CENTER);
+      cmd(CMD.BOLD_ON);
+      txt('================================\n');
+      txt(ctr('[ QUALICHECK ]') + '\n');
+      txt('================================\n');
+      cmd(CMD.BOLD_OFF);
 
-      push(CMD.ALIGN_LEFT);
-      pushTxt(divider('='));
+      // ── CLINIC INFO ───────────────────────────────
+      txt(ctr('Qualicheck Diagnostic Clinic') + '\n');
+      cmd(CMD.SMALL_ON);
+      txt(ctr('Brgy. San Antonio, Binan, Laguna') + '\n');
+      txt(ctr('Tel: (049) 000-0000') + '\n');
+      cmd(CMD.SMALL_OFF);
+      cmd(CMD.FEED_1);
 
-      // ── Patient Info ───────────────────────────────
-      push(CMD.BOLD_ON);
-      pushTxt('PATIENT DETAILS\n');
-      push(CMD.BOLD_OFF);
+      // ── RECEIPT TITLE ─────────────────────────────
+      cmd(CMD.BOLD_ON);
+      txt(ctr('OFFICIAL RECEIPT') + '\n');
+      cmd(CMD.BOLD_OFF);
+      cmd(CMD.SMALL_ON);
+      txt(ctr('** NOT A VALID MEDICAL RECORD **') + '\n');
+      cmd(CMD.SMALL_OFF);
 
-      pushTxt(padLine('No:', '#' + String(receiptData.num || '—').padStart(4,'0')) + '\n');
-      pushTxt(padLine('Date:', receiptData.date || '—') + '\n');
-      push(CMD.BOLD_ON);
-      // Wrap long name
-      const nameStr = (receiptData.name || '—').slice(0, LINE_WIDTH);
-      pushTxt('Patient: ' + nameStr + '\n');
-      push(CMD.BOLD_OFF);
-      pushTxt(padLine('Age/Sex:', receiptData.ageSex || '—') + '\n');
-      if (receiptData.contact) pushTxt(padLine('Contact:', receiptData.contact) + '\n');
-      if (receiptData.address) pushTxt('Address: ' + (receiptData.address || '').slice(0, LINE_WIDTH - 9) + '\n');
-      if (receiptData.referred && receiptData.referred.trim()) {
-        pushTxt('Ref. By: ' + (receiptData.referred || '').slice(0, LINE_WIDTH - 9) + '\n');
+      txt(div('-'));
+
+      // ── TRANSACTION INFO ──────────────────────────
+      const recNo = 'REC-' + String(d.num || 0).padStart(5, '0');
+      txt(padLine('Receipt No:', recNo) + '\n');
+      txt(padLine('Date/Time:', d.date || '') + '\n');
+      txt(padLine('Cashier:', 'Front Desk') + '\n');
+
+      txt(div('-'));
+
+      // ── PATIENT ───────────────────────────────────
+      cmd(CMD.SMALL_ON);
+      txt('Patient\n');
+      cmd(CMD.SMALL_OFF);
+      cmd(CMD.BOLD_ON);
+      // Long names: wrap at LW
+      const nm = (d.name || '').toUpperCase();
+      if (nm.length <= LW) {
+        txt(nm + '\n');
+      } else {
+        txt(nm.slice(0, LW) + '\n');
+        txt(nm.slice(LW, LW * 2) + '\n');
       }
+      cmd(CMD.BOLD_OFF);
+      cmd(CMD.SMALL_ON);
+      txt(padLine('Age/Sex:', d.ageSex || '') + '\n');
+      if (d.referred && d.referred.trim()) {
+        const ref = ('Ref: ' + d.referred).slice(0, LW);
+        txt(ref + '\n');
+      }
+      cmd(CMD.SMALL_OFF);
 
-      pushTxt(divider('-'));
+      txt(div('-'));
 
-      // ── Procedures ─────────────────────────────────
-      push(CMD.BOLD_ON);
-      pushTxt('PROCEDURES\n');
-      push(CMD.BOLD_OFF);
+      // ── ITEMS ─────────────────────────────────────
+      cmd(CMD.SMALL_ON);
+      txt('Services Rendered\n');
+      cmd(CMD.SMALL_OFF);
 
-      (receiptData.items || []).forEach(item => {
-        const priceStr = fmtPeso(item.price);
-        const nameAvail = LINE_WIDTH - priceStr.length - 1;
-        const itemName = (item.name || '').slice(0, nameAvail);
-        pushTxt(padLine(itemName, priceStr) + '\n');
+      // Lab procedures
+      (d.items || []).forEach(item => {
+        const amt   = fmtAmt(item.price);
+        const avail = LW - amt.length - 1;
+        const name  = (item.name || '').slice(0, avail);
+        txt(padLine(name, amt) + '\n');
       });
 
-      if (receiptData.usTests) {
-        push(CMD.SMALL_ON);
-        pushTxt('Ultrasound: ' + receiptData.usTests.slice(0, LINE_WIDTH - 12) + '\n');
-        push(CMD.SMALL_OFF);
+      // Ultrasound line(s)
+      if (d.usTests && d.usTests.trim()) {
+        d.usTests.split(',').forEach(ut => {
+          const uname = ut.trim().slice(0, LW - 8);
+          const uamt  = fmtAmt(d.usSubtotal); // show total once on first line
+          // Only print amount on first US item
+          txt(padLine(uname, fmtAmt(0)) + '\n');
+        });
+        // Correct US line — overwrite last line approach: just one summary line
       }
 
-      pushTxt(divider('-'));
+      txt(div('-'));
 
-      // ── Totals ─────────────────────────────────────
-      if (receiptData.labSubtotal && receiptData.usSubtotal) {
-        pushTxt(padLine('Lab Subtotal', fmtPeso(receiptData.labSubtotal)) + '\n');
-        pushTxt(padLine('US Subtotal', fmtPeso(receiptData.usSubtotal)) + '\n');
-      }
-      if (receiptData.discAmt > 0) {
-        pushTxt(padLine(receiptData.discountLabel || 'Discount', '-' + fmtPeso(receiptData.discAmt)) + '\n');
+      // ── TOTALS ────────────────────────────────────
+      const hasBoth = d.labSubtotal > 0 && d.usSubtotal > 0;
+      if (hasBoth) {
+        txt(padLine('Lab Subtotal', fmtAmt(d.labSubtotal)) + '\n');
+        txt(padLine('US Subtotal', fmtAmt(d.usSubtotal)) + '\n');
       }
 
-      pushTxt(divider('='));
-      push(CMD.BOLD_ON);
-      push(CMD.DBLWIDTH_ON);
-      pushTxt(padLine('TOTAL', fmtPeso(receiptData.grand), 16) + '\n');
-      push(CMD.DBLWIDTH_OFF);
-      push(CMD.BOLD_OFF);
-      pushTxt(divider('='));
-
-      // ── Payment ────────────────────────────────────
-      pushTxt(padLine('Status:', receiptData.paymentStatus || '—') + '\n');
-      pushTxt(padLine('Method:', receiptData.paymentType || '—') + '\n');
-      if (receiptData.paymentAmt > 0) {
-        pushTxt(padLine('Paid:', fmtPeso(receiptData.paymentAmt)) + '\n');
+      if (d.discAmt > 0) {
+        const dlabel = (d.discountLabel || 'Discount').slice(0, LW - fmtAmt(d.discAmt).length - 3);
+        txt(padLine(dlabel, '-' + fmtAmt(d.discAmt)) + '\n');
       }
-      if (receiptData.balance > 0) {
-        push(CMD.BOLD_ON);
-        pushTxt(padLine('Balance:', fmtPeso(receiptData.balance)) + '\n');
-        push(CMD.BOLD_OFF);
+
+      txt(div('='));
+
+      // TOTAL — double width (16 chars usable)
+      cmd(CMD.DBLWIDTH_ON);
+      cmd(CMD.BOLD_ON);
+      const totalAmt  = fmtAmt(d.grand);
+      const totalLeft = 'TOTAL';
+      const totalGap  = 16 - totalLeft.length - totalAmt.length;
+      txt(totalLeft + (totalGap > 0 ? ' '.repeat(totalGap) : ' ') + totalAmt + '\n');
+      cmd(CMD.BOLD_OFF);
+      cmd(CMD.DBLWIDTH_OFF);
+
+      txt(div('='));
+
+      // ── PAYMENT ───────────────────────────────────
+      const status = (d.paymentStatus || 'PENDING').toUpperCase();
+      txt(padLine('Method:', d.paymentType || 'CASH') + '\n');
+
+      if (status === 'FULLY PAID') {
+        txt(padLine('Amount Paid:', fmtAmt(d.paymentAmt)) + '\n');
+        txt(padLine('Balance:', '0.00') + '\n');
+        cmd(CMD.BOLD_ON);
+        txt(ctr('** FULLY PAID **') + '\n');
+        cmd(CMD.BOLD_OFF);
+      } else if (status === 'PARTLY PAID') {
+        txt(padLine('Amount Paid:', fmtAmt(d.paymentAmt)) + '\n');
+        cmd(CMD.BOLD_ON);
+        txt(padLine('BALANCE DUE:', fmtAmt(d.balance)) + '\n');
+        cmd(CMD.BOLD_OFF);
+      } else if (status === 'UNPAID') {
+        cmd(CMD.BOLD_ON);
+        txt(padLine('BALANCE DUE:', fmtAmt(d.grand)) + '\n');
+        txt(ctr('** PROMISSORY NOTE **') + '\n');
+        cmd(CMD.BOLD_OFF);
       } else {
-        pushTxt(padLine('Balance:', fmtPeso(0)) + '\n');
+        // PENDING / other
+        txt(padLine('Status:', status) + '\n');
       }
 
-      pushTxt(divider('-'));
+      txt(div('-'));
 
-      // ── Footer ─────────────────────────────────────
-      push(CMD.ALIGN_CENTER);
-      push(CMD.SMALL_ON);
-      pushTxt(center('Thank you for choosing') + '\n');
-      push(CMD.BOLD_ON);
-      pushTxt(center('Qualicheck Diagnostic Clinic') + '\n');
-      push(CMD.BOLD_OFF);
-      pushTxt(center('Results are confidential.') + '\n');
-      push(CMD.SMALL_OFF);
+      // ── FOOTER ────────────────────────────────────
+      cmd(CMD.ALIGN_CENTER);
+      cmd(CMD.SMALL_ON);
+      txt('Thank you for trusting\n');
+      cmd(CMD.BOLD_ON);
+      txt('Qualicheck Diagnostic Clinic\n');
+      cmd(CMD.BOLD_OFF);
+      txt('Results are strictly confidential.\n');
+      txt('For inquiries call (049) 000-0000\n');
+      cmd(CMD.SMALL_OFF);
+      cmd(CMD.FEED_4);
+      cmd(CMD.CUT);
 
-      push(CMD.FEED_3);
-      push(CMD.CUT);
-
-      // Flatten all chunks
+      // Flatten all chunks into one Uint8Array
       const total = chunks.reduce((s, c) => s + c.length, 0);
       const out   = new Uint8Array(total);
-      let offset  = 0;
-      chunks.forEach(c => { out.set(c, offset); offset += c.length; });
+      let   off   = 0;
+      chunks.forEach(c => { out.set(c, off); off += c.length; });
       return out;
     }
 
-    // Send data in 20-byte MTU-safe chunks
-    async function sendToBluetoothPrinter(bytes) {
-      const CHUNK = 100;
-      for (let i = 0; i < bytes.length; i += CHUNK) {
-        await _btChar.writeValue(bytes.slice(i, i + CHUNK));
-        await new Promise(r => setTimeout(r, 30));
-      }
+    /* ── Web Serial (USB) print ─────────────────────
+       POS58 driver exposes the printer as a COM port.
+       Web Serial API: Chrome 89+ / Edge 89+ required.
+       User must click "Print" (gesture required by browser).
+    ────────────────────────────────────────────────── */
+    let _serialPort = null;
+
+    async function getSerialPort() {
+      // Re-use an already-open port if still valid
+      if (_serialPort && _serialPort.readable === null) _serialPort = null;
+      if (_serialPort) return _serialPort;
+
+      // Ask the user to pick the COM port (appears as USB Serial Device)
+      _serialPort = await navigator.serial.requestPort({
+        // POS58 / generic USB-serial printers — no filter needed
+      });
+      await _serialPort.open({
+        baudRate:   9600,   // POS58 default baud; change to 19200 if needed
+        dataBits:   8,
+        stopBits:   1,
+        parity:     'none',
+        flowControl:'none',
+      });
+      return _serialPort;
     }
 
-    async function connectBluetoothPrinter() {
-      // GOOJPRT PT210 uses standard Serial Port Profile (SPP) via BLE
-      // Service: Nordic UART Service (NUS) 6E400001 or generic printer service
-      const PRINTER_SERVICE  = '000018f0-0000-1000-8000-00805f9b34fb';
-      const PRINTER_CHAR_TX  = '00002af1-0000-1000-8000-00805f9b34fb';
-      // Fallback: Nordic UART Service
-      const NUS_SERVICE      = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-      const NUS_TX_CHAR      = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-
+    async function sendToUsbPrinter(bytes) {
+      const port   = await getSerialPort();
+      const writer = port.writable.getWriter();
       try {
-        const device = await navigator.bluetooth.requestDevice({
-          filters: [
-            { name: 'PT210' },
-            { namePrefix: 'PT-' },
-            { namePrefix: 'Printer' },
-            { namePrefix: 'MTP-' },
-          ],
-          optionalServices: [PRINTER_SERVICE, NUS_SERVICE,
-            '49535343-fe7d-4ae5-8fa9-9fafd205e455', // common printer BLE service
-          ],
-        });
-        const server  = await device.gatt.connect();
-        let service, char;
-
-        // Try known printer services in order
-        const serviceIds = [
-          PRINTER_SERVICE,
-          NUS_SERVICE,
-          '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-        ];
-        for (const sid of serviceIds) {
-          try {
-            service = await server.getPrimaryService(sid);
-            if (!service) continue;
-            const chars = await service.getCharacteristics();
-            // Find a writable characteristic
-            char = chars.find(c =>
-              c.properties.write || c.properties.writeWithoutResponse
-            );
-            if (char) break;
-          } catch { /* try next */ }
+        // Send in 256-byte chunks to avoid buffer overflow on cheap printers
+        const CHUNK = 256;
+        for (let i = 0; i < bytes.length; i += CHUNK) {
+          await writer.write(bytes.slice(i, i + CHUNK));
+          // Small pause — gives the printer time to process ESC/POS commands
+          await new Promise(r => setTimeout(r, 20));
         }
-
-        if (!char) throw new Error('No writable characteristic found. Check printer BLE profile.');
-
-        _btDevice = device;
-        _btChar   = char;
-        return true;
-      } catch (err) {
-        throw err;
+      } finally {
+        writer.releaseLock();
       }
     }
 
     async function printReceipt() {
       const btn = document.getElementById('pos-print-btn');
-      if (!_lastReceiptData) { showToast('No receipt data available.', 'err'); return; }
+      if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
+
+      // Check browser support
+      if (!('serial' in navigator)) {
+        showToast('Web Serial not supported. Use Chrome or Edge.', 'err');
+        return;
+      }
 
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Connecting…';
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Printing…`;
 
       try {
-        // Connect if not already
-        if (!_btChar || (_btDevice && !_btDevice.gatt.connected)) {
-          await connectBluetoothPrinter();
-        }
-        btn.innerHTML = '<span class="spinner"></span> Printing…';
         const bytes = buildReceiptBytes(_lastReceiptData);
-        await sendToBluetoothPrinter(bytes);
+        await sendToUsbPrinter(bytes);
         showToast('Receipt printed!', 'ok');
       } catch (err) {
         console.error('Print error:', err);
-        showToast('Print failed: ' + (err.message || 'Unknown error'), 'err');
+        // If user cancelled the port picker, give a gentle message
+        if (err.name === 'NotFoundError' || err.message.includes('No port selected')) {
+          showToast('No printer selected.', 'err');
+        } else {
+          showToast('Print failed: ' + (err.message || 'Unknown error'), 'err');
+        }
+        // Reset port so next attempt re-prompts
+        _serialPort = null;
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt';
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt`;
       }
     }
 
