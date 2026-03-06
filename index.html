@@ -2008,7 +2008,7 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(12px);
-      background: #1a1a1a;
+      background: #2d1a52;
       color: #fff;
       padding: 13px 24px;
       border-radius: 10px;
@@ -2962,7 +2962,8 @@
       display: none;
       flex-direction: column;
       background: #f4f1fa;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;   /* Desktop: nothing outside the viewport scrolls */
     }
     #page-pos.active { display: flex; }
 
@@ -2978,8 +2979,11 @@
     .pos-left {
       padding: 28px 32px;
       overflow-y: auto;
+      overflow-x: hidden;
       border-right: 1px solid #e0d9f5;
     }
+    .pos-left::-webkit-scrollbar { width: 5px; }
+    .pos-left::-webkit-scrollbar-thumb { background: #c9b3eb; border-radius: 4px; }
     .pos-section-title {
       font-size: 11px;
       font-weight: 700;
@@ -3069,256 +3073,382 @@
 
     /* ── Right: Payment Panel ── */
     .pos-right {
-      background: #fff;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
-      padding: 28px 28px 20px;
-      overflow-y: auto;
-      border-left: 1.5px solid #e0d9f5;
-    }
-    .pos-right-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 22px;
-    }
-    .pos-field { margin-bottom: 18px; }
-    .pos-field label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #9B72D0;
-      text-transform: uppercase;
-      margin-bottom: 7px;
-    }
-    .pos-field select,
-    .pos-field input[type="text"] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid #d4c8f0;
-      border-radius: 10px;
-      font-size: 15px;
-      font-family: inherit;
-      background: #faf8ff;
-      color: #1a1a1a;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .pos-field select:focus,
-    .pos-field input:focus { border-color: #6F2DBD; }
-    .pos-field select:disabled,
-    .pos-field input:disabled {
-      background: #f0edf9;
-      color: #aaa;
-      cursor: not-allowed;
+      overflow: hidden;
+      border-left: 1px solid #e2e2e2;
+      height: 100%;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
-    /* Payment amount display */
+    /* Header strip */
+    .pos-right-header {
+      padding: 16px 24px 14px;
+      border-bottom: 1px solid #ebebeb;
+      flex-shrink: 0;
+      background: #fff;
+    }
+    .pos-right-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      color: #888;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    /* Amount-due strip */
+    .pos-due-strip {
+      background: #2d1a52;
+      padding: 20px 24px 18px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pos-due-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .pos-due-amt {
+      font-size: 34px;
+      font-weight: 700;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #ffffff;
+      letter-spacing: -1.5px;
+    }
+
+    /* Scrollable inner body */
+    .pos-right-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 18px 22px 10px;
+      background: #fafafa;
+    }
+    .pos-right-body::-webkit-scrollbar { width: 4px; }
+    .pos-right-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+    /* Footer — always visible */
+    .pos-right-footer {
+      flex-shrink: 0;
+      padding: 12px 22px 18px;
+      border-top: 1px solid #ebebeb;
+      background: #fff;
+    }
+
+    /* Method selector pills */
+    .pos-method-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 9px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .pos-method-pills {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+    .pos-method-pill {
+      flex: 1;
+      padding: 10px 6px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.12s, background 0.12s, color 0.12s;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pos-method-pill:hover { border-color: #bbb; background: #f9f9f9; }
+    .pos-method-pill.active {
+      background: #6F2DBD;
+      border-color: #6F2DBD;
+      color: #fff;
+    }
+    .pos-method-pill.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* Tendered section */
+    .pos-tendered-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 7px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    /* Large amount box */
     .pos-amount-display {
       width: 100%;
       padding: 14px 16px;
       border: 2px solid #6F2DBD;
-      border-radius: 12px;
-      font-size: 26px;
-      font-weight: 800;
-      font-family: 'DM Mono', monospace;
-      background: #faf8ff;
-      color: #6F2DBD;
+      border-radius: 10px;
+      font-size: 32px;
+      font-weight: 700;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #2d1a52;
       text-align: right;
-      letter-spacing: 1px;
-      min-height: 58px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      min-height: 60px;
+      cursor: text;
+      transition: border-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      letter-spacing: -0.5px;
+      box-sizing: border-box;
     }
-    .pos-amount-display:focus { outline: none; border-color: #4a0fa0; }
     .pos-amount-display.locked {
-      background: #f0edf9;
-      color: #aaa;
-      border-color: #d4c8f0;
-      cursor: not-allowed;
+      background: #f5f5f5;
+      color: #2d1a52;
+      border-color: #ccc;
+      cursor: default;
+    }
+    .pos-amount-display.locked-zero {
+      background: #f5f5f5;
+      color: #bbb;
+      border-color: #e0e0e0;
+      cursor: default;
     }
 
-    /* Balance row */
-    .pos-balance-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #faf8ff;
-      border: 1.5px solid #e0d9f5;
+    .pos-amount-input-desktop {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #6F2DBD;
       border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 18px;
+      font-size: 32px;
+      font-weight: 700;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #2d1a52;
+      text-align: right;
+      min-height: 60px;
+      outline: none;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+      letter-spacing: -0.5px;
+      box-sizing: border-box;
     }
-    .pos-balance-lbl { font-size: 13px; font-weight: 600; color: #666; }
-    .pos-balance-val {
-      font-size: 20px;
-      font-weight: 800;
-      font-family: 'DM Mono', monospace;
-      color: #1a1a1a;
+    .pos-amount-input-desktop::-webkit-outer-spin-button,
+    .pos-amount-input-desktop::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .pos-amount-input-desktop:focus { border-color: #6F2DBD; }
+    .pos-amount-input-desktop:disabled {
+      background: #f5f5f5;
+      color: #bbb;
+      border-color: #e0e0e0;
+      cursor: default;
     }
-    .pos-balance-val.zero { color: #2e7d32; }
-    .pos-balance-val.negative { color: #e53935; }
+
+    /* Change / Balance strip */
+    .pos-change-strip {
+      display: flex;
+      align-items: stretch;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid #e8e8e8;
+      margin-top: 10px;
+      margin-bottom: 14px;
+      background: #fff;
+    }
+    .pos-change-cell {
+      flex: 1;
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .pos-change-cell + .pos-change-cell { border-left: 1.5px solid #e8e8e8; }
+    .pos-change-cell-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #aaa;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .pos-change-cell-val {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #3d2370;
+    }
+    .pos-change-cell-val.balance-due { color: #d32f2f; }
+    .pos-change-cell-val.change-back { color: #1b7a3e; }
+    .pos-change-cell-val.settled     { color: #1b7a3e; }
 
     /* Number Keyboard */
     .pos-keyboard {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
+      gap: 6px;
+      margin-bottom: 4px;
     }
     .pos-key {
-      background: #f4f1fa;
-      border: 1.5px solid #e0d9f5;
-      border-radius: 12px;
-      padding: 16px 8px;
+      background: #fff;
+      border: 1.5px solid #e4e4e4;
+      border-radius: 8px;
+      padding: 15px 8px;
       font-size: 20px;
-      font-weight: 700;
-      color: #2a2a2a;
+      font-weight: 500;
+      color: #3d2370;
       cursor: pointer;
       text-align: center;
-      transition: background 0.12s, transform 0.08s;
+      transition: background 0.1s, transform 0.07s;
       user-select: none;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    .pos-key:active { background: #e0d5f5; transform: scale(0.96); }
-    .pos-key.zero { grid-column: span 1; }
-    .pos-key.dot { font-size: 24px; }
+    .pos-key:active { background: #f0f0f0; transform: scale(0.96); }
+    .pos-key.dot { font-size: 22px; font-weight: 700; }
     .pos-key.del {
-      background: #fff0f0;
-      border-color: #f5c6c6;
-      color: #e53935;
-      font-size: 16px;
+      background: #fff5f5;
+      border-color: #ffd7d7;
+      color: #d32f2f;
+      font-size: 15px;
     }
-    .pos-key.del:active { background: #fddada; }
+    .pos-key.del:active { background: #ffe8e8; }
     .pos-key.clear-all {
-      background: #fff8e1;
-      border-color: #ffe082;
-      color: #f57f17;
-      font-size: 13px;
+      background: #fffbf0;
+      border-color: #ffe5a0;
+      color: #b45309;
+      font-size: 12px;
       font-weight: 700;
+      letter-spacing: 0.5px;
     }
 
     /* Confirm button */
     .pos-confirm-btn {
       width: 100%;
       padding: 16px;
-      background: linear-gradient(135deg, #6F2DBD, #4a0fa0);
+      background: #6F2DBD;
       color: #fff;
       border: none;
-      border-radius: 14px;
-      font-size: 16px;
+      border-radius: 10px;
+      font-size: 15px;
       font-weight: 700;
-      font-family: inherit;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: opacity 0.2s, transform 0.1s;
-      margin-top: auto;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.3px;
     }
+    .pos-confirm-btn:hover { background: #8E44EC; }
     .pos-confirm-btn:active { transform: scale(0.98); }
-    .pos-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pos-confirm-btn:disabled { background: #aaa; cursor: not-allowed; }
+
     .pos-back-btn {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       background: transparent;
-      color: #9B72D0;
-      border: 1.5px solid #d4c8f0;
-      border-radius: 12px;
-      font-size: 14px;
+      color: #666;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
       font-weight: 600;
-      font-family: inherit;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.15s;
+      margin-top: 8px;
+      transition: background 0.12s;
     }
-    .pos-back-btn:hover { background: #f4f1fa; }
+    .pos-back-btn:hover { background: #f5f5f5; }
 
-    /* Desktop amount text input (replaces keyboard on desktop) */
-    .pos-amount-input-desktop {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #6F2DBD;
-      border-radius: 12px;
-      font-size: 26px;
-      font-weight: 800;
-      font-family: 'DM Mono', monospace;
-      background: #faf8ff;
-      color: #6F2DBD;
-      text-align: right;
-      letter-spacing: 1px;
-      min-height: 58px;
-      outline: none;
-      transition: border-color 0.2s;
-      -moz-appearance: textfield;
-    }
-    .pos-amount-input-desktop::-webkit-outer-spin-button,
-    .pos-amount-input-desktop::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .pos-amount-input-desktop:focus { border-color: #4a0fa0; }
-    .pos-amount-input-desktop:disabled {
-      background: #f0edf9;
-      color: #aaa;
-      border-color: #d4c8f0;
-      cursor: not-allowed;
-    }
-
-    /* Print Receipt button */
     .pos-print-btn {
       width: 100%;
-      padding: 13px;
+      padding: 11px;
       background: #fff;
-      color: #1e8c3a;
-      border: 1.5px solid #a5d6a7;
-      border-radius: 12px;
-      font-size: 14px;
+      color: #1b7a3e;
+      border: 1.5px solid #a8d5ba;
+      border-radius: 8px;
+      font-size: 13px;
       font-weight: 700;
-      font-family: inherit;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.15s, border-color 0.15s;
+      margin-top: 8px;
+      transition: background 0.12s;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .pos-print-btn:hover { background: #f1f8f2; border-color: #66bb6a; }
+    .pos-print-btn:hover { background: #f0faf4; }
 
     .pos-cancel-btn {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       background: transparent;
-      color: #c62828;
-      border: 1.5px solid #ffcdd2;
-      border-radius: 12px;
-      font-size: 14px;
+      color: #d32f2f;
+      border: 1.5px solid #ffd7d7;
+      border-radius: 8px;
+      font-size: 13px;
       font-weight: 600;
-      font-family: inherit;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.12s;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .pos-cancel-btn:hover { background: #fff5f5; border-color: #ef9a9a; }
+    .pos-cancel-btn:hover { background: #fff5f5; }
 
-    /* Charged banner */
+    /* Waived / Charged banner */
     .pos-charged-banner {
       display: none;
-      background: #e8f5e9;
-      border: 1.5px solid #a5d6a7;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #2e7d32;
-      margin-bottom: 14px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #1b7a3e;
+      padding: 24px 20px;
       text-align: center;
+      gap: 6px;
+      flex-shrink: 0;
     }
-    .pos-charged-banner.show { display: block; }
+    .pos-charged-banner.show { display: flex; }
+    .pos-charged-banner-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+    .pos-charged-banner-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .pos-charged-banner-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .pos-payment-section.hidden-charged { display: none; }
 
-    /* ══════════════════════════════════════════
+        /* ══════════════════════════════════════════
        CANCEL REGISTRATION CONFIRMATION MODAL
     ══════════════════════════════════════════ */
     #cancel-reg-modal {
@@ -3413,112 +3543,102 @@
 
     /* ══════════════════════════════════════════
        POS — MOBILE & TABLET RESPONSIVE
+       Desktop: #page-pos is height:100vh overflow:hidden (no scroll)
+       Tablet/Mobile: let #page-pos & .pos-body scroll naturally
     ══════════════════════════════════════════ */
 
-    /* Tablet (768–1024px) — stack vertically */
+    /* Tablet (768–1024px) — single column, page scrolls */
     @media (max-width: 1024px) {
+      #page-pos {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
       .pos-body {
         grid-template-columns: 1fr;
         height: auto;
-        overflow-y: auto;
-        overflow-x: hidden;
-        min-height: calc(100vh - 62px);
+        overflow: visible;
+        min-height: auto;
       }
       .pos-left {
         border-right: none;
-        border-bottom: 2px solid #e0d9f5;
+        border-bottom: 2px solid #e2e2e2;
         padding: 20px 24px 16px;
+        overflow: visible;
       }
       .pos-right {
         border-left: none;
-        padding: 20px 24px 24px;
+        height: auto;
+        overflow: visible;
+      }
+      .pos-right-body {
+        overflow: visible;
+        flex: none;
       }
     }
 
     /* Mobile (≤767px) */
     @media (max-width: 767px) {
+      #page-pos {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
       .pos-body {
         grid-template-columns: 1fr;
         height: auto;
-        overflow-y: auto;
-        min-height: calc(100vh - 54px);
-        padding-bottom: 0;
+        overflow: visible;
       }
       .pos-left {
         padding: 16px 14px 14px;
         border-right: none;
-        border-bottom: 2px solid #e0d9f5;
+        border-bottom: 2px solid #e2e2e2;
+        overflow: visible;
       }
       .pos-right {
         border-left: none;
-        padding: 16px 14px 24px;
-        overflow-y: visible;
+        height: auto;
+        overflow: visible;
       }
+      .pos-right-body { overflow: visible; flex: none; padding: 14px 16px 10px; }
+      .pos-right-footer { padding: 12px 16px 20px; }
+      .pos-due-strip { padding: 14px 16px; }
+      .pos-due-amt { font-size: 26px; }
       .pos-patient-name { font-size: 17px; }
       .pos-patient-meta { font-size: 12px; }
       .pos-section-title { font-size: 10px; }
-      .pos-right-title { font-size: 16px; margin-bottom: 16px; }
       .pos-items-card,
       .pos-patient-card,
       .pos-totals-card {
         padding: 14px 16px;
         margin-bottom: 16px;
-        border-radius: 12px;
+        border-radius: 10px;
       }
       .pos-item-row { font-size: 13px; padding: 8px 0; }
       .pos-total-row { font-size: 13px; padding: 6px 0; }
       .pos-total-row.grand { font-size: 17px; }
-      .pos-field { margin-bottom: 14px; }
-      .pos-field label { font-size: 10px; }
-      .pos-field select,
-      .pos-field input[type="text"] {
-        padding: 10px 12px;
-        font-size: 14px;
-      }
       .pos-amount-display {
-        font-size: 28px;
-        padding: 12px 14px;
-        min-height: 54px;
-        border-radius: 10px;
+        font-size: 26px;
+        padding: 11px 14px;
+        min-height: 52px;
       }
-      .pos-balance-row {
-        padding: 10px 14px;
-        margin-bottom: 14px;
-        border-radius: 9px;
-      }
-      .pos-balance-val { font-size: 18px; }
-      /* Keyboard — bigger keys on mobile */
-      .pos-keyboard { gap: 7px; margin-bottom: 14px; }
+      .pos-change-strip { margin-top: 8px; margin-bottom: 12px; }
+      .pos-change-cell-val { font-size: 15px; }
+      .pos-keyboard { gap: 6px; margin-bottom: 10px; }
       .pos-key {
-        padding: 18px 8px;
-        font-size: 22px;
-        border-radius: 10px;
+        padding: 16px 8px;
+        font-size: 20px;
+        border-radius: 8px;
       }
-      .pos-key.del { font-size: 18px; }
-      .pos-key.clear-all { font-size: 13px; padding: 14px 8px; }
-      .pos-confirm-btn {
-        padding: 15px;
-        font-size: 15px;
-        border-radius: 12px;
-        margin-top: 0;
-      }
-      .pos-back-btn {
-        font-size: 13px;
-        padding: 10px;
-        margin-top: 8px;
-      }
-      .pos-cancel-btn {
-        font-size: 13px;
-        padding: 10px;
-        margin-top: 8px;
-      }
-      /* Cancel modal on mobile — bottom sheet */
+      .pos-key.del { font-size: 16px; }
+      .pos-key.clear-all { font-size: 12px; padding: 13px 8px; }
+      .pos-confirm-btn { padding: 14px; font-size: 15px; border-radius: 9px; }
+      .pos-back-btn { font-size: 13px; padding: 10px; margin-top: 7px; }
+      .pos-cancel-btn { font-size: 13px; padding: 10px; margin-top: 7px; }
+      /* Cancel modal — bottom sheet */
       .cancel-modal-card {
-        border-radius: 20px 20px 0 0;
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        bottom: 0; left: 0; right: 0;
         max-width: 100%;
         padding: 28px 20px 32px;
         border-radius: 20px 20px 0 0;
@@ -3528,7 +3648,7 @@
 
     /* Small phones (≤374px) */
     @media (max-width: 374px) {
-      .pos-key { padding: 15px 6px; font-size: 19px; }
+      .pos-key { padding: 14px 6px; font-size: 18px; }
       .pos-amount-display { font-size: 24px; }
     }
 </style>
@@ -3713,8 +3833,11 @@
 
           <div class="sec-label" style="margin-top:4px;">Patient Details</div>
           <div class="patient-grid">
-            <div class="field c4"><label>Full Name</label><input type="text" id="f-name"
-                placeholder="Last Name, First Name M.I." autocomplete="off" oninput="enforceUpperCase(this)" /></div>
+            <div class="field c2"><label>Last Name</label><input type="text" id="f-lastname"
+                placeholder="DELA CRUZ" autocomplete="off" oninput="enforceUpperCase(this); buildFullName();" /></div>
+            <div class="field c2"><label>First Name &amp; M.I.</label><input type="text" id="f-firstname"
+                placeholder="JUAN D." autocomplete="off" oninput="enforceUpperCase(this); buildFullName();" /></div>
+            <input type="hidden" id="f-name" />
             <div class="field"><label>Birthday</label>
               <div class="bday-wrap">
                 <input type="date" id="f-birthday" max="" oninput="onBirthdayChange()" />
@@ -3746,7 +3869,7 @@
             <div class="field c2"><label>Address</label>
               <div class="autocomplete-wrap" id="addr-wrap">
                 <input type="text" id="f-address" placeholder="City / Municipality" autocomplete="off"
-                  oninput="enforceUpperCase(this); onAddressInput();" onblur="closeDropdown('addr-wrap',300)"
+                  oninput="enforceUpperCase(this); onAddressInput();" onblur="closeDropdown('addr-wrap',300); _checkAddressDiscount(this.value);"
                   onfocus="closeAllDropdownsExcept('addr-dropdown'); onAddressInput();"
                   onkeydown="acKeyNav(event,'addr-dropdown','addr-wrap')" />
                 <div class="ac-dropdown" id="addr-dropdown"></div>
@@ -5233,6 +5356,15 @@
       try { input.setSelectionRange(start, end); } catch (e) { }
     }
 
+    function buildFullName() {
+      const last  = (document.getElementById('f-lastname')?.value  || '').trim();
+      const first = (document.getElementById('f-firstname')?.value || '').trim();
+      let full = '';
+      if (last && first) full = last + ', ' + first;
+      else full = last || first;
+      document.getElementById('f-name').value = full;
+    }
+
     function enforceContactNumber(input) {
       // Strip everything except digits
       let v = input.value.replace(/\D/g, '');
@@ -5280,7 +5412,7 @@
        CLEAR FORM
     ════════════════════════════════════════════════ */
     function clearForm() {
-      ['f-name', 'f-address', 'f-contact', 'f-referred'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+      ['f-name', 'f-lastname', 'f-firstname', 'f-address', 'f-contact', 'f-referred'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
       // Clear birthday + age badge
       const bdEl = document.getElementById('f-birthday');
       if (bdEl) bdEl.value = '';
@@ -6379,6 +6511,9 @@
       document.getElementById('pos-senior-row').style.display = data.isSenior ? 'flex' : 'none';
       document.getElementById('pos-grand').textContent = fmtPeso(data.grand);
 
+      // Populate Amount Due strip
+      document.getElementById('pos-due-amt').textContent = fmtPeso(data.grand);
+
       // Detect 100% discount (charged)
       _posIsCharged = data.discRate >= 1;
       const banner = document.getElementById('pos-charged-banner');
@@ -6387,34 +6522,46 @@
       const amtDisplay = document.getElementById('pos-amount-display');
 
       if (_posIsCharged) {
+        // YAKAP / BSA — fully waived, no input needed
         banner.classList.add('show');
-        // Force CHARGED and lock payment type
+        const bannerSub = document.getElementById('pos-charged-banner-sub');
+        if (bannerSub) bannerSub.textContent = data.discountLabel || '100% discount applied';
+        const dueStrip = document.getElementById('pos-due-strip');
+        if (dueStrip) dueStrip.style.display = 'none';
+        const paySection = document.getElementById('pos-payment-section');
+        if (paySection) paySection.classList.add('hidden-charged');
         payTypeEl.value = 'CHARGED';
-        payTypeEl.disabled = true;
-        // Force NO PAYMENT status and lock
         document.getElementById('pos-status').value = 'NONE';
-        document.getElementById('pos-status').disabled = true;
         _posRawAmount = '0';
         _posAmountLocked = true;
-        amtDisplay.classList.add('locked');
-        keyboard.style.opacity = '0.3';
+        amtDisplay.className = 'pos-amount-display locked-zero';
+        keyboard.style.opacity = '0.2';
         keyboard.style.pointerEvents = 'none';
       } else {
+        // Normal payment — reset pills, unlock amount
         banner.classList.remove('show');
-        payTypeEl.disabled = false;
+        const dueStrip = document.getElementById('pos-due-strip');
+        if (dueStrip) dueStrip.style.display = '';
+        const paySection = document.getElementById('pos-payment-section');
+        if (paySection) paySection.classList.remove('hidden-charged');
+        // Reset method pills — default to Cash
+        document.querySelectorAll('.pos-method-pill').forEach(p => p.classList.remove('active'));
+        const cashPill = document.querySelector('.pos-method-pill[data-method="CASH"]');
+        if (cashPill) cashPill.classList.add('active');
         payTypeEl.value = 'CASH';
-        document.getElementById('pos-status').disabled = false;
         document.getElementById('pos-status').value = 'FULL';
+        // Un-hide change strip
+        const cs = document.querySelector('.pos-change-strip');
+        if (cs) cs.style.display = '';
+        const tendSec = document.getElementById('pos-tendered-section');
+        if (tendSec) tendSec.style.opacity = '1';
         _posAmountLocked = false;
-        amtDisplay.classList.remove('locked');
+        _posRawAmount = '';
+        amtDisplay.className = 'pos-amount-display';
         keyboard.style.opacity = '1';
         keyboard.style.pointerEvents = '';
-        // Default: full payment
-        _posRawAmount = String(data.grand);
-        // Sync desktop input
         const deskInp = document.getElementById('pos-amount-input-desktop');
-        if (deskInp) { deskInp.value = data.grand; deskInp.disabled = true; }
-        onPosStatusChange();
+        if (deskInp) { deskInp.value = ''; deskInp.disabled = false; deskInp.placeholder = '0.00'; }
       }
 
       posUpdateDisplay();
@@ -6445,45 +6592,51 @@
         if (amtInput) amtInput.style.display = 'none';
       }
     }
-    function onPosStatusChange() {
+    /* ════════════════════════════════════════════════
+       POS METHOD PILL SELECTION
+       No status dropdown — method pills only.
+       NONE pill hides the amount entry.
+    ════════════════════════════════════════════════ */
+    function posPillSelect(el) {
       if (_posIsCharged) return;
-      const status    = document.getElementById('pos-status').value;
-      const amtDisplay = document.getElementById('pos-amount-display');
-      const keyboard  = document.getElementById('pos-keyboard');
-      const deskInp   = document.getElementById('pos-amount-input-desktop');
+      const method = el.dataset.method;
+      // Deselect all pills
+      document.querySelectorAll('.pos-method-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      // Store method in hidden field
+      document.getElementById('pos-payment-type').value = method === 'NONE' ? 'NONE' : method;
 
-      if (status === 'FULL') {
-        _posRawAmount = String(_posData.grand);
-        _posAmountLocked = true;
-        amtDisplay.classList.add('locked');
-        keyboard.style.opacity = '0.35';
-        keyboard.style.pointerEvents = 'none';
-        if (deskInp) { deskInp.value = _posData.grand; deskInp.disabled = true; }
-      } else if (status === 'NONE') {
+      const amtDisplay  = document.getElementById('pos-amount-display');
+      const keyboard    = document.getElementById('pos-keyboard');
+      const deskInp     = document.getElementById('pos-amount-input-desktop');
+      const tendSec     = document.getElementById('pos-tendered-section');
+      const changeStrip = document.querySelector('.pos-change-strip');
+
+      if (method === 'NONE') {
+        // No payment — hide amount entry, show locked zero
         _posRawAmount = '0';
         _posAmountLocked = true;
-        amtDisplay.classList.add('locked');
-        keyboard.style.opacity = '0.35';
-        keyboard.style.pointerEvents = 'none';
-        if (deskInp) { deskInp.value = '0'; deskInp.disabled = true; }
+        if (amtDisplay)  { amtDisplay.className = 'pos-amount-display locked-zero'; amtDisplay.style.display = 'flex'; }
+        if (deskInp)     { deskInp.style.display = 'none'; }
+        if (keyboard)    { keyboard.style.opacity = '0.25'; keyboard.style.pointerEvents = 'none'; }
+        if (tendSec)     tendSec.style.opacity = '0.35';
+        if (changeStrip) changeStrip.style.display = 'none';
       } else {
-        // PARTIAL — let user type
-        _posRawAmount = '';
+        // Cash / GCash / Card — open for entry
         _posAmountLocked = false;
-        amtDisplay.classList.remove('locked');
-        keyboard.style.opacity = '1';
-        keyboard.style.pointerEvents = '';
-        if (deskInp) { deskInp.value = ''; deskInp.disabled = false; deskInp.focus(); }
+        if (amtDisplay)  { amtDisplay.className = 'pos-amount-display'; amtDisplay.style.display = 'flex'; }
+        if (keyboard)    { keyboard.style.opacity = '1'; keyboard.style.pointerEvents = ''; }
+        if (tendSec)     tendSec.style.opacity = '1';
+        if (changeStrip) changeStrip.style.display = '';
+        applyPosKeyboardVisibility();
+        if (IS_DESKTOP && deskInp) { deskInp.disabled = false; deskInp.placeholder = '0.00'; deskInp.focus(); }
       }
       posUpdateDisplay();
     }
 
-    /* ════════════════════════════════════════════════
-       POS PAYMENT TYPE CHANGE
-    ════════════════════════════════════════════════ */
-    function onPosPaymentTypeChange() {
-      // No special logic needed unless CHARGED is forced
-    }
+    /* Legacy stub — no longer used but kept to avoid JS errors if called */
+    function onPosStatusChange() {}
+    function onPosPaymentTypeChange() {}
 
     /* ════════════════════════════════════════════════
        NUMBER KEYBOARD
@@ -6523,25 +6676,45 @@
     function posUpdateDisplay() {
       const raw = _posRawAmount;
       const display = document.getElementById('pos-amount-display');
-      const balEl = document.getElementById('pos-balance-val');
+      const balEl   = document.getElementById('pos-balance-val');
+      const chgEl   = document.getElementById('pos-change-val');
 
+      // Format tendered display
       let formatted = '0';
       if (raw !== '' && raw !== '.') {
         const parts = raw.split('.');
-        // Add commas to integer part
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         formatted = parts.join('.');
-        // Show trailing dot while typing decimal
         if (raw.endsWith('.') && !formatted.includes('.')) formatted += '.';
       }
-      display.textContent = formatted;
+      if (display) display.textContent = formatted;
 
-      // Compute balance
-      const paid = parseFloat(raw) || 0;
+      // Compute balance / change
+      const paid  = parseFloat(raw) || 0;
       const total = _posData ? _posData.grand : 0;
-      const balance = total - paid;
-      balEl.textContent = fmtPeso(Math.abs(balance));
-      balEl.className = 'pos-balance-val' + (balance <= 0 ? ' zero' : '') + (balance < 0 ? ' negative' : '');
+      const diff  = paid - total; // positive = change back, negative = still owes
+
+      if (balEl) {
+        if (diff >= 0) {
+          // Fully paid or overpaid — balance is ₱0.00
+          balEl.textContent = fmtPeso(0);
+          balEl.className   = 'pos-change-cell-val settled';
+        } else {
+          // Still owes
+          balEl.textContent = fmtPeso(Math.abs(diff));
+          balEl.className   = 'pos-change-cell-val balance-due';
+        }
+      }
+      if (chgEl) {
+        if (diff > 0) {
+          // Overpaid — show change
+          chgEl.textContent = fmtPeso(diff);
+          chgEl.className   = 'pos-change-cell-val change-back';
+        } else {
+          chgEl.textContent = fmtPeso(0);
+          chgEl.className   = 'pos-change-cell-val';
+        }
+      }
     }
 
     /* ════════════════════════════════════════════════
@@ -6550,20 +6723,29 @@
     function posConfirm() {
       const btn = document.getElementById('pos-confirm-btn');
       const payType = document.getElementById('pos-payment-type').value;
-      const statusVal = document.getElementById('pos-status').value;
-      const paid = parseFloat(_posRawAmount) || 0;
-      const total = _posData.grand;
-      const balance = total - paid;
+      const paid    = parseFloat(_posRawAmount) || 0;
+      const total   = _posData.grand;
+      const balance = Math.max(0, total - paid); // amount still owed (never negative)
 
-      // Map status
-      const statusMap = { FULL: 'FULLY PAID', PARTIAL: 'PARTLY PAID', NONE: 'UNPAID' };
-      const sheetStatus = _posIsCharged ? 'FULLY PAID' : (statusMap[statusVal] || 'PENDING');
+      // Auto-compute payment status from amount vs total
+      let sheetStatus;
+      if (_posIsCharged) {
+        sheetStatus = 'FULLY PAID';   // YAKAP / BSA — waived
+      } else if (payType === 'NONE') {
+        sheetStatus = 'NO PAYMENT';   // Promissory note
+      } else if (paid >= total) {
+        sheetStatus = 'FULLY PAID';   // Exact or overpaid (change given)
+      } else if (paid > 0) {
+        sheetStatus = 'PARTLY PAID';  // Partial
+      } else {
+        sheetStatus = 'NO PAYMENT';   // Zero entered
+      }
 
       const finalPayload = Object.assign({}, _posData.rawPayload, {
-        paymentType: payType,
+        paymentType:   _posIsCharged ? 'CHARGED' : payType,
         paymentStatus: sheetStatus,
         paymentAmount: _posIsCharged ? 0 : paid,
-        balance: _posIsCharged ? 0 : balance,
+        balance:       _posIsCharged ? 0 : balance,
       });
 
       btn.disabled = true;
@@ -6995,76 +7177,109 @@
 
       <!-- ── Right: Payment Panel ── -->
       <div class="pos-right">
-        <div class="pos-right-title">💳 Payment</div>
 
+        <!-- Header -->
+        <div class="pos-right-header">
+          <div class="pos-right-title">Payment</div>
+        </div>
+
+        <!-- Amount Due strip — always visible -->
+        <div class="pos-due-strip" id="pos-due-strip">
+          <span class="pos-due-lbl">Amount Due</span>
+          <span class="pos-due-amt" id="pos-due-amt">₱0.00</span>
+        </div>
+
+        <!-- Charged / Waived banner — auto-shown when YAKAP/BSA detected -->
         <div class="pos-charged-banner" id="pos-charged-banner">
-          🎁 100% Discount Applied — No Payment Required
+          <div class="pos-charged-banner-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="pos-charged-banner-title">Fully Waived — No Payment Required</div>
+          <div class="pos-charged-banner-sub" id="pos-charged-banner-sub">100% discount applied</div>
         </div>
 
-        <div class="pos-field">
-          <label>Payment Method</label>
-          <select id="pos-payment-type" onchange="onPosPaymentTypeChange()">
-            <option value="CASH">Cash</option>
-            <option value="GCASH">GCash</option>
-            <option value="CHARGED">Charged (Covered / Waived)</option>
-          </select>
-        </div>
+        <!-- Scrollable body: method pills + amount + keyboard -->
+        <div class="pos-right-body" id="pos-payment-section">
 
-        <div class="pos-field">
-          <label>Payment Status</label>
-          <select id="pos-status" onchange="onPosStatusChange()">
-            <option value="FULL">Pay in Full</option>
-            <option value="PARTIAL">Pay Partially</option>
-            <option value="NONE">No Payment (Promissory Note)</option>
-          </select>
-        </div>
+          <!-- Payment Method pills (no status dropdown — auto-calculated) -->
+          <div class="pos-method-label">Payment Method</div>
+          <div class="pos-method-pills" id="pos-method-pills">
+            <div class="pos-method-pill active" data-method="CASH" onclick="posPillSelect(this)">Cash</div>
+            <div class="pos-method-pill" data-method="GCASH" onclick="posPillSelect(this)">GCash</div>
+            <div class="pos-method-pill" data-method="CARD" onclick="posPillSelect(this)">Card</div>
+          </div>
 
-        <div class="pos-field">
-          <label>Amount Received</label>
+          <!-- "No Payment" pill — shown when user taps it; replaces the amount entry -->
+          <div class="pos-method-pills" style="margin-top:-6px;">
+            <div class="pos-method-pill" id="pos-pill-nopay" data-method="NONE" onclick="posPillSelect(this)"
+              style="border-color:#ffd7d7;color:#d32f2f;">
+              No Payment (Promissory Note)
+            </div>
+          </div>
+
+          <!-- Amount Tendered -->
+          <div class="pos-tendered-label" style="margin-top:14px;" id="pos-tendered-section">Amount Tendered</div>
+          <!-- Touch display (mobile/tablet) -->
           <div class="pos-amount-display" id="pos-amount-display">0</div>
-          <!-- Desktop: type-in amount field (hidden on mobile/tablet) -->
+          <!-- Desktop text input -->
           <input type="number" id="pos-amount-input-desktop" class="pos-amount-input-desktop"
-            placeholder="Enter amount…" min="0" step="0.01"
+            placeholder="0.00" min="0" step="0.01"
             oninput="onDesktopAmountInput(this)"
             style="display:none;" />
+
+          <!-- Change / Balance strip -->
+          <div class="pos-change-strip">
+            <div class="pos-change-cell">
+              <span class="pos-change-cell-lbl">Balance Due</span>
+              <span class="pos-change-cell-val" id="pos-balance-val">₱0.00</span>
+            </div>
+            <div class="pos-change-cell">
+              <span class="pos-change-cell-lbl">Change</span>
+              <span class="pos-change-cell-val" id="pos-change-val">₱0.00</span>
+            </div>
+          </div>
+
+          <!-- Number Keyboard (touch/tablet) -->
+          <div class="pos-keyboard" id="pos-keyboard">
+            <div class="pos-key" onclick="posKey('7')">7</div>
+            <div class="pos-key" onclick="posKey('8')">8</div>
+            <div class="pos-key" onclick="posKey('9')">9</div>
+            <div class="pos-key" onclick="posKey('4')">4</div>
+            <div class="pos-key" onclick="posKey('5')">5</div>
+            <div class="pos-key" onclick="posKey('6')">6</div>
+            <div class="pos-key" onclick="posKey('1')">1</div>
+            <div class="pos-key" onclick="posKey('2')">2</div>
+            <div class="pos-key" onclick="posKey('3')">3</div>
+            <div class="pos-key" onclick="posKey('0')">0</div>
+            <div class="pos-key dot" onclick="posKey('.')">·</div>
+            <div class="pos-key del" onclick="posKeyDel()">⌫</div>
+            <div class="pos-key clear-all" style="grid-column:span 3;" onclick="posKeyClear()">CLEAR</div>
+          </div>
+
+          <!-- Hidden fields for submission -->
+          <input type="hidden" id="pos-payment-type" value="CASH" />
+          <input type="hidden" id="pos-status" value="FULL" />
+
+        </div><!-- /.pos-right-body -->
+
+        <!-- Footer — always visible -->
+        <div class="pos-right-footer">
+          <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm &amp; Save
+          </button>
+          <button class="pos-print-btn" id="pos-print-btn" onclick="printReceipt()" style="display:none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print Receipt
+          </button>
+          <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
+          <button class="pos-cancel-btn" onclick="posCancelRegistration()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            Cancel Registration
+          </button>
         </div>
 
-        <div class="pos-balance-row">
-          <span class="pos-balance-lbl">Balance</span>
-          <span class="pos-balance-val" id="pos-balance-val">₱0.00</span>
-        </div>
-
-        <!-- Number Keyboard -->
-        <div class="pos-keyboard" id="pos-keyboard">
-          <div class="pos-key" onclick="posKey('7')">7</div>
-          <div class="pos-key" onclick="posKey('8')">8</div>
-          <div class="pos-key" onclick="posKey('9')">9</div>
-          <div class="pos-key" onclick="posKey('4')">4</div>
-          <div class="pos-key" onclick="posKey('5')">5</div>
-          <div class="pos-key" onclick="posKey('6')">6</div>
-          <div class="pos-key" onclick="posKey('1')">1</div>
-          <div class="pos-key" onclick="posKey('2')">2</div>
-          <div class="pos-key" onclick="posKey('3')">3</div>
-          <div class="pos-key zero" onclick="posKey('0')">0</div>
-          <div class="pos-key dot" onclick="posKey('.')">·</div>
-          <div class="pos-key del" onclick="posKeyDel()">⌫</div>
-          <div class="pos-key clear-all" style="grid-column:span 3;" onclick="posKeyClear()">CLEAR</div>
-        </div>
-
-        <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Confirm & Save
-        </button>
-        <button class="pos-print-btn" id="pos-print-btn" onclick="printReceipt()" style="display:none;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print Receipt
-        </button>
-        <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
-        <button class="pos-cancel-btn" onclick="posCancelRegistration()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          Cancel Registration
-        </button>
-      </div>
+      </div><!-- /.pos-right -->
 
     </div>
   </div><!-- /#page-pos -->
