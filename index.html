@@ -1981,6 +1981,25 @@
       font-style: italic;
     }
 
+    .success-print-btn {
+      margin-top: 18px;
+      padding: 12px 28px;
+      background: #1e8c3a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: background 0.15s;
+      box-shadow: 0 4px 14px rgba(30,140,58,0.25);
+    }
+    .success-print-btn:hover { background: #22a344; }
+    .success-print-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
     /* ══════════════════════════════════════════
      TOAST
   ══════════════════════════════════════════ */
@@ -3217,6 +3236,54 @@
     }
     .pos-back-btn:hover { background: #f4f1fa; }
 
+    /* Desktop amount text input (replaces keyboard on desktop) */
+    .pos-amount-input-desktop {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #6F2DBD;
+      border-radius: 12px;
+      font-size: 26px;
+      font-weight: 800;
+      font-family: 'DM Mono', monospace;
+      background: #faf8ff;
+      color: #6F2DBD;
+      text-align: right;
+      letter-spacing: 1px;
+      min-height: 58px;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+    .pos-amount-input-desktop::-webkit-outer-spin-button,
+    .pos-amount-input-desktop::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .pos-amount-input-desktop:focus { border-color: #4a0fa0; }
+    .pos-amount-input-desktop:disabled {
+      background: #f0edf9;
+      color: #aaa;
+      border-color: #d4c8f0;
+      cursor: not-allowed;
+    }
+
+    /* Print Receipt button */
+    .pos-print-btn {
+      width: 100%;
+      padding: 13px;
+      background: #fff;
+      color: #1e8c3a;
+      border: 1.5px solid #a5d6a7;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pos-print-btn:hover { background: #f1f8f2; border-color: #66bb6a; }
+
     .pos-cancel-btn {
       width: 100%;
       padding: 11px;
@@ -3673,8 +3740,9 @@
                 <option value="COLLAB PROJECT">Collab Project</option>
               </select>
             </div>
-            <div class="field"><label>Contact No.</label><input type="text" id="f-contact" placeholder="09XX XXX XXXX"
-                oninput="enforceUpperCase(this)" /></div>
+            <div class="field"><label>Contact No.</label><input type="tel" id="f-contact" placeholder="09XX XXX XXXX"
+                inputmode="numeric" pattern="[0-9]*" maxlength="11"
+                oninput="enforceContactNumber(this)" /></div>
             <div class="field c2"><label>Address</label>
               <div class="autocomplete-wrap" id="addr-wrap">
                 <input type="text" id="f-address" placeholder="City / Municipality" autocomplete="off"
@@ -3937,7 +4005,11 @@
       <div class="success-title">Patient Registered!</div>
       <div class="success-patient-num" id="success-num">#0001</div>
       <div class="success-body" id="success-name-text">Registration successfully saved.</div>
-      <div class="success-dismiss">Returning to registration form…</div>
+      <button class="success-print-btn" id="success-print-btn" onclick="printReceiptFromSuccess()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Receipt
+      </button>
+      <div class="success-dismiss" id="success-dismiss-txt">Tap to dismiss or wait…</div>
     </div>
   </div>
 
@@ -5023,23 +5095,66 @@
     /* ════════════════════════════════════════════════
        SUCCESS NOTIFICATION
     ════════════════════════════════════════════════ */
+    let _successDismissTimer = null;
+
+    function dismissSuccessNotif() {
+      const notif = document.getElementById('success-notif');
+      if (!notif.classList.contains('show')) return;
+      if (_successDismissTimer) { clearTimeout(_successDismissTimer); _successDismissTimer = null; }
+      notif.classList.add('fade-out');
+      setTimeout(() => {
+        notif.classList.remove('show');
+        notif.classList.remove('fade-out');
+      }, 400);
+    }
+
     function showSuccessNotif(num, name) {
       const padded = String(num).padStart(4, '0');
       document.getElementById('success-num').textContent = '#' + padded;
       document.getElementById('success-name-text').textContent = name + ' has been successfully registered.';
+      document.getElementById('success-dismiss-txt').textContent = 'Print receipt or tap anywhere to dismiss…';
+
       const notif = document.getElementById('success-notif');
       notif.classList.add('show');
 
-      // Auto-dismiss after 2.5 seconds, then reset form + go to step 1
-      setTimeout(() => {
-        notif.classList.add('fade-out');
-        setTimeout(() => {
-          notif.classList.remove('show');
-          notif.classList.remove('fade-out');
-          clearForm();
-          goToStep1();
-        }, 400);
-      }, 2500);
+      // Click backdrop to dismiss
+      notif.querySelector('.success-backdrop').onclick = dismissSuccessNotif;
+
+      // Auto-dismiss after 6 seconds (longer to allow printing)
+      if (_successDismissTimer) clearTimeout(_successDismissTimer);
+      _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 6000);
+    }
+
+    async function printReceiptFromSuccess() {
+      const btn = document.getElementById('success-print-btn');
+      if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
+      // Pause auto-dismiss while printing
+      if (_successDismissTimer) { clearTimeout(_successDismissTimer); _successDismissTimer = null; }
+      document.getElementById('success-dismiss-txt').textContent = 'Connecting to printer…';
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Printing…';
+
+      try {
+        if (!_btChar || (_btDevice && !_btDevice.gatt.connected)) {
+          await connectBluetoothPrinter();
+        }
+        document.getElementById('success-dismiss-txt').textContent = 'Sending to printer…';
+        const bytes = buildReceiptBytes(_lastReceiptData);
+        await sendToBluetoothPrinter(bytes);
+        showToast('Receipt printed! ✓', 'ok');
+        document.getElementById('success-dismiss-txt').textContent = 'Printed! Tap anywhere to dismiss…';
+        // Resume auto-dismiss
+        _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 3000);
+      } catch (err) {
+        console.error('Print error:', err);
+        showToast('Print failed: ' + (err.message || 'Check printer'), 'err');
+        document.getElementById('success-dismiss-txt').textContent = 'Tap anywhere to dismiss…';
+        _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 5000);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt';
+      }
     }
 
     /* ════════════════════════════════════════════════
@@ -5116,6 +5231,14 @@
       const end = input.selectionEnd;
       input.value = input.value.toUpperCase();
       try { input.setSelectionRange(start, end); } catch (e) { }
+    }
+
+    function enforceContactNumber(input) {
+      // Strip everything except digits
+      let v = input.value.replace(/\D/g, '');
+      // Enforce max 11 digits (PH standard)
+      if (v.length > 11) v = v.slice(0, 11);
+      input.value = v;
     }
 
     /* ════════════════════════════════════════════════
@@ -6288,10 +6411,14 @@
         keyboard.style.pointerEvents = '';
         // Default: full payment
         _posRawAmount = String(data.grand);
+        // Sync desktop input
+        const deskInp = document.getElementById('pos-amount-input-desktop');
+        if (deskInp) { deskInp.value = data.grand; deskInp.disabled = true; }
         onPosStatusChange();
       }
 
       posUpdateDisplay();
+      applyPosKeyboardVisibility();
 
       // Switch pages
       document.getElementById('page-reg').classList.remove('active');
@@ -6300,13 +6427,30 @@
     }
 
     /* ════════════════════════════════════════════════
-       POS STATUS CHANGE
+       DEVICE DETECTION — true desktop = has fine pointer
     ════════════════════════════════════════════════ */
+    const IS_DESKTOP = window.matchMedia('(pointer: fine) and (hover: hover)').matches
+                    && !('ontouchstart' in window)
+                    && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    function applyPosKeyboardVisibility() {
+      const kbd       = document.getElementById('pos-keyboard');
+      const amtInput  = document.getElementById('pos-amount-input-desktop');
+      if (!kbd) return;
+      if (IS_DESKTOP) {
+        kbd.style.display      = 'none';
+        if (amtInput) amtInput.style.display = 'block';
+      } else {
+        kbd.style.display      = '';
+        if (amtInput) amtInput.style.display = 'none';
+      }
+    }
     function onPosStatusChange() {
       if (_posIsCharged) return;
-      const status = document.getElementById('pos-status').value;
+      const status    = document.getElementById('pos-status').value;
       const amtDisplay = document.getElementById('pos-amount-display');
-      const keyboard = document.getElementById('pos-keyboard');
+      const keyboard  = document.getElementById('pos-keyboard');
+      const deskInp   = document.getElementById('pos-amount-input-desktop');
 
       if (status === 'FULL') {
         _posRawAmount = String(_posData.grand);
@@ -6314,12 +6458,14 @@
         amtDisplay.classList.add('locked');
         keyboard.style.opacity = '0.35';
         keyboard.style.pointerEvents = 'none';
+        if (deskInp) { deskInp.value = _posData.grand; deskInp.disabled = true; }
       } else if (status === 'NONE') {
         _posRawAmount = '0';
         _posAmountLocked = true;
         amtDisplay.classList.add('locked');
         keyboard.style.opacity = '0.35';
         keyboard.style.pointerEvents = 'none';
+        if (deskInp) { deskInp.value = '0'; deskInp.disabled = true; }
       } else {
         // PARTIAL — let user type
         _posRawAmount = '';
@@ -6327,6 +6473,7 @@
         amtDisplay.classList.remove('locked');
         keyboard.style.opacity = '1';
         keyboard.style.pointerEvents = '';
+        if (deskInp) { deskInp.value = ''; deskInp.disabled = false; deskInp.focus(); }
       }
       posUpdateDisplay();
     }
@@ -6428,7 +6575,22 @@
       };
 
       if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-        setTimeout(() => { resetBtn(); showSuccessAndReset(finalPayload.name, '0000'); }, 1000);
+        setTimeout(() => {
+          resetBtn();
+          _lastReceiptData = {
+            num: '0000', date: finalPayload.date, name: finalPayload.name,
+            ageSex: finalPayload.ageSex, contact: finalPayload.contact,
+            address: finalPayload.address, referred: finalPayload.referred,
+            items: (_posData.itemsDetail || []), usTests: finalPayload.usTests,
+            labSubtotal: _posData.subtotal, usSubtotal: _posData.usSubtotal || 0,
+            discAmt: _posData.discAmt || 0, discountLabel: _posData.discountLabel,
+            grand: _posData.grand, paymentStatus: finalPayload.paymentStatus,
+            paymentType: finalPayload.paymentType,
+            paymentAmt: finalPayload.paymentAmount, balance: finalPayload.balance,
+          };
+          document.getElementById('pos-print-btn').style.display = 'flex';
+          showSuccessAndReset(finalPayload.name, '0000');
+        }, 1000);
         return;
       }
 
@@ -6441,6 +6603,29 @@
         .then(d => {
           resetBtn();
           if (d.success) {
+            // Build receipt data for printing
+            _lastReceiptData = {
+              num:           d.number,
+              date:          finalPayload.date,
+              name:          finalPayload.name,
+              ageSex:        finalPayload.ageSex,
+              contact:       finalPayload.contact,
+              address:       finalPayload.address,
+              referred:      finalPayload.referred,
+              items:         (_posData.itemsDetail || []),
+              usTests:       finalPayload.usTests,
+              labSubtotal:   _posData.subtotal,
+              usSubtotal:    _posData.usSubtotal || 0,
+              discAmt:       _posData.discAmt || 0,
+              discountLabel: _posData.discountLabel,
+              grand:         _posData.grand,
+              paymentStatus: finalPayload.paymentStatus,
+              paymentType:   finalPayload.paymentType,
+              paymentAmt:    finalPayload.paymentAmount,
+              balance:       finalPayload.balance,
+            };
+            // Show print button
+            document.getElementById('pos-print-btn').style.display = 'flex';
             showSuccessAndReset(finalPayload.name, d.number);
           } else {
             showToast('Error: ' + (d.message || 'Save failed.'), 'err');
@@ -6450,6 +6635,8 @@
     }
 
     function showSuccessAndReset(name, num) {
+      // Print button stays visible in POS page briefly — user can print before form clears
+      // We redirect, then keep print available via success notification area
       document.getElementById('page-pos').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
@@ -6457,6 +6644,280 @@
       clearForm();
       goToStep1();
     }
+
+    /* ════════════════════════════════════════════════
+       DESKTOP AMOUNT INPUT HANDLER
+    ════════════════════════════════════════════════ */
+    function onDesktopAmountInput(inp) {
+      if (_posAmountLocked) { inp.value = _posRawAmount; return; }
+      const v = inp.value.replace(/[^0-9.]/g, '');
+      // Allow only one decimal point, max 2 decimal places
+      const parts = v.split('.');
+      if (parts.length > 2) inp.value = parts[0] + '.' + parts.slice(1).join('');
+      if (parts[1] && parts[1].length > 2) inp.value = parts[0] + '.' + parts[1].slice(0, 2);
+      _posRawAmount = inp.value || '';
+      posUpdateDisplay();
+    }
+
+    /* ════════════════════════════════════════════════
+       THERMAL RECEIPT PRINTING — GOOJPRT PT210
+       48mm paper · ESC/POS via Web Bluetooth
+       Char width: ~32 chars normal, 16 bold/2x
+    ════════════════════════════════════════════════ */
+
+    // ESC/POS constants
+    const ESC = 0x1B, GS = 0x1D;
+    const CMD = {
+      INIT:          [ESC, 0x40],
+      ALIGN_LEFT:    [ESC, 0x61, 0x00],
+      ALIGN_CENTER:  [ESC, 0x61, 0x01],
+      ALIGN_RIGHT:   [ESC, 0x61, 0x02],
+      BOLD_ON:       [ESC, 0x45, 0x01],
+      BOLD_OFF:      [ESC, 0x45, 0x00],
+      DBLWIDTH_ON:   [GS,  0x21, 0x10],
+      DBLWIDTH_OFF:  [GS,  0x21, 0x00],
+      DBLSIZE_ON:    [GS,  0x21, 0x11],
+      DBLSIZE_OFF:   [GS,  0x21, 0x00],
+      SMALL_ON:      [ESC, 0x4D, 0x01],
+      SMALL_OFF:     [ESC, 0x4D, 0x00],
+      FEED_1:        [ESC, 0x64, 0x01],
+      FEED_3:        [ESC, 0x64, 0x03],
+      CUT:           [GS,  0x56, 0x42, 0x00],
+    };
+    const LINE_WIDTH = 32; // chars for 48mm paper
+
+    let _btDevice = null, _btChar = null;
+
+    function txtBytes(str) {
+      return new TextEncoder().encode(str);
+    }
+
+    function line(str) {
+      return txtBytes(str.slice(0, LINE_WIDTH) + '\n');
+    }
+
+    function padLine(left, right, width) {
+      width = width || LINE_WIDTH;
+      const gap = width - left.length - right.length;
+      if (gap <= 0) return left.slice(0, width - right.length - 1) + ' ' + right;
+      return left + ' '.repeat(gap) + right;
+    }
+
+    function divider(char) {
+      return (char || '-').repeat(LINE_WIDTH) + '\n';
+    }
+
+    function center(str, width) {
+      width = width || LINE_WIDTH;
+      const pad = Math.max(0, Math.floor((width - str.length) / 2));
+      return ' '.repeat(pad) + str;
+    }
+
+    function buildReceiptBytes(receiptData) {
+      const chunks = [];
+      const push = arr => chunks.push(new Uint8Array(arr));
+      const pushTxt = str => chunks.push(txtBytes(str));
+
+      push(CMD.INIT);
+
+      // ── Header ─────────────────────────────────────
+      push(CMD.ALIGN_CENTER);
+      push(CMD.DBLSIZE_ON);
+      pushTxt('QUALICHECK\n');
+      push(CMD.DBLSIZE_OFF);
+      push(CMD.SMALL_ON);
+      pushTxt('Diagnostic Clinic\n');
+      pushTxt('Patient Registration Receipt\n');
+      push(CMD.SMALL_OFF);
+      push(CMD.FEED_1);
+
+      push(CMD.ALIGN_LEFT);
+      pushTxt(divider('='));
+
+      // ── Patient Info ───────────────────────────────
+      push(CMD.BOLD_ON);
+      pushTxt('PATIENT DETAILS\n');
+      push(CMD.BOLD_OFF);
+
+      pushTxt(padLine('No:', '#' + String(receiptData.num || '—').padStart(4,'0')) + '\n');
+      pushTxt(padLine('Date:', receiptData.date || '—') + '\n');
+      push(CMD.BOLD_ON);
+      // Wrap long name
+      const nameStr = (receiptData.name || '—').slice(0, LINE_WIDTH);
+      pushTxt('Patient: ' + nameStr + '\n');
+      push(CMD.BOLD_OFF);
+      pushTxt(padLine('Age/Sex:', receiptData.ageSex || '—') + '\n');
+      if (receiptData.contact) pushTxt(padLine('Contact:', receiptData.contact) + '\n');
+      if (receiptData.address) pushTxt('Address: ' + (receiptData.address || '').slice(0, LINE_WIDTH - 9) + '\n');
+      if (receiptData.referred && receiptData.referred.trim()) {
+        pushTxt('Ref. By: ' + (receiptData.referred || '').slice(0, LINE_WIDTH - 9) + '\n');
+      }
+
+      pushTxt(divider('-'));
+
+      // ── Procedures ─────────────────────────────────
+      push(CMD.BOLD_ON);
+      pushTxt('PROCEDURES\n');
+      push(CMD.BOLD_OFF);
+
+      (receiptData.items || []).forEach(item => {
+        const priceStr = fmtPeso(item.price);
+        const nameAvail = LINE_WIDTH - priceStr.length - 1;
+        const itemName = (item.name || '').slice(0, nameAvail);
+        pushTxt(padLine(itemName, priceStr) + '\n');
+      });
+
+      if (receiptData.usTests) {
+        push(CMD.SMALL_ON);
+        pushTxt('Ultrasound: ' + receiptData.usTests.slice(0, LINE_WIDTH - 12) + '\n');
+        push(CMD.SMALL_OFF);
+      }
+
+      pushTxt(divider('-'));
+
+      // ── Totals ─────────────────────────────────────
+      if (receiptData.labSubtotal && receiptData.usSubtotal) {
+        pushTxt(padLine('Lab Subtotal', fmtPeso(receiptData.labSubtotal)) + '\n');
+        pushTxt(padLine('US Subtotal', fmtPeso(receiptData.usSubtotal)) + '\n');
+      }
+      if (receiptData.discAmt > 0) {
+        pushTxt(padLine(receiptData.discountLabel || 'Discount', '-' + fmtPeso(receiptData.discAmt)) + '\n');
+      }
+
+      pushTxt(divider('='));
+      push(CMD.BOLD_ON);
+      push(CMD.DBLWIDTH_ON);
+      pushTxt(padLine('TOTAL', fmtPeso(receiptData.grand), 16) + '\n');
+      push(CMD.DBLWIDTH_OFF);
+      push(CMD.BOLD_OFF);
+      pushTxt(divider('='));
+
+      // ── Payment ────────────────────────────────────
+      pushTxt(padLine('Status:', receiptData.paymentStatus || '—') + '\n');
+      pushTxt(padLine('Method:', receiptData.paymentType || '—') + '\n');
+      if (receiptData.paymentAmt > 0) {
+        pushTxt(padLine('Paid:', fmtPeso(receiptData.paymentAmt)) + '\n');
+      }
+      if (receiptData.balance > 0) {
+        push(CMD.BOLD_ON);
+        pushTxt(padLine('Balance:', fmtPeso(receiptData.balance)) + '\n');
+        push(CMD.BOLD_OFF);
+      } else {
+        pushTxt(padLine('Balance:', fmtPeso(0)) + '\n');
+      }
+
+      pushTxt(divider('-'));
+
+      // ── Footer ─────────────────────────────────────
+      push(CMD.ALIGN_CENTER);
+      push(CMD.SMALL_ON);
+      pushTxt(center('Thank you for choosing') + '\n');
+      push(CMD.BOLD_ON);
+      pushTxt(center('Qualicheck Diagnostic Clinic') + '\n');
+      push(CMD.BOLD_OFF);
+      pushTxt(center('Results are confidential.') + '\n');
+      push(CMD.SMALL_OFF);
+
+      push(CMD.FEED_3);
+      push(CMD.CUT);
+
+      // Flatten all chunks
+      const total = chunks.reduce((s, c) => s + c.length, 0);
+      const out   = new Uint8Array(total);
+      let offset  = 0;
+      chunks.forEach(c => { out.set(c, offset); offset += c.length; });
+      return out;
+    }
+
+    // Send data in 20-byte MTU-safe chunks
+    async function sendToBluetoothPrinter(bytes) {
+      const CHUNK = 100;
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        await _btChar.writeValue(bytes.slice(i, i + CHUNK));
+        await new Promise(r => setTimeout(r, 30));
+      }
+    }
+
+    async function connectBluetoothPrinter() {
+      // GOOJPRT PT210 uses standard Serial Port Profile (SPP) via BLE
+      // Service: Nordic UART Service (NUS) 6E400001 or generic printer service
+      const PRINTER_SERVICE  = '000018f0-0000-1000-8000-00805f9b34fb';
+      const PRINTER_CHAR_TX  = '00002af1-0000-1000-8000-00805f9b34fb';
+      // Fallback: Nordic UART Service
+      const NUS_SERVICE      = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+      const NUS_TX_CHAR      = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [
+            { name: 'PT210' },
+            { namePrefix: 'PT-' },
+            { namePrefix: 'Printer' },
+            { namePrefix: 'MTP-' },
+          ],
+          optionalServices: [PRINTER_SERVICE, NUS_SERVICE,
+            '49535343-fe7d-4ae5-8fa9-9fafd205e455', // common printer BLE service
+          ],
+        });
+        const server  = await device.gatt.connect();
+        let service, char;
+
+        // Try known printer services in order
+        const serviceIds = [
+          PRINTER_SERVICE,
+          NUS_SERVICE,
+          '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+        ];
+        for (const sid of serviceIds) {
+          try {
+            service = await server.getPrimaryService(sid);
+            if (!service) continue;
+            const chars = await service.getCharacteristics();
+            // Find a writable characteristic
+            char = chars.find(c =>
+              c.properties.write || c.properties.writeWithoutResponse
+            );
+            if (char) break;
+          } catch { /* try next */ }
+        }
+
+        if (!char) throw new Error('No writable characteristic found. Check printer BLE profile.');
+
+        _btDevice = device;
+        _btChar   = char;
+        return true;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    async function printReceipt() {
+      const btn = document.getElementById('pos-print-btn');
+      if (!_lastReceiptData) { showToast('No receipt data available.', 'err'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Connecting…';
+
+      try {
+        // Connect if not already
+        if (!_btChar || (_btDevice && !_btDevice.gatt.connected)) {
+          await connectBluetoothPrinter();
+        }
+        btn.innerHTML = '<span class="spinner"></span> Printing…';
+        const bytes = buildReceiptBytes(_lastReceiptData);
+        await sendToBluetoothPrinter(bytes);
+        showToast('Receipt printed!', 'ok');
+      } catch (err) {
+        console.error('Print error:', err);
+        showToast('Print failed: ' + (err.message || 'Unknown error'), 'err');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt';
+      }
+    }
+
+    // Receipt data is stored after posConfirm succeeds
+    let _lastReceiptData = null;
 
     function posBack() {
       document.getElementById('page-pos').classList.remove('active');
@@ -6561,6 +7022,11 @@
         <div class="pos-field">
           <label>Amount Received</label>
           <div class="pos-amount-display" id="pos-amount-display">0</div>
+          <!-- Desktop: type-in amount field (hidden on mobile/tablet) -->
+          <input type="number" id="pos-amount-input-desktop" class="pos-amount-input-desktop"
+            placeholder="Enter amount…" min="0" step="0.01"
+            oninput="onDesktopAmountInput(this)"
+            style="display:none;" />
         </div>
 
         <div class="pos-balance-row">
@@ -6588,6 +7054,10 @@
         <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           Confirm & Save
+        </button>
+        <button class="pos-print-btn" id="pos-print-btn" onclick="printReceipt()" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Receipt
         </button>
         <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
         <button class="pos-cancel-btn" onclick="posCancelRegistration()">
