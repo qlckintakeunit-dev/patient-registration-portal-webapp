@@ -2937,79 +2937,533 @@
     }
   
     /* ══════════════════════════════════════════════════
-       POS PAGE  —  macOS style, compact
+       POS PAGE
     ══════════════════════════════════════════════════ */
-    #page-pos { display:none; flex-direction:column; background:#f0eef7; min-height:100vh; }
-    #page-pos.active { display:flex; }
-    .pos-body { display:grid; grid-template-columns:1fr 370px; height:calc(100vh - 62px); overflow:hidden; }
+    #page-pos {
+      display: none;
+      flex-direction: column;
+      background: #f4f1fa;
+      min-height: 100vh;
+    }
+    #page-pos.active { display: flex; }
 
-    .pos-left { padding:18px 22px; overflow-y:auto; border-right:1px solid #ddd8ee; background:#f7f5fc; }
-    .pos-section-lbl { font-size:10px; font-weight:700; letter-spacing:1.4px; color:#9B72D0; text-transform:uppercase; margin-bottom:8px; }
-    .pos-patient-card { background:#fff; border:1px solid #e5dff5; border-radius:11px; padding:11px 14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(111,45,189,.06); }
-    .pos-patient-name { font-size:16px; font-weight:700; color:#1a1a1a; margin-bottom:2px; }
-    .pos-patient-meta { font-size:12px; color:#999; }
-    .pos-items-card { background:#fff; border:1px solid #e5dff5; border-radius:11px; padding:8px 12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(111,45,189,.06); }
-    .pos-item-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #f3effe; font-size:13px; color:#2a2a2a; }
-    .pos-item-row:last-child { border-bottom:none; }
-    .pos-item-name { flex:1; padding-right:10px; }
-    .pos-item-cat { font-size:10px; color:#bbb; font-weight:500; text-transform:uppercase; letter-spacing:.4px; display:block; }
-    .pos-item-price { font-weight:600; color:#6F2DBD; font-size:13px; white-space:nowrap; }
-    .pos-totals-card { background:#fff; border:1px solid #e5dff5; border-radius:11px; padding:8px 12px; box-shadow:0 1px 3px rgba(111,45,189,.06); }
-    .pos-total-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px; color:#555; }
-    .pos-total-row.disc { color:#e53935; font-size:12px; }
-    .pos-total-row.grand { border-top:1.5px solid #6F2DBD; margin-top:6px; padding-top:9px; font-size:17px; font-weight:800; color:#6F2DBD; }
-    .pos-senior-badge { display:inline-block; background:#ede8ff; color:#6F2DBD; font-size:10px; font-weight:700; padding:1px 6px; border-radius:20px; margin-left:5px; }
+    .pos-body {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 0;
+      height: calc(100vh - 62px);
+      overflow: hidden;
+    }
 
-    .pos-right { background:#fff; display:flex; flex-direction:column; padding:14px 16px 12px; overflow-y:auto; border-left:1px solid #ddd8ee; }
-    .pos-right-title { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:11px; }
-    .pos-charged-banner { display:none; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:600; color:#2e7d32; margin-bottom:10px; text-align:center; }
-    .pos-charged-banner.show { display:block; }
+    /* ── Left: Order Summary ── */
+    .pos-left {
+      padding: 28px 32px;
+      overflow-y: auto;
+      border-right: 1px solid #e0d9f5;
+    }
+    .pos-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #9B72D0;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .pos-patient-card {
+      background: #fff;
+      border: 1.5px solid #e0d9f5;
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+    }
+    .pos-patient-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .pos-patient-meta {
+      font-size: 13px;
+      color: #888;
+    }
+    .pos-items-card {
+      background: #fff;
+      border: 1.5px solid #e0d9f5;
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+    }
+    .pos-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid #f0eaf9;
+      font-size: 14px;
+      color: #2a2a2a;
+    }
+    .pos-item-row:last-child { border-bottom: none; }
+    .pos-item-name { flex: 1; padding-right: 12px; }
+    .pos-item-cat {
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+    }
+    .pos-item-price { font-weight: 600; color: #6F2DBD; white-space: nowrap; }
+    .pos-totals-card {
+      background: #fff;
+      border: 1.5px solid #e0d9f5;
+      border-radius: 14px;
+      padding: 18px 22px;
+    }
+    .pos-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      font-size: 14px;
+      color: #444;
+    }
+    .pos-total-row.disc { color: #e53935; }
+    .pos-total-row.grand {
+      border-top: 2px solid #6F2DBD;
+      margin-top: 8px;
+      padding-top: 14px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #6F2DBD;
+    }
+    .pos-senior-badge {
+      display: inline-block;
+      background: #EDE8FF;
+      color: #6F2DBD;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
 
-    .pos-fields-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:9px; }
-    .pos-field label { display:block; font-size:10px; font-weight:700; letter-spacing:.9px; color:#9B72D0; text-transform:uppercase; margin-bottom:4px; }
-    .pos-field select { width:100%; padding:7px 9px; border:1.5px solid #d4c8f0; border-radius:8px; font-size:13px; font-family:inherit; background:#faf8ff; color:#1a1a1a; outline:none; }
-    .pos-field select:focus { border-color:#6F2DBD; }
-    .pos-field select:disabled { background:#f2eff9; color:#bbb; cursor:not-allowed; }
+    /* ── Right: Payment Panel ── */
+    .pos-right {
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 28px 20px;
+      overflow-y: auto;
+      border-left: 1.5px solid #e0d9f5;
+    }
+    .pos-right-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 22px;
+    }
+    .pos-field { margin-bottom: 18px; }
+    .pos-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #9B72D0;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .pos-field select,
+    .pos-field input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #d4c8f0;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #faf8ff;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .pos-field select:focus,
+    .pos-field input:focus { border-color: #6F2DBD; }
+    .pos-field select:disabled,
+    .pos-field input:disabled {
+      background: #f0edf9;
+      color: #aaa;
+      cursor: not-allowed;
+    }
 
-    .pos-amount-wrap { margin-bottom:7px; }
-    .pos-amount-lbl { font-size:10px; font-weight:700; letter-spacing:.9px; color:#9B72D0; text-transform:uppercase; margin-bottom:4px; }
-    .pos-amount-display { width:100%; padding:9px 12px; border:2px solid #6F2DBD; border-radius:9px; font-size:22px; font-weight:800; font-family:'SF Mono','DM Mono','Fira Mono',monospace; background:#faf8ff; color:#6F2DBD; text-align:right; box-sizing:border-box; }
-    .pos-amount-display.locked { background:#f2eff9; color:#bbb; border-color:#d4c8f0; }
+    /* Payment amount display */
+    .pos-amount-display {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #6F2DBD;
+      border-radius: 12px;
+      font-size: 26px;
+      font-weight: 800;
+      font-family: 'DM Mono', monospace;
+      background: #faf8ff;
+      color: #6F2DBD;
+      text-align: right;
+      letter-spacing: 1px;
+      min-height: 58px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .pos-amount-display:focus { outline: none; border-color: #4a0fa0; }
+    .pos-amount-display.locked {
+      background: #f0edf9;
+      color: #aaa;
+      border-color: #d4c8f0;
+      cursor: not-allowed;
+    }
 
-    .pos-balance-row { display:flex; justify-content:space-between; align-items:center; background:#f7f5fc; border:1px solid #e5dff5; border-radius:8px; padding:7px 11px; margin-bottom:9px; }
-    .pos-balance-lbl { font-size:11px; font-weight:600; color:#888; }
-    .pos-balance-val { font-size:16px; font-weight:800; font-family:'SF Mono','DM Mono','Fira Mono',monospace; color:#1a1a1a; }
-    .pos-balance-val.zero { color:#2e7d32; }
-    .pos-balance-val.overpaid { color:#1565c0; }
+    /* Balance row */
+    .pos-balance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #faf8ff;
+      border: 1.5px solid #e0d9f5;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+    }
+    .pos-balance-lbl { font-size: 13px; font-weight: 600; color: #666; }
+    .pos-balance-val {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: 'DM Mono', monospace;
+      color: #1a1a1a;
+    }
+    .pos-balance-val.zero { color: #2e7d32; }
+    .pos-balance-val.negative { color: #e53935; }
 
-    .pos-keyboard { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-bottom:9px; }
-    .pos-key { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#f0eef7; border:1px solid #ddd8ee; border-radius:9px; font-size:17px; font-weight:600; color:#1a1a1a; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; box-shadow:0 1px 0 #c8c2e0,0 2px 3px rgba(0,0,0,.07); transition:background .07s,transform .06s,box-shadow .06s; }
-    .pos-key:hover { background:#e8e4f5; }
-    .pos-key:active { background:#ddd8f0; transform:scale(0.93); box-shadow:none; }
-    .pos-key.wide { aspect-ratio:auto; grid-column:span 3; padding:8px; font-size:11px; font-weight:700; letter-spacing:1px; background:#f7f5fc; color:#9B72D0; text-transform:uppercase; }
-    .pos-key.del { background:#fff0f0; border-color:#f5c6c6; color:#e53935; font-size:15px; }
-    .pos-key.del:active { background:#fddada; }
+    /* Number Keyboard */
+    .pos-keyboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .pos-key {
+      background: #f4f1fa;
+      border: 1.5px solid #e0d9f5;
+      border-radius: 12px;
+      padding: 16px 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2a2a2a;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.12s, transform 0.08s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pos-key:active { background: #e0d5f5; transform: scale(0.96); }
+    .pos-key.zero { grid-column: span 1; }
+    .pos-key.dot { font-size: 24px; }
+    .pos-key.del {
+      background: #fff0f0;
+      border-color: #f5c6c6;
+      color: #e53935;
+      font-size: 16px;
+    }
+    .pos-key.del:active { background: #fddada; }
+    .pos-key.clear-all {
+      background: #fff8e1;
+      border-color: #ffe082;
+      color: #f57f17;
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-    .pos-confirm-btn { width:100%; padding:11px; background:linear-gradient(135deg,#6F2DBD,#4a0fa0); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 2px 8px rgba(111,45,189,.3); margin-bottom:6px; transition:opacity .15s,transform .08s; }
-    .pos-confirm-btn:active { transform:scale(0.98); }
-    .pos-confirm-btn:disabled { opacity:.45; cursor:not-allowed; }
-    .pos-actions-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-    .pos-back-btn { padding:9px; background:#fff; color:#555; border:1px solid #ddd; border-radius:9px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
-    .pos-back-btn:hover { background:#f5f5f5; }
-    .pos-cancel-btn { padding:9px; background:#fff0f0; color:#e53935; border:1px solid #f5c6c6; border-radius:9px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; }
-    .pos-cancel-btn:hover { background:#fddada; }
+    /* Confirm button */
+    .pos-confirm-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #6F2DBD, #4a0fa0);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: auto;
+    }
+    .pos-confirm-btn:active { transform: scale(0.98); }
+    .pos-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pos-back-btn {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      color: #9B72D0;
+      border: 1.5px solid #d4c8f0;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.15s;
+    }
+    .pos-back-btn:hover { background: #f4f1fa; }
 
-    .pos-cancel-overlay { display:none; position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.35); backdrop-filter:blur(6px); align-items:center; justify-content:center; }
-    .pos-cancel-overlay.show { display:flex; }
-    .pos-cancel-dialog { background:rgba(248,246,255,.97); border:1px solid rgba(180,160,220,.4); border-radius:15px; padding:26px 26px 20px; width:300px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.22),0 4px 16px rgba(111,45,189,.1); }
-    .pos-cancel-icon { width:44px; height:44px; border-radius:50%; background:#fff0f0; border:1.5px solid #f5c6c6; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
-    .pos-cancel-title { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:6px; }
-    .pos-cancel-body { font-size:12px; color:#666; line-height:1.5; margin-bottom:18px; }
-    .pos-cancel-btns { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-    .pos-cancel-keep { padding:9px; background:#fff; border:1px solid #d4c8f0; border-radius:8px; font-size:13px; font-weight:600; color:#6F2DBD; font-family:inherit; cursor:pointer; }
-    .pos-cancel-keep:hover { background:#f4f1fa; }
-    .pos-cancel-confirm { padding:9px; background:#e53935; border:none; border-radius:8px; font-size:13px; font-weight:700; color:#fff; font-family:inherit; cursor:pointer; }
-    .pos-cancel-confirm:hover { opacity:.88; }
+    .pos-cancel-btn {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      color: #c62828;
+      border: 1.5px solid #ffcdd2;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pos-cancel-btn:hover { background: #fff5f5; border-color: #ef9a9a; }
+
+    /* Charged banner */
+    .pos-charged-banner {
+      display: none;
+      background: #e8f5e9;
+      border: 1.5px solid #a5d6a7;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2e7d32;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .pos-charged-banner.show { display: block; }
+
+    /* ══════════════════════════════════════════
+       CANCEL REGISTRATION CONFIRMATION MODAL
+    ══════════════════════════════════════════ */
+    #cancel-reg-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      align-items: center;
+      justify-content: center;
+    }
+    #cancel-reg-modal.show { display: flex; }
+    .cancel-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 10, 30, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .cancel-modal-card {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px 36px 28px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.35);
+      animation: notifCardIn 0.35s cubic-bezier(0.22,1,0.36,1);
+      text-align: center;
+    }
+    .cancel-modal-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #b71c1c, #ef5350);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(183,28,28,0.3);
+    }
+    .cancel-modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      letter-spacing: -0.3px;
+    }
+    .cancel-modal-body {
+      font-size: 14px;
+      color: #777;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .cancel-modal-patient {
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .cancel-modal-btns {
+      display: flex;
+      gap: 10px;
+    }
+    .cancel-modal-keep {
+      flex: 1;
+      padding: 13px;
+      border: 1.5px solid #d4c8f0;
+      border-radius: 11px;
+      background: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #6F2DBD;
+      transition: background 0.15s;
+    }
+    .cancel-modal-keep:hover { background: #f5f0ff; }
+    .cancel-modal-confirm {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #b71c1c, #c62828);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      transition: opacity 0.15s;
+      box-shadow: 0 4px 14px rgba(183,28,28,0.3);
+    }
+    .cancel-modal-confirm:hover { opacity: 0.88; }
+
+    /* ══════════════════════════════════════════
+       POS — MOBILE & TABLET RESPONSIVE
+    ══════════════════════════════════════════ */
+
+    /* Tablet (768–1024px) — stack vertically */
+    @media (max-width: 1024px) {
+      .pos-body {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: calc(100vh - 62px);
+      }
+      .pos-left {
+        border-right: none;
+        border-bottom: 2px solid #e0d9f5;
+        padding: 20px 24px 16px;
+      }
+      .pos-right {
+        border-left: none;
+        padding: 20px 24px 24px;
+      }
+    }
+
+    /* Mobile (≤767px) */
+    @media (max-width: 767px) {
+      .pos-body {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+        min-height: calc(100vh - 54px);
+        padding-bottom: 0;
+      }
+      .pos-left {
+        padding: 16px 14px 14px;
+        border-right: none;
+        border-bottom: 2px solid #e0d9f5;
+      }
+      .pos-right {
+        border-left: none;
+        padding: 16px 14px 24px;
+        overflow-y: visible;
+      }
+      .pos-patient-name { font-size: 17px; }
+      .pos-patient-meta { font-size: 12px; }
+      .pos-section-title { font-size: 10px; }
+      .pos-right-title { font-size: 16px; margin-bottom: 16px; }
+      .pos-items-card,
+      .pos-patient-card,
+      .pos-totals-card {
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        border-radius: 12px;
+      }
+      .pos-item-row { font-size: 13px; padding: 8px 0; }
+      .pos-total-row { font-size: 13px; padding: 6px 0; }
+      .pos-total-row.grand { font-size: 17px; }
+      .pos-field { margin-bottom: 14px; }
+      .pos-field label { font-size: 10px; }
+      .pos-field select,
+      .pos-field input[type="text"] {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+      .pos-amount-display {
+        font-size: 28px;
+        padding: 12px 14px;
+        min-height: 54px;
+        border-radius: 10px;
+      }
+      .pos-balance-row {
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        border-radius: 9px;
+      }
+      .pos-balance-val { font-size: 18px; }
+      /* Keyboard — bigger keys on mobile */
+      .pos-keyboard { gap: 7px; margin-bottom: 14px; }
+      .pos-key {
+        padding: 18px 8px;
+        font-size: 22px;
+        border-radius: 10px;
+      }
+      .pos-key.del { font-size: 18px; }
+      .pos-key.clear-all { font-size: 13px; padding: 14px 8px; }
+      .pos-confirm-btn {
+        padding: 15px;
+        font-size: 15px;
+        border-radius: 12px;
+        margin-top: 0;
+      }
+      .pos-back-btn {
+        font-size: 13px;
+        padding: 10px;
+        margin-top: 8px;
+      }
+      .pos-cancel-btn {
+        font-size: 13px;
+        padding: 10px;
+        margin-top: 8px;
+      }
+      /* Cancel modal on mobile — bottom sheet */
+      .cancel-modal-card {
+        border-radius: 20px 20px 0 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        padding: 28px 20px 32px;
+        border-radius: 20px 20px 0 0;
+      }
+      #cancel-reg-modal { align-items: flex-end; }
+    }
+
+    /* Small phones (≤374px) */
+    @media (max-width: 374px) {
+      .pos-key { padding: 15px 6px; font-size: 19px; }
+      .pos-amount-display { font-size: 24px; }
+    }
 </style>
 </head>
 
@@ -6009,88 +6463,112 @@
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
     }
-    function posCancelPrompt() { document.getElementById('pos-cancel-overlay').classList.add('show'); }
-    function posCancelDismiss() { document.getElementById('pos-cancel-overlay').classList.remove('show'); }
-    function posCancelConfirm() {
-      document.getElementById('pos-cancel-overlay').classList.remove('show');
+
+    /* ════════════════════════════════════════════════
+       CANCEL REGISTRATION — modal + confirm
+    ════════════════════════════════════════════════ */
+    function posCancelRegistration() {
+      // Show patient name in modal
+      const patientName = _posData && _posData.rawPayload && _posData.rawPayload.name
+        ? _posData.rawPayload.name
+        : document.getElementById('pos-patient-name').textContent || 'this patient';
+      document.getElementById('cancel-modal-patient-name').textContent = patientName;
+      document.getElementById('cancel-reg-modal').classList.add('show');
+    }
+
+    function closeCancelModal() {
+      document.getElementById('cancel-reg-modal').classList.remove('show');
+    }
+
+    function confirmCancelRegistration() {
+      closeCancelModal();
+      // Go back to registration, clear the entire form, go to step 1
       document.getElementById('page-pos').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
       clearForm();
       goToStep1();
+      showToast('Registration cancelled and form cleared.', 'err');
     }
 </script>
 
   <!-- ═══════════════════════════════════════════════════
        POS PAGE
   ═══════════════════════════════════════════════════ -->
-  <!-- ═══════════ POS PAGE ═══════════ -->
   <div id="page-pos">
     <div class="pos-body">
 
-      <!-- LEFT: Order Summary -->
+      <!-- ── Left: Order Summary ── -->
       <div class="pos-left">
-        <div class="pos-section-lbl">Patient</div>
+        <div class="pos-section-title">Order Summary</div>
+
         <div class="pos-patient-card">
           <div class="pos-patient-name" id="pos-patient-name">—</div>
           <div class="pos-patient-meta" id="pos-patient-meta">—</div>
         </div>
 
-        <div class="pos-section-lbl">Procedures</div>
+        <div class="pos-section-title">Procedures</div>
         <div class="pos-items-card">
           <div id="pos-items-list"></div>
         </div>
 
         <div class="pos-totals-card">
-          <div class="pos-total-row"><span>Subtotal</span><span id="pos-subtotal">&#8369;0.00</span></div>
+          <div class="pos-total-row" id="pos-subtotal-row">
+            <span>Subtotal</span>
+            <span id="pos-subtotal">₱0.00</span>
+          </div>
           <div class="pos-total-row disc" id="pos-disc-row" style="display:none;">
-            <span id="pos-disc-label">Discount</span><span id="pos-disc-amt">&#8722;&#8369;0.00</span>
+            <span id="pos-disc-label">Discount</span>
+            <span id="pos-disc-amt">—₱0.00</span>
           </div>
           <div class="pos-total-row" id="pos-senior-row" style="display:none;">
             <span>Senior Pricing <span class="pos-senior-badge">Applied</span></span>
-            <span style="color:#9B72D0;font-size:11px;">Adjusted</span>
+            <span style="color:#9B72D0;font-size:13px;">Rates adjusted</span>
           </div>
-          <div class="pos-total-row grand"><span>Total Amount</span><span id="pos-grand">&#8369;0.00</span></div>
+          <div class="pos-total-row grand">
+            <span>Total Amount</span>
+            <span id="pos-grand">₱0.00</span>
+          </div>
         </div>
       </div>
 
-      <!-- RIGHT: Payment -->
+      <!-- ── Right: Payment Panel ── -->
       <div class="pos-right">
-        <div class="pos-right-title">&#128179; Payment</div>
+        <div class="pos-right-title">💳 Payment</div>
 
         <div class="pos-charged-banner" id="pos-charged-banner">
-          &#127873; 100% Discount &#8212; No Payment Required
+          🎁 100% Discount Applied — No Payment Required
         </div>
 
-        <div class="pos-fields-row">
-          <div class="pos-field">
-            <label>Method</label>
-            <select id="pos-payment-type" onchange="onPosPaymentTypeChange()">
-              <option value="CASH">Cash</option>
-              <option value="GCASH">GCash</option>
-              <option value="CHARGED">Charged / Waived</option>
-            </select>
-          </div>
-          <div class="pos-field">
-            <label>Status</label>
-            <select id="pos-status" onchange="onPosStatusChange()">
-              <option value="FULL">Pay in Full</option>
-              <option value="PARTIAL">Pay Partially</option>
-              <option value="NONE">No Payment</option>
-            </select>
-          </div>
+        <div class="pos-field">
+          <label>Payment Method</label>
+          <select id="pos-payment-type" onchange="onPosPaymentTypeChange()">
+            <option value="CASH">Cash</option>
+            <option value="GCASH">GCash</option>
+            <option value="CHARGED">Charged (Covered / Waived)</option>
+          </select>
         </div>
 
-        <div class="pos-amount-wrap">
-          <div class="pos-amount-lbl">Amount Received</div>
+        <div class="pos-field">
+          <label>Payment Status</label>
+          <select id="pos-status" onchange="onPosStatusChange()">
+            <option value="FULL">Pay in Full</option>
+            <option value="PARTIAL">Pay Partially</option>
+            <option value="NONE">No Payment (Promissory Note)</option>
+          </select>
+        </div>
+
+        <div class="pos-field">
+          <label>Amount Received</label>
           <div class="pos-amount-display" id="pos-amount-display">0</div>
         </div>
 
         <div class="pos-balance-row">
           <span class="pos-balance-lbl">Balance</span>
-          <span class="pos-balance-val" id="pos-balance-val">&#8369;0.00</span>
+          <span class="pos-balance-val" id="pos-balance-val">₱0.00</span>
         </div>
 
+        <!-- Number Keyboard -->
         <div class="pos-keyboard" id="pos-keyboard">
           <div class="pos-key" onclick="posKey('7')">7</div>
           <div class="pos-key" onclick="posKey('8')">8</div>
@@ -6101,38 +6579,42 @@
           <div class="pos-key" onclick="posKey('1')">1</div>
           <div class="pos-key" onclick="posKey('2')">2</div>
           <div class="pos-key" onclick="posKey('3')">3</div>
-          <div class="pos-key" onclick="posKey('0')">0</div>
-          <div class="pos-key" onclick="posKey('.')">&#183;</div>
-          <div class="pos-key del" onclick="posKeyDel()">&#9003;</div>
-          <div class="pos-key wide" onclick="posKeyClear()">Clear</div>
+          <div class="pos-key zero" onclick="posKey('0')">0</div>
+          <div class="pos-key dot" onclick="posKey('.')">·</div>
+          <div class="pos-key del" onclick="posKeyDel()">⌫</div>
+          <div class="pos-key clear-all" style="grid-column:span 3;" onclick="posKeyClear()">CLEAR</div>
         </div>
 
         <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Confirm &amp; Save
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm & Save
         </button>
-        <div class="pos-actions-row">
-          <button class="pos-back-btn" onclick="posBack()">&#8592; Back</button>
-          <button class="pos-cancel-btn" onclick="posCancelPrompt()">&#10005; Cancel Reg.</button>
-        </div>
+        <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
+        <button class="pos-cancel-btn" onclick="posCancelRegistration()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Cancel Registration
+        </button>
       </div>
 
     </div>
   </div><!-- /#page-pos -->
 
-  <!-- Cancel Confirmation Dialog -->
-  <div class="pos-cancel-overlay" id="pos-cancel-overlay">
-    <div class="pos-cancel-dialog">
-      <div class="pos-cancel-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2.5">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
+  <!-- CANCEL REGISTRATION CONFIRMATION MODAL -->
+  <div id="cancel-reg-modal">
+    <div class="cancel-modal-backdrop" onclick="closeCancelModal()"></div>
+    <div class="cancel-modal-card">
+      <div class="cancel-modal-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       </div>
-      <div class="pos-cancel-title">Cancel Registration?</div>
-      <div class="pos-cancel-body">This will discard the current patient and all selected procedures. This cannot be undone.</div>
-      <div class="pos-cancel-btns">
-        <button class="pos-cancel-keep" onclick="posCancelDismiss()">Keep</button>
-        <button class="pos-cancel-confirm" onclick="posCancelConfirm()">Yes, Cancel</button>
+      <div class="cancel-modal-title">Cancel Registration?</div>
+      <div class="cancel-modal-body">
+        You are about to cancel the registration for<br>
+        <span class="cancel-modal-patient" id="cancel-modal-patient-name">this patient</span>.<br><br>
+        All entered data will be cleared and you will return to Step 1. This cannot be undone.
+      </div>
+      <div class="cancel-modal-btns">
+        <button class="cancel-modal-keep" onclick="closeCancelModal()">Keep Registration</button>
+        <button class="cancel-modal-confirm" onclick="confirmCancelRegistration()">Yes, Cancel</button>
       </div>
     </div>
   </div>
