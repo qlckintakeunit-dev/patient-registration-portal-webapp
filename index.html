@@ -5251,27 +5251,30 @@
     async function printReceiptFromSuccess() {
       const btn = document.getElementById('success-print-btn');
       if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
-      // Pause auto-dismiss while printing
+
       if (_successDismissTimer) { clearTimeout(_successDismissTimer); _successDismissTimer = null; }
-      document.getElementById('success-dismiss-txt').textContent = 'Connecting to printer…';
+      document.getElementById('success-dismiss-txt').textContent = 'Sending to printer…';
 
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Printing…';
 
       try {
-        if (!_btChar || (_btDevice && !_btDevice.gatt.connected)) {
-          await connectBluetoothPrinter();
-        }
-        document.getElementById('success-dismiss-txt').textContent = 'Sending to printer…';
         const bytes = buildReceiptBytes(_lastReceiptData);
-        await sendToBluetoothPrinter(bytes);
-        showToast('Receipt printed! ✓', 'ok');
+        await sendToUsbPrinter(bytes);
+        showToast('Receipt printed!', 'ok');
         document.getElementById('success-dismiss-txt').textContent = 'Printed! Tap anywhere to dismiss…';
-        // Resume auto-dismiss
         _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 3000);
       } catch (err) {
         console.error('Print error:', err);
-        showToast('Print failed: ' + (err.message || 'Check printer'), 'err');
+        const msg = err.message || '';
+        if (msg.includes('Unable to establish') || msg.includes('connect')) {
+          showToast('QZ Tray not running. Start it first.', 'err');
+        } else if (msg.includes('not found') || msg.includes('printer')) {
+          showToast('Printer "' + QZ_PRINTER_NAME + '" not found. Check name.', 'err');
+        } else {
+          showToast('Print failed: ' + msg, 'err');
+        }
+        _qzConnected = false;
         document.getElementById('success-dismiss-txt').textContent = 'Tap anywhere to dismiss…';
         _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 5000);
       } finally {
@@ -6842,7 +6845,7 @@
     }
 
     /* ════════════════════════════════════════════════
-       THERMAL RECEIPT PRINTING — POS58 USB (Web Serial)
+       THERMAL RECEIPT PRINTING — POS58 USB via QZ Tray
        58mm paper · ESC/POS · 32 chars per line
        Requires: Chrome/Edge + printer installed as COM port
        Driver: POS58 (shows as USB Serial Device in Device Manager)
@@ -7064,57 +7067,93 @@
       return out;
     }
 
-    /* ── Web Serial (USB) print ─────────────────────
-       POS58 driver exposes the printer as a COM port.
-       Web Serial API: Chrome 89+ / Edge 89+ required.
-       User must click "Print" (gesture required by browser).
-    ────────────────────────────────────────────────── */
-    let _serialPort = null;
+    /* ════════════════════════════════════════════════
+       QZ TRAY — USB Thermal Printing
+       ─────────────────────────────────────────────
+       HOW IT WORKS:
+         1. QZ Tray runs silently in the background on
+            the laptop (system tray icon).
+         2. This page loads qz-tray.js from the CDN.
+         3. qz.websocket.connect() opens a secure local
+            WebSocket to QZ Tray (wss://localhost:8181).
+         4. We build an ESC/POS data array and call
+            qz.print() — QZ Tray sends it directly to
+            the USB printer by name.
 
-    async function getSerialPort() {
-      // Re-use an already-open port if still valid
-      if (_serialPort && _serialPort.readable === null) _serialPort = null;
-      if (_serialPort) return _serialPort;
+       SETUP (one-time):
+         1. Download & install QZ Tray from https://qz.io
+         2. Launch QZ Tray — it runs in the system tray
+         3. Open this page in any browser (file:// is fine)
+         4. Click Print — done.
 
-      // Ask the user to pick the COM port (appears as USB Serial Device)
-      _serialPort = await navigator.serial.requestPort({
-        // POS58 / generic USB-serial printers — no filter needed
+       PRINTER NAME:
+         Set QZ_PRINTER_NAME below to match exactly what
+         Windows shows in Control Panel → Devices & Printers.
+         e.g. 'POS58' or 'Thermal Printer' or 'POS-58'
+    ════════════════════════════════════════════════ */
+
+    // ── CONFIG — set your printer name here ──────────
+    const QZ_PRINTER_NAME = 'POS58'; // ← change if needed
+
+    // QZ Tray connection state
+    let _qzConnected = false;
+
+    // Load qz-tray.js from CDN (only once)
+    function loadQzScript() {
+      return new Promise((resolve, reject) => {
+        if (window.qz) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.js';
+        s.onload  = resolve;
+        s.onerror = () => reject(new Error('Could not load QZ Tray library. Check internet connection.'));
+        document.head.appendChild(s);
       });
-      await _serialPort.open({
-        baudRate:   9600,   // POS58 default baud; change to 19200 if needed
-        dataBits:   8,
-        stopBits:   1,
-        parity:     'none',
-        flowControl:'none',
+    }
+
+    // Connect to QZ Tray WebSocket (localhost:8181)
+    async function connectQZ() {
+      if (_qzConnected && qz.websocket.isActive()) return;
+      _qzConnected = false;
+
+      // QZ Tray uses a self-signed cert — we disable cert validation
+      // for local connections (this is safe for localhost only)
+      qz.security.setCertificatePromise((resolve) => resolve());
+      qz.security.setSignatureAlgorithm('SHA512');
+      qz.security.setSignaturePromise((toSign) => {
+        return (resolve) => resolve(); // unsigned for local use
       });
-      return _serialPort;
+
+      await qz.websocket.connect({ retries: 2, delay: 1 });
+      _qzConnected = true;
+    }
+
+    // Convert our Uint8Array to the hex-string array format QZ Tray expects
+    // QZ sends each element as a literal byte — we use type:'raw' with hex
+    function bytesToQzData(uint8arr) {
+      // QZ Tray raw mode accepts an array of objects or strings.
+      // Easiest: pass the whole thing as a single base64 string.
+      let binary = '';
+      uint8arr.forEach(b => binary += String.fromCharCode(b));
+      return [{ type: 'raw', format: 'base64', data: btoa(binary) }];
     }
 
     async function sendToUsbPrinter(bytes) {
-      const port   = await getSerialPort();
-      const writer = port.writable.getWriter();
-      try {
-        // Send in 256-byte chunks to avoid buffer overflow on cheap printers
-        const CHUNK = 256;
-        for (let i = 0; i < bytes.length; i += CHUNK) {
-          await writer.write(bytes.slice(i, i + CHUNK));
-          // Small pause — gives the printer time to process ESC/POS commands
-          await new Promise(r => setTimeout(r, 20));
-        }
-      } finally {
-        writer.releaseLock();
-      }
+      await loadQzScript();
+      await connectQZ();
+
+      const config = qz.configs.create(QZ_PRINTER_NAME, {
+        encoding:  'RAW',
+        copies:    1,
+        colorType: 'blackwhite',
+      });
+
+      const data = bytesToQzData(bytes);
+      await qz.print(config, data);
     }
 
     async function printReceipt() {
       const btn = document.getElementById('pos-print-btn');
       if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
-
-      // Check browser support
-      if (!('serial' in navigator)) {
-        showToast('Web Serial not supported. Use Chrome or Edge.', 'err');
-        return;
-      }
 
       btn.disabled = true;
       btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Printing…`;
@@ -7125,14 +7164,15 @@
         showToast('Receipt printed!', 'ok');
       } catch (err) {
         console.error('Print error:', err);
-        // If user cancelled the port picker, give a gentle message
-        if (err.name === 'NotFoundError' || err.message.includes('No port selected')) {
-          showToast('No printer selected.', 'err');
+        const msg = err.message || '';
+        if (msg.includes('Unable to establish') || msg.includes('connect')) {
+          showToast('QZ Tray not running. Start it first.', 'err');
+        } else if (msg.includes('not found') || msg.includes('printer')) {
+          showToast('Printer "' + QZ_PRINTER_NAME + '" not found. Check name.', 'err');
         } else {
-          showToast('Print failed: ' + (err.message || 'Unknown error'), 'err');
+          showToast('Print failed: ' + msg, 'err');
         }
-        // Reset port so next attempt re-prompts
-        _serialPort = null;
+        _qzConnected = false;
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt`;
