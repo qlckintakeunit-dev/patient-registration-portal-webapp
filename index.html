@@ -2803,14 +2803,12 @@
   ══════════════════════════════════════════ */
     .bday-wrap {
       position: relative;
-      display: flex;
-      align-items: center;
-      gap: 0;
+      display: block;
     }
 
     .bday-wrap input[type="date"] {
       width: 100%;
-      padding: 11px 80px 11px 13px;
+      padding: 11px 72px 11px 13px;
       border: 1.5px solid #e0e0e0;
       border-radius: 9px;
       font-family: 'DM Sans', sans-serif;
@@ -2820,6 +2818,7 @@
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       cursor: pointer;
+      box-sizing: border-box;
     }
 
     .bday-wrap input[type="date"]:focus {
@@ -2830,18 +2829,19 @@
 
     .bday-age-badge {
       position: absolute;
-      right: 10px;
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
       background: #6F2DBD;
       color: #fff;
       border-radius: 6px;
-      padding: 3px 8px;
-      font-size: 12px;
+      padding: 3px 7px;
+      font-size: 11px;
       font-weight: 700;
       pointer-events: none;
       white-space: nowrap;
-      line-height: 1.4;
+      line-height: 1.5;
+      z-index: 1;
     }
 
     .bday-age-unit {
@@ -3651,28 +3651,6 @@
       .pos-key { padding: 14px 6px; font-size: 18px; }
       .pos-amount-display { font-size: 24px; }
     }
-    /* ── Logo Drop Zone ── */
-    .logo-drop-zone {
-      border: 1.5px dashed #c9b3eb;
-      border-radius: 8px;
-      padding: 10px 12px;
-      text-align: center;
-      cursor: pointer;
-      margin-bottom: 10px;
-      transition: border-color 0.15s, background 0.15s;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #faf7ff;
-    }
-    .logo-drop-zone.drag-over { border-color: #6F2DBD; background: #f0e8ff; }
-    .logo-drop-zone.loaded    { border-color: #1e8c3a; border-style: solid; background: #f0faf4; }
-    .logo-drop-label {
-      font-size: 11px; font-weight: 600; color: #9B72D0; pointer-events: none;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; letter-spacing: 0.3px;
-    }
-    .logo-drop-zone.loaded .logo-drop-label { color: #1e8c3a; }
 </style>
 </head>
 
@@ -3862,12 +3840,13 @@
             <input type="hidden" id="f-name" />
             <div class="field"><label>Birthday</label>
               <div class="bday-wrap">
-                <input type="date" id="f-birthday" max="" oninput="onBirthdayChange()" />
+                <input type="date" id="f-birthday" lang="en-US" max="" oninput="onBirthdayChange()" />
                 <div class="bday-age-badge" id="bday-age-badge" style="display:none;">
                   <span id="bday-age-val">—</span> <span class="bday-age-unit">yrs</span>
                 </div>
               </div>
               <input type="hidden" id="f-age" />
+              <input type="hidden" id="f-birthday-fmt" />
             </div>
             <div class="field"><label>Sex</label>
               <select id="f-sex">
@@ -4608,7 +4587,7 @@
       'bact': ['Gramstain', 'AFB', 'KOH', 'Culture & Sensitivity – Urine', 'Culture & Sensitivity – Blood', 'Culture & Sensitivity with ARD-Pedia', 'Culture & Sensitivity with ARD-Adult'],
       'hist': ["Pap's Smear", 'Cell Block', 'Cell Cytology', 'FNAB Small', 'FNAB Medium', 'FNAB Large', 'FNAB XL', 'FNAB XXLarge', 'Estrogen-Progesterone Receptor Assay'],
       'us': ['Whole Abdomen', 'Upper Abdomen', 'Lower Abdomen', 'KUB', 'KUB with Prostate', 'UB Prostate with Post Void', 'Transvaginal', 'Breast (each)', 'HBT', 'HBT Pancreas', 'Pelvic', 'BPS', 'Single Organ', 'Prostate Only', 'Thyroid', 'KUB Prostate with Post Void'],
-      'pkg': ['OBPack 1', 'OBPack 2', 'OBPack 3', 'Medical Basic 5', 'Medical Basic 5 + Drug Test', 'Medical CXR UA FA', 'Drug Test'],
+      'pkg': ['OBPack 1', 'OBPack 2', 'OBPack 3', 'MEDICAL \u2014 BASIC 5', 'Medical Basic 5 + Drug Test', 'Medical CXR UA FA', 'Drug Test'],
       'xray': ['Chest PA', 'Apico Lordotic View / Spot Film', 'Chest PA & Apico Lordotic View', 'Chest PA & Lateral View (Adult)', 'Chest PA & Lateral View (Pedia)', 'Skull AP/Lateral View', 'Skull Series', "Water's View/Towne's View/Caldwell", 'Paranasal Sinuses (PNS)', 'Mastoid Series', 'Temporomandibular Joint (TMJ)', 'Cervical AP/Lateral View', 'Cervical AP/Lateral/Oblique View', 'Thoracic Cage (AP)/Chest Bucky', 'Thoracic AP/Lateral View', 'Plain KUB/Plain Abdomen (AP)', 'Plain Abdomen Upright & Supine', 'Plain Abdomen AP/Lateral (Pedia)', 'Thoracolumbar AP/Lateral View', 'Lumbo-Sacral AP/Lateral View', 'Lumbo-Sacral AP/Lateral/Oblique', 'Coccyx AP/Lateral View', 'Coccyx Lateral View', 'Pelvic AP/Hip Joint', 'Shoulder AP', 'Shoulder AP (Internal/External)', 'Clavicle AP', 'Finger AP/Lateral View', 'Hand AP/Lateral View', 'Wrist AP/Lateral View', 'Forearm AP/Lateral View', 'Arm AP/Lateral View', 'Elbow AP/Lateral View', 'Foot AP/Oblique', 'Ankle AP/Lateral View', 'Leg AP/Lateral View', 'Knee AP/Lateral View', 'Femur/Thigh (AP/Lateral View)'],
       'others': ['ECG', 'TVS Kit']
     };
@@ -5195,6 +5174,7 @@
         action: 'register',
         date: dateStr,
         name,
+        birthday: document.getElementById('f-birthday-fmt').value || '',
         ageSex: `${age} / ${sex}`,
         address,
         opType: document.getElementById('f-optype').value || '',
@@ -5333,6 +5313,10 @@
       }
       const bday = new Date(val);
       const now = new Date();
+      // Store as MM/DD/YYYY for sheet
+      const parts = val.split('-');
+      const fmtHidden = document.getElementById('f-birthday-fmt');
+      if (fmtHidden && parts.length === 3) fmtHidden.value = `${parts[1]}/${parts[2]}/${parts[0]}`;
       let age = now.getFullYear() - bday.getFullYear();
       const m = now.getMonth() - bday.getMonth();
       if (m < 0 || (m === 0 && now.getDate() < bday.getDate())) age--;
@@ -5442,6 +5426,8 @@
       const bdEl = document.getElementById('f-birthday');
       if (bdEl) bdEl.value = '';
       document.getElementById('f-age').value = '';
+      const fmtEl2 = document.getElementById('f-birthday-fmt');
+      if (fmtEl2) fmtEl2.value = '';
       const badge = document.getElementById('bday-age-badge');
       if (badge) badge.style.display = 'none';
       // Clear operation type
@@ -5479,18 +5465,18 @@
        ACCREDITED COMPANY
     ════════════════════════════════════════════════ */
     const ACCT_TEST_MAP = {
-      'B5': 'Medical Basic 5',
-      'DT': 'Drug Test',
-      'HBSAG': '(A) HBsAg Screening',
+      'B5':       'MEDICAL \u2014 BASIC 5',   // exact name from TESTS & PRICES sheet
+      'DT':       'Drug Test',
+      'HBSAG':    '(A) HBsAg Screening',
       'URINE PT': 'Pregnancy Test (Urine)',
-      'ECG': null,
+      'ECG':      null,
     };
 
     const ACCT_TEST_CAT = {
-      'Medical Basic 5': 'pkg',
-      'Drug Test': 'pkg',
-      '(A) HBsAg Screening': 'hep',
-      'Pregnancy Test (Urine)': 'cm',
+      'MEDICAL \u2014 BASIC 5':  'pkg',
+      'Drug Test':               'pkg',
+      '(A) HBsAg Screening':     'hep',
+      'Pregnancy Test (Urine)':  'cm',
     };
 
     const ACCT_PACKAGES = {
@@ -6895,28 +6881,17 @@
     const LOGO_DOTS   = 192;   // target logo width in dots (~half width)
     const LW          = 32;    // text characters per line
 
-    // ── LOGO: loaded via drag-and-drop or file picker ──
-    // Stored as a data URL (base64) in memory for the session.
-    // file:// restriction means we can't load by path — user
-    // drops the file once and it's ready for every print.
-    let _logoDataUrl = null;
-
-    function loadLogoFromFile(file) {
-      if (!file || !file.type.startsWith('image/')) {
-        showToast('Please drop an image file (PNG/JPG).', 'err');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        _logoDataUrl = e.target.result;
-        const zone  = document.getElementById('logo-drop-zone');
-        const label = document.getElementById('logo-drop-label');
-        if (zone)  { zone.style.backgroundImage = `url('${_logoDataUrl}')`; zone.style.backgroundSize='contain'; zone.style.backgroundRepeat='no-repeat'; zone.style.backgroundPosition='center'; }
-        if (label) label.textContent = '\u2713 ' + file.name;
-        showToast('Logo loaded — ready to print!', 'ok');
-      };
-      reader.readAsDataURL(file);
-    }
+    // ── LOGO: paste your base64 data URL here ───────────
+    // To embed your logo:
+    //   1. Go to https://www.base64-image.de/
+    //   2. Upload logo.png
+    //   3. Copy the full data:image/png;base64,xxxx... string
+    //   4. Replace null below with that string (keep the quotes)
+    //
+    // Example:
+    //   const _logoDataUrl = 'data:image/png;base64,iVBORw0KGgo...';
+    //
+    const _logoDataUrl = null; // ← paste base64 string here
 
     function txtBytes(str) {
       return new TextEncoder().encode(str);
@@ -7449,18 +7424,6 @@
         <!-- Footer — always visible -->
         <div class="pos-right-footer">
 
-          <!-- Logo drop zone — drag logo.png here once per session -->
-          <div class="logo-drop-zone" id="logo-drop-zone"
-               onclick="document.getElementById('logo-file-input').click()"
-               ondragover="event.preventDefault(); this.classList.add('drag-over')"
-               ondragleave="this.classList.remove('drag-over')"
-               ondrop="event.preventDefault(); this.classList.remove('drag-over'); this.classList.add('loaded'); loadLogoFromFile(event.dataTransfer.files[0])">
-            <span class="logo-drop-label" id="logo-drop-label">
-              🖼 Drop logo here or click to load
-            </span>
-          </div>
-          <input type="file" id="logo-file-input" accept="image/*" style="display:none"
-                 onchange="if(this.files[0]){ document.getElementById('logo-drop-zone').classList.add('loaded'); loadLogoFromFile(this.files[0]); this.value=''; }">
 
           <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
