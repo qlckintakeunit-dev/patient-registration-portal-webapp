@@ -1927,6 +1927,105 @@
 
 
     /* ══════════════════════════════════════════
+     PER-ITEM DISCOUNT MODAL
+  ══════════════════════════════════════════ */
+    #item-disc-modal {
+      display: none; position: fixed; inset: 0; z-index: 800;
+      align-items: center; justify-content: center;
+    }
+    #item-disc-modal.show { display: flex; }
+    #item-disc-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(10,10,30,0.55);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    #item-disc-card {
+      position: relative; z-index: 1;
+      background: #fff; border-radius: 18px;
+      padding: 28px 28px 22px; max-width: 580px; width: 96%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+      animation: notifCardIn 0.35s cubic-bezier(0.22,1,0.36,1);
+    }
+    #item-disc-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: #aaa; margin-bottom: 4px;
+    }
+    #item-disc-name {
+      font-size: 17px; font-weight: 700; color: #1a1a1a;
+      margin-bottom: 4px; line-height: 1.25;
+    }
+    #item-disc-base {
+      font-size: 13px; color: #888; margin-bottom: 18px;
+    }
+    #item-disc-list {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      max-height: 340px; overflow-y: auto;
+    }
+    .idc-row {
+      display: flex; flex-direction: column;
+      padding: 10px 11px; border-radius: 10px;
+      border: 1.5px solid #ece6f8; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .idc-row:hover { background: #faf7ff; border-color: #c4aff0; }
+    .idc-row.active { background: #f0e8ff; border-color: #8B5CF6; }
+    .idc-row-top {
+      display: flex; align-items: flex-start; gap: 7px; margin-bottom: 4px;
+    }
+    .idc-row-info { flex: 1; min-width: 0; }
+    .idc-row-label {
+      font-size: 12px; font-weight: 700; color: #1a1a1a;
+      line-height: 1.3; word-break: break-word;
+    }
+    .idc-row-pct   { font-size: 11px; color: #888; margin-top: 2px; }
+    .idc-row-amt   { font-size: 13px; font-weight: 700; color: #22a344; margin-top: 4px; }
+    .idc-toggle    { flex-shrink: 0; margin-top: 1px; }
+    /* Toggle switch */
+    .idc-toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .idc-toggle input { opacity: 0; width: 0; height: 0; }
+    .idc-slider {
+      position: absolute; inset: 0; border-radius: 22px;
+      background: #d1d5db; transition: background 0.2s;
+      cursor: pointer;
+    }
+    .idc-slider::before {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .idc-toggle input:checked + .idc-slider { background: #6F2DBD; }
+    .idc-toggle input:checked + .idc-slider::before { transform: translateX(18px); }
+    #item-disc-result {
+      margin-top: 14px; padding: 12px 14px;
+      background: #f5f0ff; border-radius: 10px;
+      font-size: 13px; color: #6F2DBD; font-weight: 600;
+      text-align: center; min-height: 40px; line-height: 1.4;
+    }
+    #item-disc-result.none { color: #aaa; font-weight: 400; }
+    .idc-footer {
+      display: flex; gap: 10px; margin-top: 16px;
+    }
+    .idc-btn-cancel {
+      flex: 1; padding: 11px; border-radius: 9px;
+      border: 1.5px solid #e0d6f7; background: #fff;
+      color: #6F2DBD; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .idc-btn-cancel:hover { background: #f5f0ff; }
+    .idc-btn-apply {
+      flex: 2; padding: 11px; border-radius: 9px;
+      border: none; background: #6F2DBD;
+      color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 4px 12px rgba(111,45,189,0.3);
+    }
+    .idc-btn-apply:hover { background: #5a23a0; }
+
+    /* ══════════════════════════════════════════
      TOAST
   ══════════════════════════════════════════ */
     .toast {
@@ -4003,8 +4102,16 @@
             <span class="lbl">Lab Subtotal</span>
             <span class="val" id="lab-subtotal-val">₱ 0.00</span>
           </div>
+          <div class="total-line sub-line xray-sub-line" id="xray-subtotal-line" style="display:none;">
+            <span class="lbl">X-Ray Subtotal</span>
+            <span class="val" id="xray-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line drug-sub-line" id="drug-subtotal-line" style="display:none;">
+            <span class="lbl">Drug Test Subtotal</span>
+            <span class="val" id="drug-subtotal-val">₱ 0.00</span>
+          </div>
           <div class="total-line sub-line us-sub-line" id="us-subtotal-line" style="display:none;">
-            <span class="lbl">US Subtotal</span>
+            <span class="lbl">UTZ Subtotal</span>
             <span class="val" id="us-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line" id="combined-subtotal-line" style="display:none;">
@@ -4206,8 +4313,16 @@
             <span class="lbl">Lab Subtotal</span>
             <span class="val" id="mob-lab-subtotal-val">₱ 0.00</span>
           </div>
+          <div class="total-line sub-line xray-sub-line" id="mob-xray-subtotal-line" style="display:none;">
+            <span class="lbl">X-Ray Subtotal</span>
+            <span class="val" id="mob-xray-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line drug-sub-line" id="mob-drug-subtotal-line" style="display:none;">
+            <span class="lbl">Drug Test Subtotal</span>
+            <span class="val" id="mob-drug-subtotal-val">₱ 0.00</span>
+          </div>
           <div class="total-line sub-line us-sub-line" id="mob-us-subtotal-line" style="display:none;">
-            <span class="lbl">US Subtotal</span>
+            <span class="lbl">UTZ Subtotal</span>
             <span class="val" id="mob-us-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line" id="mob-simple-subtotal-line">
@@ -4530,24 +4645,25 @@
        CATEGORIES
     ════════════════════════════════════════════════ */
     const CATEGORIES = [
-      { id: 'hema', name: 'Hematology', tests: [] },
-      { id: 'bchem', name: 'Blood Chemistry', tests: [] },
-      { id: 'cpkg', name: 'Chemistry Packages', tests: [] },
-      { id: 'cm', name: 'Clinical Microscopy', tests: [] },
-      { id: 'enz', name: 'Enzymes', tests: [] },
-      { id: 'urine24', name: '24Hr Urine Test', tests: [] },
-      { id: 'elec', name: 'Electrolytes', tests: [] },
-      { id: 'sero', name: 'Serology', tests: [] },
-      { id: 'hep', name: 'Hepatitis', tests: [] },
-      { id: 'horm', name: 'Hormones', tests: [] },
-      { id: 'thy', name: 'Thyroid Function Tests', tests: [] },
-      { id: 'tm', name: 'Tumor Markers', tests: [] },
-      { id: 'bact', name: 'Bacteriology', tests: [] },
-      { id: 'hist', name: 'Histopathology', tests: [] },
-      { id: 'us', name: 'Ultrasound', tests: [] },
-      { id: 'pkg', name: 'Packages 2026', tests: [] },
-      { id: 'xray', name: 'X-Ray', tests: [] },
-      { id: 'others', name: 'Others', tests: [] }
+      { id: 'hema',    name: 'Hematology',             tests: [], type: 'lab' },
+      { id: 'bchem',   name: 'Blood Chemistry',         tests: [], type: 'lab' },
+      { id: 'cpkg',    name: 'Chemistry Packages',      tests: [], type: 'lab' },
+      { id: 'cm',      name: 'Clinical Microscopy',     tests: [], type: 'lab' },
+      { id: 'enz',     name: 'Enzymes',                 tests: [], type: 'lab' },
+      { id: 'urine24', name: '24Hr Urine Test',         tests: [], type: 'lab' },
+      { id: 'elec',    name: 'Electrolytes',            tests: [], type: 'lab' },
+      { id: 'sero',    name: 'Serology',                tests: [], type: 'lab' },
+      { id: 'hep',     name: 'Hepatitis',               tests: [], type: 'lab' },
+      { id: 'horm',    name: 'Hormones',                tests: [], type: 'lab' },
+      { id: 'thy',     name: 'Thyroid Function Tests',  tests: [], type: 'lab' },
+      { id: 'tm',      name: 'Tumor Markers',           tests: [], type: 'lab' },
+      { id: 'bact',    name: 'Bacteriology',            tests: [], type: 'lab' },
+      { id: 'hist',    name: 'Histopathology',          tests: [], type: 'lab' },
+      { id: 'us',      name: 'UTZ Tests',               tests: [], type: 'utz' },
+      { id: 'pkg',     name: 'Packages 2026',           tests: [], type: 'lab' },
+      { id: 'xray',    name: 'X-Ray',                   tests: [], type: 'xray' },
+      { id: 'drug',    name: 'Drug Test',               tests: [], type: 'drug' },
+      { id: 'others',  name: 'Others',                  tests: [], type: 'lab' }
     ];
 
     /* Fallback test lists — used when sheet has no category data */
@@ -4569,7 +4685,8 @@
       'us': ['Whole Abdomen', 'Upper Abdomen', 'Lower Abdomen', 'KUB', 'KUB with Prostate', 'UB Prostate with Post Void', 'Transvaginal', 'Breast (each)', 'HBT', 'HBT Pancreas', 'Pelvic', 'BPS', 'Single Organ', 'Prostate Only', 'Thyroid', 'KUB Prostate with Post Void'],
       'pkg': ['OBPack 1', 'OBPack 2', 'OBPack 3', 'MEDICAL \u2014 BASIC 5', 'Medical Basic 5 + Drug Test', 'Medical CXR UA FA', 'Drug Test'],
       'xray': ['Chest PA', 'Apico Lordotic View / Spot Film', 'Chest PA & Apico Lordotic View', 'Chest PA & Lateral View (Adult)', 'Chest PA & Lateral View (Pedia)', 'Skull AP/Lateral View', 'Skull Series', "Water's View/Towne's View/Caldwell", 'Paranasal Sinuses (PNS)', 'Mastoid Series', 'Temporomandibular Joint (TMJ)', 'Cervical AP/Lateral View', 'Cervical AP/Lateral/Oblique View', 'Thoracic Cage (AP)/Chest Bucky', 'Thoracic AP/Lateral View', 'Plain KUB/Plain Abdomen (AP)', 'Plain Abdomen Upright & Supine', 'Plain Abdomen AP/Lateral (Pedia)', 'Thoracolumbar AP/Lateral View', 'Lumbo-Sacral AP/Lateral View', 'Lumbo-Sacral AP/Lateral/Oblique', 'Coccyx AP/Lateral View', 'Coccyx Lateral View', 'Pelvic AP/Hip Joint', 'Shoulder AP', 'Shoulder AP (Internal/External)', 'Clavicle AP', 'Finger AP/Lateral View', 'Hand AP/Lateral View', 'Wrist AP/Lateral View', 'Forearm AP/Lateral View', 'Arm AP/Lateral View', 'Elbow AP/Lateral View', 'Foot AP/Oblique', 'Ankle AP/Lateral View', 'Leg AP/Lateral View', 'Knee AP/Lateral View', 'Femur/Thigh (AP/Lateral View)'],
-      'others': ['ECG', 'TVS Kit']
+      'others': ['ECG', 'TVS Kit'],
+      'drug':   ['Drug Test (DOLE)', 'Drug Test (NBI)', 'Drug Test (Standard)', 'Drug Test (5 Panel)', 'Drug Test (10 Panel)']
     };
 
     /* ════════════════════════════════════════════════
@@ -5022,16 +5139,21 @@
        TOTALS
     ════════════════════════════════════════════════ */
     function recalcTotal() {
-      let labSubtotal = 0, usSubtotal = 0;
+      let labSubtotal = 0, xraySubtotal = 0, drugSubtotal = 0, utzSubtotal = 0;
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
         if (p !== null) {
-          if (cat.id === 'us') usSubtotal += p;
-          else labSubtotal += p;
+          if      (cat.type === 'utz')  utzSubtotal  += p;
+          else if (cat.type === 'xray') xraySubtotal += p;
+          else if (cat.type === 'drug') drugSubtotal += p;
+          else                          labSubtotal  += p;
         }
       }));
-      const subtotal = labSubtotal + usSubtotal;
-      const hasUS = usSubtotal > 0;
+      const subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal;
+      const hasXray  = xraySubtotal > 0;
+      const hasDrug  = drugSubtotal > 0;
+      const hasUtz   = utzSubtotal  > 0;
+      const hasExtra = hasXray || hasDrug || hasUtz;
       const isSenior = priceMode === 's';
 
       const discOn = document.getElementById('discount-toggle').checked;
@@ -5047,14 +5169,18 @@
 
       const grand = subtotal - discAmt;
 
-      // Desktop: show separate lines if US tests present
-      document.getElementById('lab-subtotal-line').style.display = hasUS ? 'flex' : 'none';
-      document.getElementById('us-subtotal-line').style.display = hasUS ? 'flex' : 'none';
-      document.getElementById('simple-subtotal-line').style.display = hasUS ? 'none' : 'flex';
+      // Show/hide subtotal rows
+      document.getElementById('lab-subtotal-line').style.display  = hasExtra ? 'flex' : 'none';
+      document.getElementById('xray-subtotal-line').style.display = hasXray  ? 'flex' : 'none';
+      document.getElementById('drug-subtotal-line').style.display = hasDrug  ? 'flex' : 'none';
+      document.getElementById('us-subtotal-line').style.display   = hasUtz   ? 'flex' : 'none';
+      document.getElementById('simple-subtotal-line').style.display   = hasExtra ? 'none' : 'flex';
       document.getElementById('combined-subtotal-line').style.display = 'none';
 
-      document.getElementById('lab-subtotal-val').textContent = fmtPeso(labSubtotal);
-      document.getElementById('us-subtotal-val').textContent = fmtPeso(usSubtotal);
+      document.getElementById('lab-subtotal-val').textContent   = fmtPeso(labSubtotal);
+      document.getElementById('xray-subtotal-val').textContent  = fmtPeso(xraySubtotal);
+      document.getElementById('drug-subtotal-val').textContent  = fmtPeso(drugSubtotal);
+      document.getElementById('us-subtotal-val').textContent    = fmtPeso(utzSubtotal);
       document.getElementById('subtotal-val-simple').textContent = fmtPeso(subtotal);
       const stv = document.getElementById('subtotal-val');
       if (stv) stv.textContent = fmtPeso(subtotal);
@@ -5064,14 +5190,12 @@
       document.getElementById('grand-total-val').textContent = fmtPeso(grand);
       document.getElementById('discount-line').style.display = (discOn && discVal && discAmt > 0) ? 'flex' : 'none';
 
-      // Senior pricing info line — purely informational, no extra deduction
       const seniorLine = document.getElementById('senior-pricing-line');
       if (seniorLine) seniorLine.style.display = isSenior ? 'flex' : 'none';
       const mobSeniorLine = document.getElementById('mob-senior-pricing-line');
       if (mobSeniorLine) mobSeniorLine.style.display = isSenior ? 'flex' : 'none';
 
-      // Store for syncMobTotals
-      recalcTotal._last = { labSubtotal, usSubtotal, subtotal, hasUS, isSenior };
+      recalcTotal._last = { labSubtotal, xraySubtotal, drugSubtotal, utzSubtotal, subtotal, hasExtra, hasXray, hasDrug, hasUtz, isSenior };
     }
 
     function onDiscountToggle() {
@@ -5098,27 +5222,30 @@
         showToast('Please complete all required patient fields.', 'err'); return;
       }
 
-      const labTests = [];
-      const usTests = [];
+      const labTests  = [];
+      const xrayTests = [];
+      const drugTests = [];
+      const utzTests  = [];
       CATEGORIES.forEach(cat => {
-        if (cat.id === 'us') {
-          sel[cat.id].forEach(t => usTests.push(t));
-        } else {
-          sel[cat.id].forEach(t => labTests.push(t));
-        }
+        if      (cat.type === 'utz')  sel[cat.id].forEach(t => utzTests.push(t));
+        else if (cat.type === 'xray') sel[cat.id].forEach(t => xrayTests.push(t));
+        else if (cat.type === 'drug') sel[cat.id].forEach(t => drugTests.push(t));
+        else                          sel[cat.id].forEach(t => labTests.push(t));
       });
-      const allTests = [...labTests, ...usTests];
+      const allTests = [...labTests, ...xrayTests, ...drugTests, ...utzTests];
       if (!allTests.length) { showToast('Please select at least one procedure.', 'err'); return; }
 
-      let labSubtotal = 0, usSubtotal = 0;
+      let labSubtotal = 0, xraySubtotal = 0, drugSubtotal = 0, utzSubtotal = 0;
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
         if (p !== null) {
-          if (cat.id === 'us') usSubtotal += p;
-          else labSubtotal += p;
+          if      (cat.type === 'utz')  utzSubtotal  += p;
+          else if (cat.type === 'xray') xraySubtotal += p;
+          else if (cat.type === 'drug') drugSubtotal += p;
+          else                          labSubtotal  += p;
         }
       }));
-      let subtotal = labSubtotal + usSubtotal;
+      let subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal;
 
       const discOn = document.getElementById('discount-toggle').checked;
       const discVal = document.getElementById('discount-select').value;
@@ -5161,14 +5288,18 @@
         opType: document.getElementById('f-optype').value || '',
         contact,
         referred,
-        company,                           // COMPANY column (I)
-        procedures: labTests.join(', '),// J  LAB PROCEDURES (lab only)
-        usTests: usTests.join(', '), // K  US TEST
-        discountLabel,                     // L  DISCOUNT
-        discountAmt: discAmt,            // O  DIS. TOTAL
-        amount: grand,              // P  AMOUNT
-        subtotal: labSubtotal,        // M  SUBTOTAL (lab only)
-        usSubtotal,                        // N  US TOTAL
+        company,
+        procedures:    labTests.join(', '),   // K  LAB PROCEDURES
+        xrayTests:     xrayTests.join(', '),  // M  XRAY TESTS
+        drugTests:     drugTests.join(', '),  // O  DRUG TEST
+        utzTests:      utzTests.join(', '),   // Q  UTZ TESTS
+        discountLabel,                        // S  DISCOUNT
+        discountAmt:   discAmt,               // T  DIS. TOTAL
+        amount:        grand,                 // U  AMOUNT
+        labSubtotal,                          // L  LAB SUBTOTAL
+        xraySubtotal,                         // N  XRAY SUBTOTAL
+        drugSubtotal,                         // P  DRUG SUBTOTAL
+        utzSubtotal,                          // R  UTZ SUBTOTAL
       };
 
       // Build itemsDetail for POS display
@@ -5176,7 +5307,7 @@
       CATEGORIES.forEach(cat => {
         sel[cat.id].forEach(t => {
           const p = getPrice(t);
-          if (p !== null) itemsDetail.push({ name: t, cat: cat.name, price: p });
+          if (p !== null) itemsDetail.push({ name: t, cat: cat.name, catType: cat.type, price: p });
         });
       });
 
@@ -5186,8 +5317,10 @@
         ageSex: `${age} / ${sex}`,
         opType: document.getElementById('f-optype').value || '',
         referred,
-        subtotal: labSubtotal,
-        usSubtotal,
+        subtotal:      labSubtotal,
+        xraySubtotal,
+        drugSubtotal,
+        utzSubtotal,
         discAmt,
         discRate,
         discountLabel,
@@ -6390,20 +6523,27 @@
     }
 
     function syncMobTotals() {
-      const last = recalcTotal._last || {};
-      const hasUS = last.hasUS || false;
+      const last     = recalcTotal._last || {};
+      const hasExtra = last.hasExtra || false;
+      const hasXray  = last.hasXray  || false;
+      const hasDrug  = last.hasDrug  || false;
+      const hasUtz   = last.hasUtz   || false;
       const isSenior = last.isSenior || false;
 
-      document.getElementById('mob-lab-subtotal-line').style.display = hasUS ? 'flex' : 'none';
-      document.getElementById('mob-us-subtotal-line').style.display = hasUS ? 'flex' : 'none';
-      document.getElementById('mob-simple-subtotal-line').style.display = hasUS ? 'none' : 'flex';
+      document.getElementById('mob-lab-subtotal-line').style.display   = hasExtra ? 'flex' : 'none';
+      document.getElementById('mob-xray-subtotal-line').style.display  = hasXray  ? 'flex' : 'none';
+      document.getElementById('mob-drug-subtotal-line').style.display  = hasDrug  ? 'flex' : 'none';
+      document.getElementById('mob-us-subtotal-line').style.display    = hasUtz   ? 'flex' : 'none';
+      document.getElementById('mob-simple-subtotal-line').style.display = hasExtra ? 'none' : 'flex';
 
-      document.getElementById('mob-lab-subtotal-val').textContent = document.getElementById('lab-subtotal-val').textContent;
-      document.getElementById('mob-us-subtotal-val').textContent = document.getElementById('us-subtotal-val').textContent;
-      document.getElementById('mob-subtotal-val').textContent = document.getElementById('subtotal-val-simple').textContent;
+      document.getElementById('mob-lab-subtotal-val').textContent  = document.getElementById('lab-subtotal-val').textContent;
+      document.getElementById('mob-xray-subtotal-val').textContent = document.getElementById('xray-subtotal-val').textContent;
+      document.getElementById('mob-drug-subtotal-val').textContent = document.getElementById('drug-subtotal-val').textContent;
+      document.getElementById('mob-us-subtotal-val').textContent   = document.getElementById('us-subtotal-val').textContent;
+      document.getElementById('mob-subtotal-val').textContent      = document.getElementById('subtotal-val-simple').textContent;
 
       document.getElementById('mob-grand-total-val').textContent = document.getElementById('grand-total-val').textContent;
-      const discLine = document.getElementById('discount-line');
+      const discLine    = document.getElementById('discount-line');
       const mobDiscLine = document.getElementById('mob-discount-line');
       mobDiscLine.style.display = discLine.style.display;
       document.getElementById('mob-discount-lbl').textContent = document.getElementById('discount-lbl').textContent;
@@ -6542,7 +6682,10 @@
     /* ════════════════════════════════════════════════
        POS STATE
     ════════════════════════════════════════════════ */
-    let _posData = null;  // holds the full payload + computed values
+    let _posData        = null;  // holds the full payload + computed values
+    let _itemDiscounts  = {};    // { itemIdx: { discName, discRate, discAmt, origPrice } }
+    let _idcEditIdx     = null;  // index of item being edited in modal
+    let _idcSelectedIdx = null;  // index inside DISCOUNTS array selected in modal (null = none)
     let _posRawAmount = '';  // raw digit string for keyboard
     let _posAmountLocked = false;
     let _posIsCharged = false;
@@ -6554,6 +6697,8 @@
     ════════════════════════════════════════════════ */
     function showPosPage(data) {
       _posData = data;
+      // Store the global discount label separately so per-item can append to it
+      _posData.discountLabelBase = data.discountLabel || '';
       _posRawAmount = '';
       _posIsCharged = false;
 
@@ -6562,24 +6707,33 @@
       const metaParts = [data.ageSex, data.opType, data.referred ? 'Ref: ' + data.referred : ''].filter(Boolean);
       document.getElementById('pos-patient-meta').textContent = metaParts.join(' · ');
 
-      // Populate items list
+      // Populate items list (clickable for per-item discount)
+      _itemDiscounts = {};   // reset per-item discounts each time POS opens
       const list = document.getElementById('pos-items-list');
       list.innerHTML = '';
       const allItems = data.itemsDetail || [];
-      allItems.forEach(item => {
+      allItems.forEach((item, idx) => {
         const row = document.createElement('div');
         row.className = 'pos-item-row';
+        row.style.cursor = 'pointer';
+        row.title = 'Click to apply individual discount';
+        row.dataset.itemIdx = idx;
         row.innerHTML = `
           <div class="pos-item-name">
             <span class="pos-item-cat">${item.cat}</span>
             ${item.name}
           </div>
-          <div class="pos-item-price">${fmtPeso(item.price)}</div>`;
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="item-disc-badge" id="idb-${idx}" style="display:none;background:#EDE8FF;color:#6F2DBD;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;"></span>
+            <div class="pos-item-price" id="idp-${idx}">${fmtPeso(item.price)}</div>
+          </div>`;
+        row.addEventListener('click', () => openItemDiscModal(idx));
         list.appendChild(row);
       });
 
       // Totals
-      document.getElementById('pos-subtotal').textContent = fmtPeso(data.subtotal + (data.usSubtotal || 0));
+      const totalSub = (data.subtotal||0) + (data.xraySubtotal||0) + (data.drugSubtotal||0) + (data.utzSubtotal||0);
+      document.getElementById('pos-subtotal').textContent = fmtPeso(totalSub);
       const discRow = document.getElementById('pos-disc-row');
       if (data.discAmt > 0) {
         discRow.style.display = 'flex';
@@ -6651,6 +6805,219 @@
       document.getElementById('page-reg').classList.remove('active');
       document.getElementById('page-pos').classList.add('active');
       document.getElementById('logout-btn').classList.remove('visible');
+    }
+
+    /* ════════════════════════════════════════════════
+       PER-ITEM DISCOUNT — recalc grand total
+    ════════════════════════════════════════════════ */
+
+    /* Recompute grand total = (sum of effective item prices) - global discount */
+    function recalcPosGrand() {
+      if (!_posData) return;
+
+      const items = _posData.itemsDetail || [];
+
+      // Sum effective prices per type (base - item discount)
+      let labEff = 0, xrayEff = 0, drugEff = 0, utzEff = 0;
+      items.forEach((item, idx) => {
+        const id        = _itemDiscounts[idx];
+        const effective = id ? Math.max(0, item.price - id.discAmt) : item.price;
+        if      (item.catType === 'utz')  utzEff  += effective;
+        else if (item.catType === 'xray') xrayEff += effective;
+        else if (item.catType === 'drug') drugEff += effective;
+        else                              labEff  += effective;
+      });
+
+      const rawSubtotal = labEff + xrayEff + drugEff + utzEff;
+
+      // Global discount applies to full effective subtotal
+      const discRate      = _posData.discRate || 0;
+      const globalDiscAmt = discRate > 0 ? rawSubtotal * discRate : 0;
+
+      // Sum of item-level discount amounts
+      const itemDiscTotal = Object.values(_itemDiscounts)
+        .reduce((s, d) => s + (d.discAmt || 0), 0);
+
+      const totalDiscAmt = globalDiscAmt + itemDiscTotal;
+      const origSubtotal = (_posData.subtotal||0) + (_posData.xraySubtotal||0) + (_posData.drugSubtotal||0) + (_posData.utzSubtotal||0);
+      const grand        = Math.max(0, origSubtotal - totalDiscAmt);
+
+      // Update _posData live values
+      _posData.grand   = grand;
+      _posData.discAmt = totalDiscAmt;
+
+      // Build combined discount label
+      const globalLabel = _posData.discountLabelBase || '';
+      const itemLabels  = Object.entries(_itemDiscounts).map(([idx, d]) => {
+        const item = (_posData.itemsDetail || [])[parseInt(idx)];
+        const name = item ? item.name.split(' ').slice(0,3).join(' ') : 'Item';
+        return `${name}: ${d.discName} (${Math.round(d.discRate*100)}%)`;
+      });
+
+      let combinedLabel = '';
+      if (globalLabel && itemLabels.length)
+        combinedLabel = globalLabel + ' | ' + itemLabels.join(', ');
+      else if (globalLabel)
+        combinedLabel = globalLabel;
+      else if (itemLabels.length)
+        combinedLabel = 'Item Discount: ' + itemLabels.join(', ');
+
+      _posData.discountLabel = combinedLabel;
+
+      // Sync rawPayload so posConfirm sends updated values
+      if (_posData.rawPayload) {
+        _posData.rawPayload.discountLabel = combinedLabel;
+        _posData.rawPayload.discountAmt   = totalDiscAmt;
+        _posData.rawPayload.amount        = grand;
+        // Update per-type subtotals in payload too
+        _posData.rawPayload.labSubtotal   = labEff;
+        _posData.rawPayload.xraySubtotal  = xrayEff;
+        _posData.rawPayload.drugSubtotal  = drugEff;
+        _posData.rawPayload.utzSubtotal   = utzEff;
+      }
+
+      // Update UI
+      const discRow = document.getElementById('pos-disc-row');
+      if (totalDiscAmt > 0) {
+        discRow.style.display = 'flex';
+        document.getElementById('pos-disc-label').textContent = combinedLabel || 'Discount';
+        document.getElementById('pos-disc-amt').textContent   = '−' + fmtPeso(totalDiscAmt);
+      } else {
+        discRow.style.display = 'none';
+      }
+      document.getElementById('pos-grand').textContent   = fmtPeso(grand);
+      document.getElementById('pos-due-amt').textContent = fmtPeso(grand);
+
+      // Update item price displays
+      (items).forEach((item, idx) => {
+        const id      = _itemDiscounts[idx];
+        const priceEl = document.getElementById('idp-' + idx);
+        const badgeEl = document.getElementById('idb-' + idx);
+        if (!priceEl) return;
+        if (id) {
+          const eff = Math.max(0, item.price - id.discAmt);
+          priceEl.innerHTML = `<span style="text-decoration:line-through;color:#ccc;font-size:11px;margin-right:3px;">${fmtPeso(item.price)}</span>${fmtPeso(eff)}`;
+          if (badgeEl) { badgeEl.style.display='inline-block'; badgeEl.textContent='-'+Math.round(id.discRate*100)+'%'; }
+        } else {
+          priceEl.textContent = fmtPeso(item.price);
+          if (badgeEl) badgeEl.style.display='none';
+        }
+      });
+
+      posUpdateDisplay();
+    }
+
+    /* ────────────────────────────────────────────────
+       ITEM DISCOUNT MODAL — open / render / apply
+    ──────────────────────────────────────────────── */
+    function openItemDiscModal(idx) {
+      if (!_posData) return;
+      const item = (_posData.itemsDetail || [])[idx];
+      if (!item) return;
+
+      _idcEditIdx     = idx;
+      _idcSelectedIdx = null;
+
+      // Pre-select if this item already has a discount
+      const existing = _itemDiscounts[idx];
+      if (existing) {
+        const ei = DISCOUNTS.findIndex(d => d.name === existing.discName);
+        if (ei >= 0) _idcSelectedIdx = ei;
+      }
+
+      document.getElementById('item-disc-name').textContent       = item.name;
+      document.getElementById('item-disc-base-price').textContent = fmtPeso(item.price);
+      document.getElementById('item-disc-title').textContent      = 'Apply Item Discount';
+
+      _renderIdcList(item.price);
+      _updateIdcResult(item.price);
+
+      document.getElementById('item-disc-modal').classList.add('show');
+    }
+
+    function _renderIdcList(basePrice) {
+      const wrap = document.getElementById('item-disc-list');
+      wrap.innerHTML = DISCOUNTS.map((d, i) => {
+        const pct     = Math.round(d.rate * 100);
+        const discAmt = basePrice * d.rate;
+        const eff     = Math.max(0, basePrice - discAmt);
+        const active  = _idcSelectedIdx === i ? ' active' : '';
+        const checked = _idcSelectedIdx === i ? ' checked' : '';
+        return `<div class="idc-row${active}" onclick="_idcToggle(${i},${basePrice})">
+          <div class="idc-row-top">
+            <label class="idc-toggle" onclick="event.stopPropagation()">
+              <input type="checkbox" id="idc-chk-${i}"${checked} onchange="_idcToggle(${i},${basePrice})">
+              <span class="idc-slider"></span>
+            </label>
+            <div class="idc-row-info">
+              <div class="idc-row-label">${d.name}</div>
+              <div class="idc-row-pct">${pct === 100 ? 'Free / Fully waived' : pct + '% off'}</div>
+            </div>
+          </div>
+          <span class="idc-row-amt">−${fmtPeso(discAmt)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function _idcToggle(i, basePrice) {
+      // Only one discount at a time per item
+      if (_idcSelectedIdx === i) {
+        _idcSelectedIdx = null;  // deselect
+      } else {
+        _idcSelectedIdx = i;
+      }
+      _renderIdcList(basePrice);
+      _updateIdcResult(basePrice);
+    }
+
+    function _updateIdcResult(basePrice) {
+      const el = document.getElementById('item-disc-result');
+      if (_idcSelectedIdx === null) {
+        el.textContent = 'No discount selected — original price applies';
+        el.className   = 'none';
+      } else {
+        const d       = DISCOUNTS[_idcSelectedIdx];
+        const pct     = Math.round(d.rate * 100);
+        const discAmt = basePrice * d.rate;
+        const eff     = Math.max(0, basePrice - discAmt);
+        el.innerHTML  = `${d.name} (${pct}%) applied → <strong>${fmtPeso(eff)}</strong> <span style="color:#aaa;font-size:11px;text-decoration:line-through;">${fmtPeso(basePrice)}</span>`;
+        el.className  = '';
+      }
+    }
+
+    function closeItemDiscModal() {
+      document.getElementById('item-disc-modal').classList.remove('show');
+      _idcEditIdx     = null;
+      _idcSelectedIdx = null;
+    }
+
+    function applyItemDiscount() {
+      if (_idcEditIdx === null || !_posData) { closeItemDiscModal(); return; }
+      const item = (_posData.itemsDetail || [])[_idcEditIdx];
+      if (!item) { closeItemDiscModal(); return; }
+
+      if (_idcSelectedIdx === null) {
+        // Remove discount for this item
+        delete _itemDiscounts[_idcEditIdx];
+      } else {
+        const d       = DISCOUNTS[_idcSelectedIdx];
+        const discAmt = item.price * d.rate;
+        _itemDiscounts[_idcEditIdx] = {
+          discName: d.name,
+          discRate: d.rate,
+          discAmt:  discAmt,
+          origPrice: item.price,
+        };
+      }
+
+      recalcPosGrand();
+      closeItemDiscModal();
+      showToast(
+        _idcSelectedIdx === null
+          ? 'Item discount removed.'
+          : `Discount applied to ${item.name.split(' ').slice(0,3).join(' ')}.`,
+        'ok'
+      );
     }
 
     /* ════════════════════════════════════════════════
@@ -6839,16 +7206,31 @@
       if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         setTimeout(() => {
           resetBtn();
+          // Build receipt items with per-item effective prices
+          const _rcptItems = (_posData.itemsDetail || []).map((it, i) => {
+            const id = _itemDiscounts[i];
+            return id ? Object.assign({}, it, { price: Math.max(0, it.price - id.discAmt), discNote: id.discName }) : it;
+          });
           _lastReceiptData = {
             num: '0000', date: finalPayload.date, name: finalPayload.name,
             ageSex: finalPayload.ageSex, contact: finalPayload.contact,
             address: finalPayload.address, referred: finalPayload.referred,
-            items: (_posData.itemsDetail || []), usTests: finalPayload.usTests,
-            labSubtotal: _posData.subtotal, usSubtotal: _posData.usSubtotal || 0,
-            discAmt: _posData.discAmt || 0, discountLabel: _posData.discountLabel,
-            grand: _posData.grand, paymentStatus: finalPayload.paymentStatus,
-            paymentType: finalPayload.paymentType,
-            paymentAmt: finalPayload.paymentAmount, balance: finalPayload.balance,
+            items: _rcptItems,
+            procedures:   finalPayload.procedures,
+            xrayTests:    finalPayload.xrayTests,
+            drugTests:    finalPayload.drugTests,
+            utzTests:     finalPayload.utzTests,
+            labSubtotal:  _posData.subtotal       || 0,
+            xraySubtotal: _posData.xraySubtotal   || 0,
+            drugSubtotal: _posData.drugSubtotal   || 0,
+            utzSubtotal:  _posData.utzSubtotal    || 0,
+            discAmt:      _posData.discAmt        || 0,
+            discountLabel: _posData.discountLabel,
+            grand: _posData.grand,
+            paymentStatus: finalPayload.paymentStatus,
+            paymentType:   finalPayload.paymentType,
+            paymentAmt:    finalPayload.paymentAmount,
+            balance:       finalPayload.balance,
           };
           document.getElementById('pos-print-btn').style.display = 'flex';
           showSuccessAndReset(finalPayload.name, '0000');
@@ -6866,6 +7248,11 @@
           resetBtn();
           if (d.success) {
             // Build receipt data for printing
+            // Build receipt items with per-item effective prices
+            const _rcptItemsLive = (_posData.itemsDetail || []).map((it, i) => {
+              const id = _itemDiscounts[i];
+              return id ? Object.assign({}, it, { price: Math.max(0, it.price - id.discAmt), discNote: id.discName }) : it;
+            });
             _lastReceiptData = {
               num:           d.number,
               date:          finalPayload.date,
@@ -6874,11 +7261,16 @@
               contact:       finalPayload.contact,
               address:       finalPayload.address,
               referred:      finalPayload.referred,
-              items:         (_posData.itemsDetail || []),
-              usTests:       finalPayload.usTests,
-              labSubtotal:   _posData.subtotal,
-              usSubtotal:    _posData.usSubtotal || 0,
-              discAmt:       _posData.discAmt || 0,
+              items:         _rcptItemsLive,
+              procedures:    finalPayload.procedures,
+              xrayTests:     finalPayload.xrayTests,
+              drugTests:     finalPayload.drugTests,
+              utzTests:      finalPayload.utzTests,
+              labSubtotal:   _posData.subtotal      || 0,
+              xraySubtotal:  _posData.xraySubtotal  || 0,
+              drugSubtotal:  _posData.drugSubtotal  || 0,
+              utzSubtotal:   _posData.utzSubtotal   || 0,
+              discAmt:       _posData.discAmt       || 0,
               discountLabel: _posData.discountLabel,
               grand:         _posData.grand,
               paymentStatus: finalPayload.paymentStatus,
@@ -7122,26 +7514,58 @@
         const avail = LW - amt.length - 1;
         const name  = (item.name || '').slice(0, avail);
         txt(padLine(name, amt) + '\n');
+        if (item.discNote) {
+          cmd(CMD.SMALL_ON);
+          txt('  (' + item.discNote + ')\n');
+          cmd(CMD.SMALL_OFF);
+        }
       });
 
-      // Ultrasound line(s)
-      if (d.usTests && d.usTests.trim()) {
-        d.usTests.split(',').forEach(ut => {
-          const uname = ut.trim().slice(0, LW - 8);
-          const uamt  = fmtAmt(d.usSubtotal); // show total once on first line
-          // Only print amount on first US item
-          txt(padLine(uname, fmtAmt(0)) + '\n');
+      // X-Ray line(s)
+      if (d.xrayTests && d.xrayTests.trim()) {
+        cmd(CMD.SMALL_ON);
+        txt('-- X-Ray --\n');
+        cmd(CMD.SMALL_OFF);
+        d.xrayTests.split(',').forEach(xt => {
+          const xname = xt.trim().slice(0, LW - 1);
+          txt(xname + '\n');
         });
-        // Correct US line — overwrite last line approach: just one summary line
+      }
+
+      // Drug Test line(s)
+      if (d.drugTests && d.drugTests.trim()) {
+        cmd(CMD.SMALL_ON);
+        txt('-- Drug Test --\n');
+        cmd(CMD.SMALL_OFF);
+        d.drugTests.split(',').forEach(dt => {
+          const dname = dt.trim().slice(0, LW - 1);
+          txt(dname + '\n');
+        });
+      }
+
+      // UTZ line(s)
+      if (d.utzTests && d.utzTests.trim()) {
+        cmd(CMD.SMALL_ON);
+        txt('-- UTZ Tests --\n');
+        cmd(CMD.SMALL_OFF);
+        d.utzTests.split(',').forEach(ut => {
+          const uname = ut.trim().slice(0, LW - 1);
+          txt(uname + '\n');
+        });
       }
 
       txt(div('-'));
 
       // ── TOTALS ────────────────────────────────────
-      const hasBoth = d.labSubtotal > 0 && d.usSubtotal > 0;
-      if (hasBoth) {
-        txt(padLine('Lab Subtotal', fmtAmt(d.labSubtotal)) + '\n');
-        txt(padLine('US Subtotal', fmtAmt(d.usSubtotal)) + '\n');
+      const hasXray = d.xraySubtotal > 0;
+      const hasDrug = d.drugSubtotal > 0;
+      const hasUtz  = d.utzSubtotal  > 0;
+      const hasMulti = hasXray || hasDrug || hasUtz;
+      if (hasMulti) {
+        if (d.labSubtotal > 0)  txt(padLine('Lab Subtotal',      fmtAmt(d.labSubtotal))  + '\n');
+        if (hasXray)            txt(padLine('X-Ray Subtotal',     fmtAmt(d.xraySubtotal)) + '\n');
+        if (hasDrug)            txt(padLine('Drug Test Subtotal', fmtAmt(d.drugSubtotal)) + '\n');
+        if (hasUtz)             txt(padLine('UTZ Subtotal',       fmtAmt(d.utzSubtotal))  + '\n');
       }
 
       if (d.discAmt > 0) {
@@ -7510,6 +7934,22 @@
 
     </div>
   </div><!-- /#page-pos -->
+
+  <!-- PER-ITEM DISCOUNT MODAL -->
+  <div id="item-disc-modal">
+    <div id="item-disc-backdrop" onclick="closeItemDiscModal()"></div>
+    <div id="item-disc-card">
+      <div id="item-disc-title">Apply Item Discount</div>
+      <div id="item-disc-name">—</div>
+      <div id="item-disc-base">Base price: <strong id="item-disc-base-price">₱0.00</strong></div>
+      <div id="item-disc-list"><!-- discount rows injected by JS --></div>
+      <div id="item-disc-result" class="none">No discount selected</div>
+      <div class="idc-footer">
+        <button class="idc-btn-cancel" onclick="closeItemDiscModal()">Cancel</button>
+        <button class="idc-btn-apply" onclick="applyItemDiscount()">Apply Discount</button>
+      </div>
+    </div>
+  </div>
 
   <!-- CANCEL REGISTRATION CONFIRMATION MODAL -->
   <div id="cancel-reg-modal">
