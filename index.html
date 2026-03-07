@@ -1879,126 +1879,52 @@
       transform: none;
     }
 
-    /* ══════════════════════════════════════════
-     SUCCESS NOTIFICATION (full-screen, auto-dismiss)
-  ══════════════════════════════════════════ */
-    #success-notif {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 700;
-      align-items: center;
-      justify-content: center;
+    /* ════════════════════════════════════════════════
+     RECENT REGISTRANTS PAGE
+  ════════════════════════════════════════════════ */
+    #print-progress-wrap { display:none; margin-bottom:18px; }
+    #print-progress-track {
+      background:#e8e0f7; border-radius:99px; height:9px; overflow:hidden;
     }
-
-    #success-notif.show {
-      display: flex;
-      animation: notifBgIn 0.3s ease;
+    #print-progress-bar {
+      height:100%; background:linear-gradient(90deg,#6F2DBD,#9B72D0);
+      border-radius:99px; width:0%; transition:width 0.35s ease;
     }
-
-    #success-notif.fade-out {
-      animation: splashOut 0.4s ease forwards;
+    #print-progress-bar.error { background:#ef5350; }
+    .recent-row {
+      background:#fff; border-radius:12px; padding:14px 16px;
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      border:1px solid #ece6f8; box-shadow:0 1px 4px rgba(0,0,0,0.06);
+      transition:box-shadow 0.15s;
     }
-
-    .success-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(10, 30, 10, 0.75);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+    .recent-row.latest { border-color:#b49de0; box-shadow:0 3px 14px rgba(111,45,189,0.14); }
+    .recent-row-num {
+      width:44px; height:44px; border-radius:10px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'DM Mono',monospace; font-size:12px; font-weight:800;
+      background:#ede8ff; color:#6F2DBD; letter-spacing:-0.5px;
     }
-
-    .success-card {
-      position: relative;
-      z-index: 1;
-      background: #fff;
-      border-radius: 22px;
-      padding: 44px 52px 40px;
-      max-width: 460px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35);
-      animation: notifCardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    .recent-row-num.latest { background:#6F2DBD; color:#fff; }
+    .recent-row-info { flex:1; min-width:140px; }
+    .recent-row-name { font-size:15px; font-weight:700; color:#1a1a1a; }
+    .recent-row-meta { font-size:12px; color:#888; margin-top:2px; }
+    .recent-row-amt  { text-align:right; flex-shrink:0; min-width:90px; }
+    .recent-row-price { font-size:15px; font-weight:700; color:#1a1a1a; }
+    .recent-status-badge {
+      display:inline-block; margin-top:3px; font-size:10px; font-weight:700;
+      padding:2px 8px; border-radius:5px; text-transform:uppercase; letter-spacing:0.5px;
     }
-
-    .success-checkmark {
-      width: 76px;
-      height: 76px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #1e8c3a, #22c55e);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(30, 140, 58, 0.35);
-      animation: checkPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+    .recent-reprint-btn {
+      background:#f4f1fa; color:#6F2DBD; border:1.5px solid #c4aff0;
+      border-radius:8px; font-family:'DM Sans',sans-serif;
+      font-size:12px; font-weight:700; padding:9px 15px; cursor:pointer;
+      white-space:nowrap; flex-shrink:0;
+      display:flex; align-items:center; gap:5px; transition:background 0.15s;
     }
+    .recent-reprint-btn:hover { background:#ede8ff; }
+    .recent-reprint-btn:disabled { opacity:0.45; cursor:not-allowed; }
 
-    @keyframes checkPop {
-      from {
-        transform: scale(0.4);
-        opacity: 0;
-      }
 
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    .success-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
-    }
-
-    .success-patient-num {
-      font-family: 'DM Mono', monospace;
-      font-size: 36px;
-      font-weight: 500;
-      color: #6F2DBD;
-      background: #f5f0ff;
-      border-radius: 12px;
-      padding: 10px 28px;
-      display: inline-block;
-      margin: 14px 0;
-      letter-spacing: 2px;
-    }
-
-    .success-body {
-      font-size: 14px;
-      color: #888;
-      line-height: 1.5;
-      margin-top: 4px;
-    }
-
-    .success-dismiss {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #bbb;
-      font-style: italic;
-    }
-
-    .success-print-btn {
-      margin-top: 18px;
-      padding: 12px 28px;
-      background: #1e8c3a;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      transition: background 0.15s;
-      box-shadow: 0 4px 14px rgba(30,140,58,0.25);
-    }
-    .success-print-btn:hover { background: #22a344; }
-    .success-print-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
     /* ══════════════════════════════════════════
      TOAST
@@ -4118,24 +4044,78 @@
   </div><!-- /#page-reg -->
 
   <!-- ═══════════ SUCCESS NOTIFICATION ═══════════ -->
-  <div id="success-notif">
-    <div class="success-backdrop"></div>
-    <div class="success-card">
-      <div class="success-checkmark">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
+  <!-- ═══════════════════════════════════════════════════
+       RECENT REGISTRANTS PAGE  (#page-recent)
+  ═══════════════════════════════════════════════════ -->
+  <div id="page-recent" class="page" style="min-height:calc(100vh - 62px);background:#f4f1fa;flex-direction:column;align-items:center;padding:32px 16px 48px;">
+    <div style="width:100%;max-width:820px;">
+
+      <!-- Page header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+        <div>
+          <div style="font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.4px;">Registration Saved</div>
+          <div style="font-size:13px;color:#888;margin-top:3px;">Receipt is printing — use <strong>Reprint</strong> if the printer missed it</div>
+        </div>
+        <button onclick="goRegisterAnother()" style="background:#6F2DBD;color:#fff;border:none;border-radius:10px;
+          font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:12px 22px;
+          cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;
+          box-shadow:0 4px 14px rgba(111,45,189,0.35);transition:background 0.15s;"
+          onmouseover="this.style.background='#5a23a0'" onmouseout="this.style.background='#6F2DBD'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Register Next Patient
+        </button>
       </div>
-      <div class="success-title">Patient Registered!</div>
-      <div class="success-patient-num" id="success-num">#0001</div>
-      <div class="success-body" id="success-name-text">Registration successfully saved.</div>
-      <button class="success-print-btn" id="success-print-btn" onclick="printReceiptFromSuccess()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Print Receipt
-      </button>
-      <div class="success-dismiss" id="success-dismiss-txt">Tap to dismiss or wait…</div>
+
+      <!-- Latest patient banner -->
+      <div style="background:linear-gradient(135deg,#1B5E20,#2E7D32);border-radius:14px;
+        padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;
+        gap:16px;color:#fff;flex-wrap:wrap;">
+        <div style="width:46px;height:46px;background:rgba(255,255,255,0.18);border-radius:50%;
+          display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;opacity:0.75;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;">Just Registered</div>
+          <div style="font-size:18px;font-weight:700;margin-top:2px;" id="recent-banner-name">—</div>
+          <div style="font-size:12px;opacity:0.75;margin-top:2px;" id="recent-banner-meta">—</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:11px;opacity:0.75;text-transform:uppercase;letter-spacing:0.8px;">Record No.</div>
+          <div style="font-size:28px;font-weight:800;letter-spacing:-1px;font-family:'DM Mono',monospace;" id="recent-banner-num">#0001</div>
+        </div>
+      </div>
+
+      <!-- Print progress bar -->
+      <div id="print-progress-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:600;color:#6F2DBD;" id="print-progress-label">Preparing receipt…</span>
+          <span style="font-size:12px;color:#888;" id="print-progress-pct">0%</span>
+        </div>
+        <div id="print-progress-track"><div id="print-progress-bar"></div></div>
+        <div style="font-size:11px;color:#aaa;margin-top:5px;" id="print-progress-sub">Starting…</div>
+      </div>
+
+      <!-- List header -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;">Today's Session</span>
+        <span id="recent-count-badge" style="background:#ede8ff;color:#6F2DBD;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">0</span>
+      </div>
+
+      <!-- Registrant list -->
+      <div id="recent-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <!-- Bottom action -->
+      <div style="margin-top:28px;text-align:center;border-top:1px solid #e8e0f7;padding-top:24px;">
+        <button onclick="goRegisterAnother()" style="background:#fff;color:#6F2DBD;
+          border:2px solid #c4aff0;border-radius:10px;font-family:'DM Sans',sans-serif;
+          font-size:15px;font-weight:700;padding:14px 34px;cursor:pointer;transition:all 0.15s;"
+          onmouseover="this.style.background='#f4f1fa'" onmouseout="this.style.background='#fff'">
+          ← Start New Registration
+        </button>
+      </div>
+
     </div>
-  </div>
+  </div><!-- /#page-recent -->
 
   <div class="toast" id="toast"><span id="toast-msg"></span></div>
 
@@ -4744,6 +4724,7 @@
 
     function doLogout() {
       document.getElementById('page-reg').classList.remove('active');
+      document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-login').classList.add('active');
       document.getElementById('logout-btn').classList.remove('visible');
       document.getElementById('login-btn').disabled = false;
@@ -5218,72 +5199,160 @@
     }
 
     /* ════════════════════════════════════════════════
-       SUCCESS NOTIFICATION
+       RECENT REGISTRANTS — session list + progress bar reprint
     ════════════════════════════════════════════════ */
-    let _successDismissTimer = null;
+    const _recentList = [];
+    const _SBADGE = {
+      'FULLY PAID':  { bg:'#E8F5E9', fg:'#1B5E20' },
+      'PARTLY PAID': { bg:'#FFFDE7', fg:'#F57F17' },
+      'UNPAID':      { bg:'#FFEBEE', fg:'#B71C1C' },
+      'NO PAYMENT':  { bg:'#F3E5F5', fg:'#6A1B9A' },
+      'PENDING':     { bg:'#EDE8FF', fg:'#3D0099' },
+    };
 
-    function dismissSuccessNotif() {
-      const notif = document.getElementById('success-notif');
-      if (!notif.classList.contains('show')) return;
-      if (_successDismissTimer) { clearTimeout(_successDismissTimer); _successDismissTimer = null; }
-      notif.classList.add('fade-out');
-      setTimeout(() => {
-        notif.classList.remove('show');
-        notif.classList.remove('fade-out');
-      }, 400);
-    }
-
-    function showSuccessNotif(num, name) {
+    function showRecentPage(name, num, receiptData) {
       const padded = String(num).padStart(4, '0');
-      document.getElementById('success-num').textContent = '#' + padded;
-      document.getElementById('success-name-text').textContent = name + ' has been successfully registered.';
-      document.getElementById('success-dismiss-txt').textContent = 'Print receipt or tap anywhere to dismiss…';
+      const entry = {
+        num, padded, name,
+        ageSex:        receiptData ? receiptData.ageSex        : '',
+        referred:      receiptData ? receiptData.referred      : '',
+        grand:         receiptData ? receiptData.grand         : 0,
+        paymentStatus: receiptData ? receiptData.paymentStatus : 'PENDING',
+        paymentType:   receiptData ? receiptData.paymentType   : '',
+        ts:            new Date().toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' }),
+        receiptData,
+      };
+      _recentList.unshift(entry);
+      if (_recentList.length > 20) _recentList.length = 20;
 
-      const notif = document.getElementById('success-notif');
-      notif.classList.add('show');
+      document.getElementById('recent-banner-name').textContent = name;
+      document.getElementById('recent-banner-num').textContent  = '#' + padded;
+      const meta = [receiptData && receiptData.ageSex,
+                    receiptData && receiptData.referred ? 'Ref: ' + receiptData.referred : '']
+                   .filter(Boolean).join(' · ');
+      document.getElementById('recent-banner-meta').textContent = meta || 'Registered just now';
 
-      // Click backdrop to dismiss
-      notif.querySelector('.success-backdrop').onclick = dismissSuccessNotif;
-
-      // Auto-dismiss after 6 seconds (longer to allow printing)
-      if (_successDismissTimer) clearTimeout(_successDismissTimer);
-      _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 6000);
+      _renderRecentList();
+      document.getElementById('page-recent').classList.add('active');
+      if (receiptData) setTimeout(() => _recentPrint(0), 300);
     }
 
-    async function printReceiptFromSuccess() {
-      const btn = document.getElementById('success-print-btn');
-      if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
+    function _renderRecentList() {
+      const wrap  = document.getElementById('recent-list');
+      document.getElementById('recent-count-badge').textContent = _recentList.length;
 
-      if (_successDismissTimer) { clearTimeout(_successDismissTimer); _successDismissTimer = null; }
-      document.getElementById('success-dismiss-txt').textContent = 'Sending to printer…';
+      wrap.innerHTML = _recentList.map((r, i) => {
+        const sc  = _SBADGE[r.paymentStatus] || _SBADGE['PENDING'];
+        const lat = i === 0;
+        const amt = (r.grand || 0).toLocaleString('en-PH', { minimumFractionDigits:2 });
+        return `<div class="recent-row${lat ? ' latest' : ''}">
+          <div class="recent-row-num${lat ? ' latest' : ''}">${r.padded}</div>
+          <div class="recent-row-info">
+            <div class="recent-row-name">${r.name}</div>
+            <div class="recent-row-meta">${[r.ageSex, r.ts].filter(Boolean).join(' · ')}</div>
+          </div>
+          <div class="recent-row-amt">
+            <div class="recent-row-price">₱${amt}</div>
+            <div class="recent-status-badge" style="background:${sc.bg};color:${sc.fg};">${r.paymentStatus}</div>
+          </div>
+          <button class="recent-reprint-btn" id="rprint-${i}" onclick="_recentPrint(${i})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            ${lat ? 'Print Receipt' : 'Reprint'}
+          </button>
+        </div>`;
+      }).join('');
+    }
 
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Printing…';
+    async function _recentPrint(idx) {
+      const r = _recentList[idx];
+      if (!r || !r.receiptData) { showToast('No receipt data for this entry.', 'err'); return; }
+
+      // Disable all reprint buttons while printing
+      document.querySelectorAll('.recent-reprint-btn').forEach(b => b.disabled = true);
+
+      const wrap  = document.getElementById('print-progress-wrap');
+      const bar   = document.getElementById('print-progress-bar');
+      const lbl   = document.getElementById('print-progress-label');
+      const pct   = document.getElementById('print-progress-pct');
+      const sub   = document.getElementById('print-progress-sub');
+
+      const step = (p, l, s) => {
+        bar.style.width = p + '%'; lbl.textContent = l;
+        pct.textContent = p + '%'; if (s !== undefined) sub.textContent = s;
+      };
+
+      bar.classList.remove('error');
+      lbl.style.color = '#6F2DBD';
+      wrap.style.display = 'block';
+      wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      step(5, 'Preparing receipt…', 'Building ESC/POS commands…');
 
       try {
-        const bytes = await buildReceiptBytes(_lastReceiptData);
-        await sendToUsbPrinter(bytes);
+        step(18, 'Building receipt layout…', 'Rendering items and totals…');
+        const bytes = await buildReceiptBytes(r.receiptData);
+
+        step(42, 'Loading print driver…', 'Fetching QZ Tray library…');
+        await loadQzScript();
+
+        step(60, 'Connecting to QZ Tray…', 'Opening WebSocket on localhost:8181…');
+        await connectQZ();
+
+        step(80, 'Sending to printer…', `Sending to "${QZ_PRINTER_NAME}"…`);
+        const cfg = qz.configs.create(QZ_PRINTER_NAME, { encoding:'RAW', copies:1, colorType:'blackwhite' });
+        await qz.print(cfg, bytesToQzData(bytes));
+
+        step(100, '✓ Receipt printed!', 'The paper is printing now.');
         showToast('Receipt printed!', 'ok');
-        document.getElementById('success-dismiss-txt').textContent = 'Printed! Tap anywhere to dismiss…';
-        _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 3000);
+        setTimeout(() => { wrap.style.display = 'none'; step(0,'Preparing receipt…','Starting…'); }, 3500);
+
       } catch (err) {
         console.error('Print error:', err);
-        const msg = err.message || '';
-        if (msg.includes('Unable to establish') || msg.includes('connect')) {
-          showToast('QZ Tray not running. Start it first.', 'err');
-        } else if (msg.includes('not found') || msg.includes('printer')) {
-          showToast('Printer "' + QZ_PRINTER_NAME + '" not found. Check name.', 'err');
-        } else {
-          showToast('Print failed: ' + msg, 'err');
-        }
         _qzConnected = false;
-        document.getElementById('success-dismiss-txt').textContent = 'Tap anywhere to dismiss…';
-        _successDismissTimer = setTimeout(() => { dismissSuccessNotif(); }, 5000);
+        const msg = err.message || '';
+        let errMsg = 'Print failed: ' + msg;
+        if (msg.includes('Unable to establish') || msg.includes('connect'))
+          errMsg = 'QZ Tray is not running — start it from the system tray, then tap Reprint.';
+        else if (msg.includes('not found') || msg.includes('printer'))
+          errMsg = `Printer "${QZ_PRINTER_NAME}" not found — check the printer name, then tap Reprint.`;
+
+        bar.style.width = '100%';
+        bar.classList.add('error');
+        lbl.style.color = '#c62828';
+        lbl.textContent = '⚠ Print failed — tap Reprint to try again';
+        pct.textContent = '';
+        sub.textContent = errMsg;
+        showToast(errMsg, 'err');
+
+        // After 8 s, collapse the bar — but stay on this page
+        setTimeout(() => {
+          wrap.style.display = 'none';
+          bar.classList.remove('error');
+          bar.style.width = '0%';
+          lbl.style.color = '#6F2DBD';
+          step(0, 'Preparing receipt…', 'Starting…');
+        }, 8000);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt';
+        document.querySelectorAll('.recent-reprint-btn').forEach(b => b.disabled = false);
       }
     }
+
+    /* Only called when staff explicitly clicks "Register Next Patient" */
+    function goRegisterAnother() {
+      document.getElementById('page-recent').classList.remove('active');
+      document.getElementById('page-reg').classList.add('active');
+      document.getElementById('logout-btn').classList.add('visible');
+      clearForm();
+      goToStep1();
+    }
+
+    /* Legacy stubs — kept so nothing else breaks */
+    function dismissSuccessNotif() {}
+    function showSuccessNotif() {}
+    function printReceiptFromSuccess() { if (_recentList.length) _recentPrint(0); }
 
     /* ════════════════════════════════════════════════
        BIRTHDAY → AUTO-AGE
@@ -6828,14 +6897,11 @@
     }
 
     function showSuccessAndReset(name, num) {
-      // Print button stays visible in POS page briefly — user can print before form clears
-      // We redirect, then keep print available via success notification area
+      // Go to the Recent Registrants page — DO NOT clear the form yet.
+      // Staff can reprint freely. Form clears only when "Register Next Patient" is clicked.
       document.getElementById('page-pos').classList.remove('active');
-      document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
-      showSuccessNotif(num, name);
-      clearForm();
-      goToStep1();
+      showRecentPage(name, num, _lastReceiptData);
     }
 
     /* ════════════════════════════════════════════════
