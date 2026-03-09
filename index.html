@@ -5857,7 +5857,7 @@
                   <span style="font-size:11px;color:#888;">${r.ageSex || ''}</span>
                 </div>
                 <div style="font-size:11px;color:#aaa;margin-bottom:6px;">
-                  ${(r.date||'').replace(/\s*(GMT|UTC).*$/,'').trim()}${r.ts ? ' · ' + r.ts : ''}${r.referred ? ' · ' + r.referred : ''}
+                  ${(()=>{ const s=String(r.date||''); const m=s.match(/(\d{1,2}\/\d{1,2}\/\d{4})/); return m?m[1]:''; })()}${r.ts ? ' · ' + (()=>{ const m=String(r.ts).match(/(\d{1,2}:\d{2}:\d{2})/); return m?m[1]:String(r.ts).replace(/GMT.*/,'').replace(/\(.*\)/,'').trim(); })() : ''}${r.referred ? ' · ' + r.referred : ''}
                 </div>
                 ${services ? `<div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${services}</div>` : ''}
               </div>
