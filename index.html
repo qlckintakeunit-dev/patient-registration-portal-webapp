@@ -1903,9 +1903,11 @@
       background: rgba(10, 5, 25, 0.78);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 16px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     #receipt-preview-overlay.show { display: flex; animation: rpFadeIn 0.3s ease; }
     @keyframes rpFadeIn { from { opacity:0; } to { opacity:1; } }
@@ -1915,8 +1917,9 @@
       gap: 20px;
       width: 100%;
       max-width: 860px;
-      max-height: calc(100vh - 32px);
-      align-items: center;
+      align-items: flex-start;
+      margin: auto;
+      padding: 8px 0 24px;
     }
 
     /* ── Left: receipt paper ── */
@@ -1937,8 +1940,6 @@
       line-height: 1.55;
       color: #111;
       box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08);
-      max-height: calc(100vh - 140px);
-      overflow-y: auto;
     }
     .rp-paper::-webkit-scrollbar { width: 4px; }
     .rp-paper::-webkit-scrollbar-thumb { background: #ddd; border-radius:4px; }
@@ -1990,7 +1991,6 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      max-height: calc(100vh - 140px);
     }
 
     .rp-status-card {
@@ -2100,9 +2100,11 @@
     .rp-reprint-btn:hover { background: rgba(255,255,255,0.14); }
 
     @media (max-width: 640px) {
-      .rp-shell { flex-direction: column; align-items: center; }
-      .rp-right { width: 100%; max-width: 280px; }
-      .rp-paper { max-height: 55vh; }
+      .rp-shell { flex-direction: column; align-items: center; gap: 16px; }
+      .rp-right { width: 100%; max-width: 320px; }
+      .rp-paper { width: 100%; max-width: 320px; }
+      .rp-paper-wrap::before,
+      .rp-paper-wrap::after { width: 100%; max-width: 320px; }
     }
 
     .recent-row {
@@ -3089,6 +3091,23 @@
       opacity: 0.85;
     }
 
+    /* Mobile/tablet: ensure bday-wrap stretches full width like other .field inputs */
+    @media (max-width: 1024px) {
+      .bday-wrap {
+        width: 100%;
+        display: block;
+      }
+      .bday-wrap input[type="date"] {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 14px;
+        padding: 11px 68px 11px 12px;
+        -webkit-appearance: none;
+        appearance: none;
+        min-height: 44px;
+      }
+    }
+
     /* Operation Type is now a standard dropdown select — no special CSS needed */
 
     /* ══════════════════════════════════════════
@@ -3879,6 +3898,12 @@
         overflow: visible;
         flex: none;
       }
+      .pos-right-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+      }
     }
 
     /* Mobile (≤767px) */
@@ -3892,6 +3917,7 @@
         grid-template-columns: 1fr;
         height: auto;
         overflow: visible;
+        padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
       }
       .pos-left {
         padding: 16px 14px 14px;
@@ -3905,7 +3931,14 @@
         overflow: visible;
       }
       .pos-right-body { overflow: visible; flex: none; padding: 12px 16px 8px; }
-      .pos-right-footer { padding: 10px 16px max(14px, env(safe-area-inset-bottom)); gap: 7px; }
+      .pos-right-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 10px 16px max(14px, env(safe-area-inset-bottom));
+        gap: 7px;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+      }
       .pos-due-strip { padding: 14px 16px 18px; }
       .pos-due-amt { font-size: 28px; }
       .pos-patient-name { font-size: 17px; }
@@ -4377,26 +4410,41 @@
 
         <!-- TOTALS -->
         <div class="totals-block">
-          <div class="total-line sub-line" id="lab-subtotal-line">
-            <span class="lbl">Lab Subtotal</span>
+          <!-- Per-category subtotals (shown only when multiple dept types have items) -->
+          <div class="total-line sub-line" id="lab-subtotal-line" style="display:none;">
+            <span class="lbl">Lab</span>
             <span class="val" id="lab-subtotal-val">₱ 0.00</span>
           </div>
+          <div class="total-line sub-line" id="checkup-subtotal-line" style="display:none;">
+            <span class="lbl">Checkup</span>
+            <span class="val" id="checkup-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line" id="cad-subtotal-line" style="display:none;">
+            <span class="lbl">Cardiology</span>
+            <span class="val" id="cad-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line" id="kits-subtotal-line" style="display:none;">
+            <span class="lbl">Kits</span>
+            <span class="val" id="kits-subtotal-val">₱ 0.00</span>
+          </div>
           <div class="total-line sub-line xray-sub-line" id="xray-subtotal-line" style="display:none;">
-            <span class="lbl">X-Ray Subtotal</span>
+            <span class="lbl">X-Ray</span>
             <span class="val" id="xray-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line sub-line drug-sub-line" id="drug-subtotal-line" style="display:none;">
-            <span class="lbl">Drug Test Subtotal</span>
+            <span class="lbl">Drug Test</span>
             <span class="val" id="drug-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line sub-line us-sub-line" id="us-subtotal-line" style="display:none;">
-            <span class="lbl">UTZ Subtotal</span>
+            <span class="lbl">UTZ</span>
             <span class="val" id="us-subtotal-val">₱ 0.00</span>
           </div>
-          <div class="total-line" id="combined-subtotal-line" style="display:none;">
-            <span class="lbl">Subtotal</span>
-            <span class="val" id="subtotal-val">₱ 0.00</span>
+          <!-- Combined SUBTOTAL: shown when any extra dept or discount is active -->
+          <div class="total-line" id="combined-subtotal-line" style="display:none;border-top:1px solid #e8e0f7;margin-top:2px;padding-top:6px;">
+            <span class="lbl" style="font-weight:700;">Subtotal</span>
+            <span class="val" style="font-weight:700;color:#444;" id="subtotal-val">₱ 0.00</span>
           </div>
+          <!-- Simple subtotal: shown when only one dept and no discount -->
           <div class="total-line" id="simple-subtotal-line">
             <span class="lbl">Subtotal</span>
             <span class="val" id="subtotal-val-simple">₱ 0.00</span>
@@ -4406,8 +4454,8 @@
             <span class="val" id="discount-val">— ₱ 0.00</span>
           </div>
           <div class="total-line senior-info-line" id="senior-pricing-line" style="display:none;">
-            <span class="lbl">🧓 Senior Pricing</span>
-            <span class="val senior-tag">Applied</span>
+            <span class="lbl">🧓 Senior Citizen Discount</span>
+            <span class="val senior-tag senior-savings-val">Applied</span>
           </div>
           <div class="total-line grand">
             <span class="lbl">Total Amount</span>
@@ -4731,21 +4779,37 @@
         </div>
         <!-- Totals -->
         <div class="totals-block">
-          <div class="total-line sub-line" id="mob-lab-subtotal-line">
-            <span class="lbl">Lab Subtotal</span>
+          <div class="total-line sub-line" id="mob-lab-subtotal-line" style="display:none;">
+            <span class="lbl">Lab</span>
             <span class="val" id="mob-lab-subtotal-val">₱ 0.00</span>
           </div>
+          <div class="total-line sub-line" id="mob-checkup-subtotal-line" style="display:none;">
+            <span class="lbl">Checkup</span>
+            <span class="val" id="mob-checkup-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line" id="mob-cad-subtotal-line" style="display:none;">
+            <span class="lbl">Cardiology</span>
+            <span class="val" id="mob-cad-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line sub-line" id="mob-kits-subtotal-line" style="display:none;">
+            <span class="lbl">Kits</span>
+            <span class="val" id="mob-kits-subtotal-val">₱ 0.00</span>
+          </div>
           <div class="total-line sub-line xray-sub-line" id="mob-xray-subtotal-line" style="display:none;">
-            <span class="lbl">X-Ray Subtotal</span>
+            <span class="lbl">X-Ray</span>
             <span class="val" id="mob-xray-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line sub-line drug-sub-line" id="mob-drug-subtotal-line" style="display:none;">
-            <span class="lbl">Drug Test Subtotal</span>
+            <span class="lbl">Drug Test</span>
             <span class="val" id="mob-drug-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line sub-line us-sub-line" id="mob-us-subtotal-line" style="display:none;">
-            <span class="lbl">UTZ Subtotal</span>
+            <span class="lbl">UTZ</span>
             <span class="val" id="mob-us-subtotal-val">₱ 0.00</span>
+          </div>
+          <div class="total-line" id="mob-combined-subtotal-line" style="display:none;border-top:1px solid #e8e0f7;margin-top:2px;padding-top:6px;">
+            <span class="lbl" style="font-weight:700;">Subtotal</span>
+            <span class="val" style="font-weight:700;color:#444;" id="mob-combined-subtotal-val">₱ 0.00</span>
           </div>
           <div class="total-line" id="mob-simple-subtotal-line">
             <span class="lbl">Subtotal</span>
@@ -4756,8 +4820,8 @@
             <span class="val" id="mob-discount-val">— ₱ 0.00</span>
           </div>
           <div class="total-line senior-info-line" id="mob-senior-pricing-line" style="display:none;">
-            <span class="lbl">🧓 Senior Pricing</span>
-            <span class="val senior-tag">Applied</span>
+            <span class="lbl">🧓 Senior Citizen Discount</span>
+            <span class="val senior-tag senior-savings-val">Applied</span>
           </div>
           <div class="total-line grand">
             <span class="lbl">Total Amount</span>
@@ -5005,6 +5069,35 @@
     }
 
     /* ════════════════════════════════════════════════
+       HELPERS
+    ════════════════════════════════════════════════ */
+    const slug = s => s.replace(/[^a-zA-Z0-9]/g, '_');
+    const escQ = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+    function normalizeKey(displayName) {
+      const up = displayName.toUpperCase().trim();
+      return KEY_ALIAS[up] || up;
+    }
+
+    function getPrice(testName) {
+      const key = normalizeKey(testName);
+      let p = PRICES[key];
+      if (!p) {
+        // Strip description suffix after ' — ' or ' - '
+        const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
+        if (stripped !== key) p = PRICES[stripped];
+      }
+      if (!p) return null;
+      if (priceMode === 's') {
+        return (p.s !== null && p.s !== undefined && typeof p.s === 'number') ? p.s : p.r;
+      }
+      return p.r;
+    }
+
+    let priceMode    = 'r';
+    let pricesLoaded = false;
+
+        /* ════════════════════════════════════════════════
        PRICE KEY ALIASES
     ════════════════════════════════════════════════ */
     const KEY_ALIAS = {
@@ -5018,155 +5111,50 @@
     };
 
     /* ════════════════════════════════════════════════
-       BUILT-IN PRICES
+       CATEGORIES — built dynamically from sheet
+       CATEGORIES is initially empty; filled by _buildCategoriesFromSheet()
+       after fetchPrices() returns.
     ════════════════════════════════════════════════ */
-    const BUILTIN_PRICES = {
-      'CHEST PA': { r: 280, s: null },
-      'APICO LORDOTIC VIEW / SPOT FILM': { r: 300, s: null },
-      'CHEST PA & APICO LORDOTIC VIEW': { r: 500, s: null },
-      'CHEST PA & LATERAL VIEW (ADULT)': { r: 550, s: null },
-      'CHEST PA & LATERAL VIEW (PEDIA)': { r: 450, s: null },
-      'SKULL AP/LATERAL VIEW': { r: 500, s: null },
-      'SKULL SERIES': { r: 650, s: null },
-      "WATER'S VIEW/TOWNE'S VIEW/CALDWELL": { r: 320, s: null },
-      'PARANASAL SINUSES (PNS)': { r: 650, s: null },
-      'MASTOID SERIES': { r: 560, s: null },
-      'TEMPOROMANDIBULAR JOINT (TMJ)': { r: 850, s: null },
-      'CERVICAL AP/LATERAL VIEW': { r: 500, s: null },
-      'CERVICAL AP/LATERAL/OBLIQUE VIEW': { r: 700, s: null },
-      'THORACIC CAGE (AP)/CHEST BUCKY': { r: 480, s: null },
-      'THORACIC AP/LATERAL VIEW': { r: 680, s: null },
-      'PLAIN KUB/PLAIN ABDOMEN (AP)': { r: 480, s: null },
-      'PLAIN ABDOMEN UPRIGHT & SUPINE': { r: 800, s: null },
-      'PLAIN ABDOMEN AP/LATERAL (PEDIA)': { r: 500, s: null },
-      'THORACOLUMBAR AP/LATERAL VIEW': { r: 1200, s: null },
-      'LUMBO-SACRAL AP/LATERAL VIEW': { r: 680, s: null },
-      'LUMBO-SACRAL AP/LATERAL/OBLIQUE': { r: 1000, s: null },
-      'COCCYX AP/LATERAL VIEW': { r: 500, s: null },
-      'COCCYX LATERAL VIEW': { r: 350, s: null },
-      'PELVIC AP/HIP JOINT': { r: 500, s: null },
-      'SHOULDER AP': { r: 450, s: null },
-      'SHOULDER AP (INTERNAL/EXTERNAL)': { r: 700, s: null },
-      'CLAVICLE AP': { r: 450, s: null },
-      'FINGER AP/LATERAL VIEW': { r: 380, s: null },
-      'HAND AP/LATERAL VIEW': { r: 450, s: null },
-      'WRIST AP/LATERAL VIEW': { r: 450, s: null },
-      'FOREARM AP/LATERAL VIEW': { r: 480, s: null },
-      'ARM AP/LATERAL VIEW': { r: 520, s: null },
-      'ELBOW AP/LATERAL VIEW': { r: 450, s: null },
-      'FOOT AP/OBLIQUE': { r: 480, s: null },
-      'ANKLE AP/LATERAL VIEW': { r: 450, s: null },
-      'LEG AP/LATERAL VIEW': { r: 550, s: null },
-      'KNEE AP/LATERAL VIEW': { r: 480, s: null },
-      'FEMUR/THIGH (AP/LATERAL VIEW)': { r: 550, s: null },
-      'ECG': { r: 380, s: null },
-      'TVS KIT': { r: 80, s: null },
-    };
+    let CATEGORIES = [];
 
-    /* ════════════════════════════════════════════════
-       CATEGORIES
-    ════════════════════════════════════════════════ */
-    const CATEGORIES = [
-      { id: 'hema',    name: 'Hematology',             tests: [], type: 'lab' },
-      { id: 'bchem',   name: 'Blood Chemistry',         tests: [], type: 'lab' },
-      { id: 'cpkg',    name: 'Chemistry Packages',      tests: [], type: 'lab' },
-      { id: 'cm',      name: 'Clinical Microscopy',     tests: [], type: 'lab' },
-      { id: 'enz',     name: 'Enzymes',                 tests: [], type: 'lab' },
-      { id: 'urine24', name: '24Hr Urine Test',         tests: [], type: 'lab' },
-      { id: 'elec',    name: 'Electrolytes',            tests: [], type: 'lab' },
-      { id: 'sero',    name: 'Serology',                tests: [], type: 'lab' },
-      { id: 'hep',     name: 'Hepatitis',               tests: [], type: 'lab' },
-      { id: 'horm',    name: 'Hormones',                tests: [], type: 'lab' },
-      { id: 'thy',     name: 'Thyroid Function Tests',  tests: [], type: 'lab' },
-      { id: 'tm',      name: 'Tumor Markers',           tests: [], type: 'lab' },
-      { id: 'bact',    name: 'Bacteriology',            tests: [], type: 'lab' },
-      { id: 'hist',    name: 'Histopathology',          tests: [], type: 'lab' },
-      { id: 'us',      name: 'UTZ Tests',               tests: [], type: 'utz' },
-      { id: 'pkg',     name: 'Packages 2026',           tests: [], type: 'lab' },
-      { id: 'xray',    name: 'X-Ray',                   tests: [], type: 'xray' },
-      { id: 'drug',    name: 'Drug Test',               tests: [], type: 'drug' },
-      { id: 'others',  name: 'Others',                  tests: [], type: 'lab' }
-    ];
+    /* Infer category type from its name */
+    function _inferCatType(name) {
+      const n = name.toLowerCase();
+      if (/ultrasound|utz|sonograph/.test(n))                    return 'utz';
+      if (/x.ray|xray|radiograph/.test(n))                       return 'xray';
+      if (/drug.test|drug testing|drug/.test(n))                  return 'drug';
+      if (/checkup|check.up|check up/.test(n))                    return 'checkup';
+      if (/cardiology|cardiac|ecg|electrocard/.test(n))           return 'cardiology';
+      if (/kit[s]?\b/.test(n))                                    return 'kits';
+      return 'lab';
+    }
 
-    /* Fallback test lists — used when sheet has no category data */
-    const FALLBACK_TESTS = {
-      'hema': ['CBC with Platelet Count', 'Platelet Count', 'HGB and HCT', 'Reticulocyte Count', 'ESR', 'Clotting Time (CT)/Bleeding Time', 'ABO Typing', 'RH Typing', 'ABO Typing W/ RH', 'Peripheral Blood Smear', 'Malarial Smear', 'Protime', 'APTT', 'Coombs Test'],
-      'bchem': ['FBS', 'RBS', '2 Hrs. PPBS', 'OGCT (50/75 gms.)', 'OGTT (50/75 gms.)', 'OGTT (100 gms.)', 'BUN', 'Creatinine', 'Blood Uric Acid', 'Total Cholesterol', 'Triglycerides', 'Lipid Profile', 'HDL (Direct)/LDL (each)', 'Bilirubin (TB, DB, IB)', 'Total Protein', 'Albumin', 'TPAG', 'HBA1C'],
-      'cpkg': ['Electrolytes (Na, K, Cl each)', 'Chem 5', 'Chem 6', 'Chem 8', 'Chem 10', 'Chem 12', 'Lipid Profile', 'Liver Profile', 'Kidney Profile'],
-      'cm': ['Urinalysis', 'Fecalysis', 'Occult Blood', 'Pregnancy Test (Urine)', 'Pregnancy Test (Serum)', 'Ketone/Acetone', 'Urobilinogen', 'Bile/Nitrates/Bilirubin', 'Sugar', 'Micro-Albumin Test', 'Concentration Technique', 'Body Fluids Cell & Diff. Count', 'Body Fluids Protein', 'Body Fluids Sugar'],
-      'enz': ['ALT/SGPT', 'AST/SGOT', 'GGTP', 'Alkaline Phosphatase', 'Acid Phosphatase', 'Amylase', 'Lipase', 'Total CPK', 'CPK-MB', 'CPK-MM', 'Troponin I (Qualitative)', 'Troponin I (Quantitative)', 'Troponin T', 'LDH'],
-      'urine24': ['Creatinine Total', 'Creatinine Clearance', 'Protein', 'Sodium', 'Potassium', 'Chloride', 'Calcium', 'Magnesium', 'Uric Acid', 'Amylase', 'Glucose'],
-      'elec': ['Sodium', 'Potassium', 'Chloride', 'Calcium Total', 'Magnesium', 'Ionized Calcium', 'Inorganic Phosphorus', 'Total Iron', 'TIBC Total Iron'],
-      'sero': ['RPR/VDRL', 'TPHA Screening', 'TPHA W/ Titer', 'Widal Test', 'Typhidot', 'ASO Titer', 'CRP', 'RA/RF Latex', 'C3/C4 (each)', 'ANA Screening', 'ANA W/ Titer', 'Dengue IgM/IgG (each) with NS1', 'Dengue IgM/IgG (each)', 'Dengue Antigen (NS1)', 'Leptospiral Test', 'H. Pylori', 'Rubella IgM/IgG (each)', 'Toxoplasma IgG', 'Toxoplasma IgM', 'HIV Screening'],
-      'hep': ['(A) HBsAg Screening', '(B) HBsAg W/ Titer', '(C) Anti-HBS W/ Titer', '(D) HBeAg', '(E) Anti-HBE', '(F) Anti-HBC IgM', '(G) Anti-HBC IgG', '(H) Anti-HAV IgM', '(I) Anti-HAV IgG', '(J) Anti-HCV', 'Hepatitis A Profile', 'Hepatitis B Profile', 'Hepatitis A & B & C Profile'],
-      'horm': ['FSH', 'LH', 'Prolactin', 'Progesterone', 'Testosterone', 'Cortisol', 'Ferritin', 'Estrogen/Estradiol'],
-      'thy': ['TSH', 'T3', 'T4', 'FT3', 'FT4', 'TSH IRMA', 'Parathyroid Hormone', 'FT3 RIA', 'FT4 RIA'],
-      'tm': ['AFP', 'CEA', 'PSA', 'B-HCG', 'CA-125 (Ovary)', 'CA-153 (Breast)', 'CA-19-9 (Pancreas)'],
-      'bact': ['Gramstain', 'AFB', 'KOH', 'Culture & Sensitivity – Urine', 'Culture & Sensitivity – Blood', 'Culture & Sensitivity with ARD-Pedia', 'Culture & Sensitivity with ARD-Adult'],
-      'hist': ["Pap's Smear", 'Cell Block', 'Cell Cytology', 'FNAB Small', 'FNAB Medium', 'FNAB Large', 'FNAB XL', 'FNAB XXLarge', 'Estrogen-Progesterone Receptor Assay'],
-      'us': ['Whole Abdomen', 'Upper Abdomen', 'Lower Abdomen', 'KUB', 'KUB with Prostate', 'UB Prostate with Post Void', 'Transvaginal', 'Breast (each)', 'HBT', 'HBT Pancreas', 'Pelvic', 'BPS', 'Single Organ', 'Prostate Only', 'Thyroid', 'KUB Prostate with Post Void'],
-      'pkg': ['OBPack 1', 'OBPack 2', 'OBPack 3', 'MEDICAL \u2014 BASIC 5', 'Medical Basic 5 + Drug Test', 'Medical CXR UA FA', 'Drug Test'],
-      'xray': ['Chest PA', 'Apico Lordotic View / Spot Film', 'Chest PA & Apico Lordotic View', 'Chest PA & Lateral View (Adult)', 'Chest PA & Lateral View (Pedia)', 'Skull AP/Lateral View', 'Skull Series', "Water's View/Towne's View/Caldwell", 'Paranasal Sinuses (PNS)', 'Mastoid Series', 'Temporomandibular Joint (TMJ)', 'Cervical AP/Lateral View', 'Cervical AP/Lateral/Oblique View', 'Thoracic Cage (AP)/Chest Bucky', 'Thoracic AP/Lateral View', 'Plain KUB/Plain Abdomen (AP)', 'Plain Abdomen Upright & Supine', 'Plain Abdomen AP/Lateral (Pedia)', 'Thoracolumbar AP/Lateral View', 'Lumbo-Sacral AP/Lateral View', 'Lumbo-Sacral AP/Lateral/Oblique', 'Coccyx AP/Lateral View', 'Coccyx Lateral View', 'Pelvic AP/Hip Joint', 'Shoulder AP', 'Shoulder AP (Internal/External)', 'Clavicle AP', 'Finger AP/Lateral View', 'Hand AP/Lateral View', 'Wrist AP/Lateral View', 'Forearm AP/Lateral View', 'Arm AP/Lateral View', 'Elbow AP/Lateral View', 'Foot AP/Oblique', 'Ankle AP/Lateral View', 'Leg AP/Lateral View', 'Knee AP/Lateral View', 'Femur/Thigh (AP/Lateral View)'],
-      'others': ['ECG', 'TVS Kit'],
-      'drug':   ['Drug Test (DOLE)', 'Drug Test (NBI)', 'Drug Test (Standard)', 'Drug Test (5 Panel)', 'Drug Test (10 Panel)']
-    };
+    /* Build a slug-style id from category name */
+    function _catNameToId(name) {
+      return name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '')
+        .substring(0, 20);
+    }
 
     /* ════════════════════════════════════════════════
        STATE
     ════════════════════════════════════════════════ */
     const sel = {};
-    CATEGORIES.forEach(c => sel[c.id] = new Set());
 
     let PRICES = {};
-    let DISCOUNTS = [];
-    let priceMode = 'r';
-    let pricesLoaded = false;
-
-    /* ════════════════════════════════════════════════
-       HELPERS
-    ════════════════════════════════════════════════ */
-    const slug = s => s.replace(/[^a-zA-Z0-9]/g, '_');
-    const escQ = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-
-    function normalizeKey(displayName) {
-      const up = displayName.toUpperCase().trim();
-      return KEY_ALIAS[up] || up;
-    }
-
-    function getPrice(testName) {
-      // Try full name first, then strip everything after ' — ' or ' - ' (sheet descriptions)
-      const key = normalizeKey(testName);
-      let p = PRICES[key];
-
-      if (!p) {
-        // Strip description suffix: "Chem 5 — FBS, BUN..." → "CHEM 5"
-        const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
-        if (stripped !== key) p = PRICES[stripped];
-      }
-
-      if (!p) return null;
-
-      if (priceMode === 's') {
-        if (p.s !== null && p.s !== undefined && typeof p.s === 'number') return p.s;
-        return p.r;
-      }
-      return p.r;
-    }
 
     function fmtPeso(n) {
       if (n === null || n === undefined || isNaN(n)) return '—';
-      return '₱\u202f' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return '₱ ' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    /* ════════════════════════════════════════════════
-       AUTH
-    ════════════════════════════════════════════════ */
     function doLogin() {
       const u = document.getElementById('inp-user').value.trim();
       const p = document.getElementById('inp-pass').value.trim();
-      const errEl = document.getElementById('login-error');
+      const errEl  = document.getElementById('login-error');
       const errTxt = document.getElementById('error-text');
-      const btn = document.getElementById('login-btn');
+      const btn    = document.getElementById('login-btn');
       const btnTxt = document.getElementById('login-btn-text');
 
       if (!u || !p) {
@@ -5201,17 +5189,15 @@
       document.getElementById('logout-btn').classList.add('visible');
 
       if (demoMode || APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-        PRICES = Object.assign({}, BUILTIN_PRICES);
-        _populateCategoriesFromFallback();
+        PRICES = {};
+        CATEGORIES = [];
         showRegPage('demo');
         return;
       }
 
-      // Show splash screen
-      const splash = document.getElementById('splash-screen');
+      const splash   = document.getElementById('splash-screen');
       splash.classList.add('show');
 
-      // Animate splash label cycling
       const labels = [
         'Syncing catalog data…',
         'Fetching procedure rates…',
@@ -5220,7 +5206,7 @@
         'Almost ready…',
       ];
       let li = 0;
-      const labelEl = document.getElementById('splash-label');
+      const labelEl    = document.getElementById('splash-label');
       const labelTimer = setInterval(() => {
         li = (li + 1) % labels.length;
         labelEl.textContent = labels[li];
@@ -5230,7 +5216,6 @@
         .then(() => {
           clearInterval(labelTimer);
           labelEl.textContent = 'Catalog ready ✓';
-          // Small delay so user sees the "ready" message
           setTimeout(() => {
             splash.classList.add('fade-out');
             setTimeout(() => {
@@ -5246,8 +5231,8 @@
           setTimeout(() => {
             splash.classList.remove('show');
             splash.classList.remove('fade-out');
-            PRICES = Object.assign({}, BUILTIN_PRICES);
-            _populateCategoriesFromFallback();
+            PRICES = {};
+            CATEGORIES = [];
             showRegPage('error');
           }, 500);
         });
@@ -5271,7 +5256,6 @@
       document.getElementById('login-error').classList.remove('show');
       document.getElementById('inp-user').value = '';
       document.getElementById('inp-pass').value = '';
-      // Reset step to 1
       goToStep1();
       clearForm();
     }
@@ -5290,93 +5274,56 @@
     document.getElementById('inp-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inp-pass').focus(); });
     document.getElementById('inp-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-    /* ════════════════════════════════════════════════
-       FETCH PRICES
+        /* ════════════════════════════════════════════════
+       FETCH PRICES — 100% dynamic from TESTS & PRICES sheet
+       No hardcoded prices, categories, or test names.
     ════════════════════════════════════════════════ */
     function fetchPrices() {
       return fetch(`${APPS_SCRIPT_URL}?action=getprices`)
         .then(r => r.json())
         .then(d => {
           if (d.success && d.prices) {
-            PRICES = Object.assign({}, BUILTIN_PRICES, d.prices);
+            PRICES = d.prices;
             pricesLoaded = true;
-
-            // Populate test lists from sheet category data
             if (d.categories && Object.keys(d.categories).length > 0) {
-              _populateCategoriesFromSheet(d.categories);
-              console.log('[LIS] Tests loaded from sheet:', Object.keys(d.categories).length, 'categories');
+              _buildCategoriesFromSheet(d.categories);
+              console.log('[LIS] Loaded', CATEGORIES.length, 'categories,',
+                Object.keys(PRICES).length, 'tests from sheet.');
             } else {
-              _populateCategoriesFromFallback();
-              console.log('[LIS] Using built-in test lists (sheet has no category data)');
+              console.warn('[LIS] Sheet returned no categories.');
+              CATEGORIES = [];
             }
           } else {
-            console.warn('[LIS] Price fetch issue:', d.message || 'no prices');
-            PRICES = Object.assign({}, BUILTIN_PRICES);
-            _populateCategoriesFromFallback();
+            console.warn('[LIS] Price fetch failed:', d.message);
+            PRICES = {};
+            CATEGORIES = [];
           }
         })
         .catch(err => {
-          console.warn('[LIS] Price fetch error:', err);
-          PRICES = Object.assign({}, BUILTIN_PRICES);
-          _populateCategoriesFromFallback();
+          console.warn('[LIS] fetchPrices error:', err);
+          PRICES = {};
+          CATEGORIES = [];
         });
     }
 
-    /* Maps sheet category names → our category ids */
-    const CAT_NAME_TO_ID = {
-      'hematology':             'hema',
-      'blood chemistry':        'bchem',
-      'chemistry packages':     'cpkg',
-      'clinical microscopy':    'cm',
-      'enzymes':                'enz',
-      '24hr urine test':        'urine24',
-      '24 hr urine test':       'urine24',
-      'electrolytes':           'elec',
-      'serology':               'sero',
-      'hepatitis':              'hep',
-      'hormones':               'horm',
-      'thyroid function tests': 'thy',
-      'thyroid':                'thy',
-      'tumor markers':          'tm',
-      'bacteriology':           'bact',
-      'histopathology':         'hist',
-      'ultrasound':             'us',
-      'packages':               'pkg',
-      'packages 2026':          'pkg',
-      'x-ray':                  'xray',
-      'xray':                   'xray',
-      'others':                 'others',
-      'other':                  'others',
-    };
-
-    function _populateCategoriesFromSheet(sheetCats) {
-      /* sheetCats = { 'Hematology': ['CBC with Platelet Count', ...], ... } */
-      CATEGORIES.forEach(c => { c.tests = []; if (!sel[c.id]) sel[c.id] = new Set(); });
+    /* Build CATEGORIES array dynamically from sheet data.
+       sheetCats = { 'Hematology': ['CBC WITH PLATELET COUNT', ...], ... }
+       Order is preserved as returned by the GS (sheet row order).
+    */
+    function _buildCategoriesFromSheet(sheetCats) {
+      // Reset
+      CATEGORIES.length = 0;
+      Object.keys(sel).forEach(k => delete sel[k]);
 
       Object.entries(sheetCats).forEach(([catName, tests]) => {
-        const key   = catName.trim().toLowerCase();
-        const catId = CAT_NAME_TO_ID[key];
-        if (catId) {
-          const cat = CATEGORIES.find(c => c.id === catId);
-          if (cat) cat.tests = tests.filter(t => t && t.trim());
-        } else {
-          console.log('[LIS] Unrecognized sheet category:', catName);
-        }
+        const id   = _catNameToId(catName);
+        const type = _inferCatType(catName);
+        const cat  = { id, name: catName, tests: tests.filter(t => t && t.trim()), type };
+        CATEGORIES.push(cat);
+        sel[id] = new Set();
       });
 
-      // Any category still empty falls back to built-in list
-      CATEGORIES.forEach(c => {
-        if (c.tests.length === 0 && FALLBACK_TESTS[c.id]) {
-          c.tests = [...FALLBACK_TESTS[c.id]];
-        }
-      });
-    }
-
-    function _populateCategoriesFromFallback() {
-      CATEGORIES.forEach(c => {
-        c.tests = FALLBACK_TESTS[c.id] ? [...FALLBACK_TESTS[c.id]] : [];
-        if (!sel[c.id]) sel[c.id] = new Set();
-      });
+      console.log('[LIS] Categories built:', CATEGORIES.map(c => c.name + '(' + c.type + ')').join(', '));
     }
 
     function fetchDiscounts() {
@@ -5436,7 +5383,7 @@
         showPriceReadyNotif(updated);
       } else if (status === 'error') {
         // Built-in prices are loaded as fallback — show a soft warning only
-        showToast('Using built-in price list — live rates unavailable', 'err');
+        showToast('Could not load price list — check your connection and reload.', 'err');
       } else {
         // demo mode — populate fallback discounts
         fetchDiscounts();
@@ -5467,6 +5414,8 @@
     function buildCategories() {
       const wrap = document.getElementById('categories');
       wrap.innerHTML = '';
+      // Ensure sel is in sync with current CATEGORIES
+      CATEGORIES.forEach(c => { if (!sel[c.id]) sel[c.id] = new Set(); });
       CATEGORIES.forEach(cat => {
         const cols = cat.tests.length <= 9 ? 3 : 4;
         const block = document.createElement('div');
@@ -5562,21 +5511,29 @@
     ════════════════════════════════════════════════ */
     function recalcTotal() {
       let labSubtotal = 0, xraySubtotal = 0, drugSubtotal = 0, utzSubtotal = 0;
+      let checkupSubtotal = 0, cadSubtotal = 0, kitsSubtotal = 0;
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
         if (p !== null) {
-          if      (cat.type === 'utz')  utzSubtotal  += p;
-          else if (cat.type === 'xray') xraySubtotal += p;
-          else if (cat.type === 'drug') drugSubtotal += p;
-          else                          labSubtotal  += p;
+          if      (cat.type === 'utz')        utzSubtotal     += p;
+          else if (cat.type === 'xray')       xraySubtotal    += p;
+          else if (cat.type === 'drug')       drugSubtotal    += p;
+          else if (cat.type === 'checkup')    checkupSubtotal += p;
+          else if (cat.type === 'cardiology') cadSubtotal     += p;
+          else if (cat.type === 'kits')       kitsSubtotal    += p;
+          else                                labSubtotal     += p;
         }
       }));
-      const subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal;
-      const hasXray  = xraySubtotal > 0;
-      const hasDrug  = drugSubtotal > 0;
-      const hasUtz   = utzSubtotal  > 0;
-      const hasExtra = hasXray || hasDrug || hasUtz;
-      const isSenior = priceMode === 's';
+      const subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal
+                   + checkupSubtotal + cadSubtotal + kitsSubtotal;
+      const hasXray    = xraySubtotal    > 0;
+      const hasDrug    = drugSubtotal    > 0;
+      const hasUtz     = utzSubtotal     > 0;
+      const hasCheckup = checkupSubtotal > 0;
+      const hasCad     = cadSubtotal     > 0;
+      const hasKits    = kitsSubtotal    > 0;
+      const hasExtra   = hasXray || hasDrug || hasUtz || hasCheckup || hasCad || hasKits;
+      const isSenior   = priceMode === 's';
 
       const discOn = document.getElementById('discount-toggle').checked;
       const discVal = document.getElementById('discount-select').value;
@@ -5591,19 +5548,28 @@
 
       const grand = subtotal - discAmt;
 
-      // Show/hide subtotal rows
-      document.getElementById('lab-subtotal-line').style.display  = hasExtra ? 'flex' : 'none';
-      document.getElementById('xray-subtotal-line').style.display = hasXray  ? 'flex' : 'none';
-      document.getElementById('drug-subtotal-line').style.display = hasDrug  ? 'flex' : 'none';
-      document.getElementById('us-subtotal-line').style.display   = hasUtz   ? 'flex' : 'none';
-      document.getElementById('simple-subtotal-line').style.display   = hasExtra ? 'none' : 'flex';
-      document.getElementById('combined-subtotal-line').style.display = 'none';
+      // Show combined SUBTOTAL row whenever there are multiple dept types OR a discount is applied
+      const showCombined = hasExtra || (discOn && discVal && discAmt > 0);
 
-      document.getElementById('lab-subtotal-val').textContent   = fmtPeso(labSubtotal);
-      document.getElementById('xray-subtotal-val').textContent  = fmtPeso(xraySubtotal);
-      document.getElementById('drug-subtotal-val').textContent  = fmtPeso(drugSubtotal);
-      document.getElementById('us-subtotal-val').textContent    = fmtPeso(utzSubtotal);
-      document.getElementById('subtotal-val-simple').textContent = fmtPeso(subtotal);
+      // Show/hide per-category subtotal rows (only when multiple depts have items)
+      document.getElementById('lab-subtotal-line').style.display      = (hasExtra && labSubtotal > 0) ? 'flex' : 'none';
+      document.getElementById('checkup-subtotal-line').style.display  = hasCheckup ? 'flex' : 'none';
+      document.getElementById('cad-subtotal-line').style.display      = hasCad     ? 'flex' : 'none';
+      document.getElementById('kits-subtotal-line').style.display     = hasKits    ? 'flex' : 'none';
+      document.getElementById('xray-subtotal-line').style.display     = hasXray    ? 'flex' : 'none';
+      document.getElementById('drug-subtotal-line').style.display     = hasDrug    ? 'flex' : 'none';
+      document.getElementById('us-subtotal-line').style.display       = hasUtz     ? 'flex' : 'none';
+      document.getElementById('combined-subtotal-line').style.display = showCombined ? 'flex' : 'none';
+      document.getElementById('simple-subtotal-line').style.display   = showCombined ? 'none' : 'flex';
+
+      document.getElementById('lab-subtotal-val').textContent         = fmtPeso(labSubtotal);
+      document.getElementById('checkup-subtotal-val').textContent     = fmtPeso(checkupSubtotal);
+      document.getElementById('cad-subtotal-val').textContent         = fmtPeso(cadSubtotal);
+      document.getElementById('kits-subtotal-val').textContent        = fmtPeso(kitsSubtotal);
+      document.getElementById('xray-subtotal-val').textContent        = fmtPeso(xraySubtotal);
+      document.getElementById('drug-subtotal-val').textContent        = fmtPeso(drugSubtotal);
+      document.getElementById('us-subtotal-val').textContent          = fmtPeso(utzSubtotal);
+      document.getElementById('subtotal-val-simple').textContent      = fmtPeso(subtotal);
       const stv = document.getElementById('subtotal-val');
       if (stv) stv.textContent = fmtPeso(subtotal);
 
@@ -5612,12 +5578,38 @@
       document.getElementById('grand-total-val').textContent = fmtPeso(grand);
       document.getElementById('discount-line').style.display = (discOn && discVal && discAmt > 0) ? 'flex' : 'none';
 
-      const seniorLine = document.getElementById('senior-pricing-line');
-      if (seniorLine) seniorLine.style.display = isSenior ? 'flex' : 'none';
-      const mobSeniorLine = document.getElementById('mob-senior-pricing-line');
-      if (mobSeniorLine) mobSeniorLine.style.display = isSenior ? 'flex' : 'none';
+      // senior lines handled in recalcTotal._last block above
 
-      recalcTotal._last = { labSubtotal, xraySubtotal, drugSubtotal, utzSubtotal, subtotal, hasExtra, hasXray, hasDrug, hasUtz, isSenior };
+      // Compute senior savings: sum of (regularPrice - seniorPrice) per item
+      let seniorSavings = 0;
+      if (isSenior) {
+        CATEGORIES.forEach(cat => {
+          (sel[cat.id] || []).forEach(t => {
+            const key = normalizeKey(t);
+            const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
+            const priceObj = PRICES[key] || PRICES[stripped];
+            if (priceObj && priceObj.s != null && priceObj.r != null && priceObj.s !== priceObj.r) {
+              seniorSavings += (priceObj.r - priceObj.s);
+            }
+          });
+        });
+      }
+
+      // Update senior line in summary
+      const seniorLine2 = document.getElementById('senior-pricing-line');
+      if (seniorLine2) {
+        seniorLine2.style.display = isSenior ? 'flex' : 'none';
+        const seniorVal = seniorLine2.querySelector('.senior-savings-val');
+        if (seniorVal) seniorVal.textContent = seniorSavings > 0 ? '− ' + fmtPeso(seniorSavings) : 'Applied';
+      }
+      const mobSeniorLine2 = document.getElementById('mob-senior-pricing-line');
+      if (mobSeniorLine2) {
+        mobSeniorLine2.style.display = isSenior ? 'flex' : 'none';
+        const mobSeniorVal = mobSeniorLine2.querySelector('.senior-savings-val');
+        if (mobSeniorVal) mobSeniorVal.textContent = seniorSavings > 0 ? '− ' + fmtPeso(seniorSavings) : 'Applied';
+      }
+
+      recalcTotal._last = { labSubtotal, checkupSubtotal, cadSubtotal, kitsSubtotal, xraySubtotal, drugSubtotal, utzSubtotal, subtotal, hasExtra, hasXray, hasDrug, hasUtz, hasCheckup, hasCad, hasKits, showCombined, isSenior, seniorSavings };
     }
 
     function onDiscountToggle() {
@@ -5644,30 +5636,41 @@
         showToast('Please complete all required patient fields.', 'err'); return;
       }
 
-      const labTests  = [];
-      const xrayTests = [];
-      const drugTests = [];
-      const utzTests  = [];
+      const labTests      = [];
+      const xrayTests     = [];
+      const drugTests     = [];
+      const utzTests      = [];
+      const checkupTests  = [];
+      const cardiologyTests = [];
+      const kitsTests     = [];
       CATEGORIES.forEach(cat => {
-        if      (cat.type === 'utz')  sel[cat.id].forEach(t => utzTests.push(t));
-        else if (cat.type === 'xray') sel[cat.id].forEach(t => xrayTests.push(t));
-        else if (cat.type === 'drug') sel[cat.id].forEach(t => drugTests.push(t));
-        else                          sel[cat.id].forEach(t => labTests.push(t));
+        if      (cat.type === 'utz')       sel[cat.id].forEach(t => utzTests.push(t));
+        else if (cat.type === 'xray')      sel[cat.id].forEach(t => xrayTests.push(t));
+        else if (cat.type === 'drug')      sel[cat.id].forEach(t => drugTests.push(t));
+        else if (cat.type === 'checkup')   sel[cat.id].forEach(t => checkupTests.push(t));
+        else if (cat.type === 'cardiology') sel[cat.id].forEach(t => cardiologyTests.push(t));
+        else if (cat.type === 'kits')      sel[cat.id].forEach(t => kitsTests.push(t));
+        else                               sel[cat.id].forEach(t => labTests.push(t));
       });
       const allTests = [...labTests, ...xrayTests, ...drugTests, ...utzTests];
       if (!allTests.length) { showToast('Please select at least one procedure.', 'err'); return; }
 
       let labSubtotal = 0, xraySubtotal = 0, drugSubtotal = 0, utzSubtotal = 0;
+      let checkupSubtotal = 0, cadSubtotal = 0, kitsSubtotal = 0;
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
         if (p !== null) {
-          if      (cat.type === 'utz')  utzSubtotal  += p;
-          else if (cat.type === 'xray') xraySubtotal += p;
-          else if (cat.type === 'drug') drugSubtotal += p;
-          else                          labSubtotal  += p;
+          if      (cat.type === 'utz')       utzSubtotal      += p;
+          else if (cat.type === 'xray')      xraySubtotal     += p;
+          else if (cat.type === 'drug')      drugSubtotal     += p;
+          else if (cat.type === 'checkup')   checkupSubtotal  += p;
+          else if (cat.type === 'cardiology') cadSubtotal     += p;
+          else if (cat.type === 'kits')      kitsSubtotal     += p;
+          else                               labSubtotal      += p;
         }
       }));
-      let subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal;
+      let subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal
+                   + checkupSubtotal + cadSubtotal + kitsSubtotal;
 
       const discOn = document.getElementById('discount-toggle').checked;
       const discVal = document.getElementById('discount-select').value;
@@ -5711,17 +5714,23 @@
         contact,
         referred,
         company,
-        procedures:    labTests.join(', '),   // K  LAB PROCEDURES
-        xrayTests:     xrayTests.join(', '),  // M  XRAY TESTS
-        drugTests:     drugTests.join(', '),  // O  DRUG TEST
-        utzTests:      utzTests.join(', '),   // Q  UTZ TESTS
-        discountLabel,                        // S  DISCOUNT
-        discountAmt:   discAmt,               // T  DIS. TOTAL
-        amount:        grand,                 // U  AMOUNT
-        labSubtotal,                          // L  LAB SUBTOTAL
-        xraySubtotal,                         // N  XRAY SUBTOTAL
-        drugSubtotal,                         // P  DRUG SUBTOTAL
-        utzSubtotal,                          // R  UTZ SUBTOTAL
+        procedures:      labTests.join(', '),        // K  LAB PROCEDURES
+        checkupTests:    checkupTests.join(', '),    // M  CHECKUP
+        cardiologyTests: cardiologyTests.join(', '), // O  CARDIOLOGY
+        kitsTests:       kitsTests.join(', '),       // Q  KITS
+        xrayTests:       xrayTests.join(', '),       // S  XRAY TESTS
+        drugTests:       drugTests.join(', '),       // U  DRUG TEST
+        utzTests:        utzTests.join(', '),        // W  UTZ TESTS
+        discountLabel,
+        discountAmt:     discAmt,
+        amount:          grand,
+        labSubtotal,
+        checkupSubtotal,
+        cadSubtotal,
+        kitsSubtotal,
+        xraySubtotal,
+        drugSubtotal,
+        utzSubtotal,
       };
 
       // Build itemsDetail for POS display
@@ -5729,7 +5738,14 @@
       CATEGORIES.forEach(cat => {
         sel[cat.id].forEach(t => {
           const p = getPrice(t);
-          if (p !== null) itemsDetail.push({ name: t, cat: cat.name, catType: cat.type, price: p });
+          if (p !== null) {
+            const key = normalizeKey(t);
+            const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
+            const priceObj = PRICES[key] || PRICES[stripped];
+            const regularPrice = priceObj ? priceObj.r : p;
+            const isSeniorPrice = priceMode === 's' && priceObj && priceObj.s !== null && priceObj.s !== undefined && priceObj.s !== priceObj.r;
+            itemsDetail.push({ name: t, cat: cat.name, catType: cat.type, price: p, regularPrice, isSeniorPrice });
+          }
         });
       });
 
@@ -5739,7 +5755,10 @@
         ageSex: `${age} / ${sex}`,
         opType: document.getElementById('f-optype').value || '',
         referred,
-        subtotal:      labSubtotal,
+        subtotal:        labSubtotal,
+        checkupSubtotal,
+        cadSubtotal,
+        kitsSubtotal,
         xraySubtotal,
         drugSubtotal,
         utzSubtotal,
@@ -6338,19 +6357,23 @@
     /* ════════════════════════════════════════════════
        ACCREDITED COMPANY
     ════════════════════════════════════════════════ */
+    // Abbreviation → exact test name as it appears in TESTS & PRICES sheet (Col B)
     const ACCT_TEST_MAP = {
-      'B5':       'MEDICAL \u2014 BASIC 5',   // exact name from TESTS & PRICES sheet
-      'DT':       'Drug Test',
-      'HBSAG':    '(A) HBsAg Screening',
-      'URINE PT': 'Pregnancy Test (Urine)',
-      'ECG':      null,
+      'B5':       'CHEM 5',
+      'DT':       'DRUG TEST',
+      'HBSAG':    '(A) HBsAg SCREENING',
+      'ECG':      'ECG (ELECTROCARDIAGRAM)',
+      'URINE PT': 'PREGNANCY TEST (URINE)',
     };
 
-    const ACCT_TEST_CAT = {
-      'MEDICAL \u2014 BASIC 5':  'pkg',
-      'Drug Test':               'pkg',
-      '(A) HBsAg Screening':     'hep',
-      'Pregnancy Test (Urine)':  'cm',
+    // Test name → which CATEGORIES type it belongs to (must match _inferCatType output)
+    // This is used to add it to the correct sel[catId] bucket
+    const ACCT_TEST_TYPE = {
+      'CHEM 5':                  'lab',
+      'DRUG TEST':               'drug',
+      '(A) HBsAg SCREENING':     'lab',
+      'ECG (ELECTROCARDIAGRAM)': 'cardiology',
+      'PREGNANCY TEST (URINE)':  'lab',
     };
 
     const ACCT_PACKAGES = {
@@ -6446,11 +6469,17 @@
       match.tests.forEach(abbr => {
         const name = ACCT_TEST_MAP[abbr];
         if (!name) return;
-        const catId = ACCT_TEST_CAT[name];
-        if (catId && sel[catId]) {
-          sel[catId].add(name);
-          updateBadge(catId);
-          document.getElementById('ti-' + catId + '-' + slug(name))?.classList.add('sel');
+        // Find the matching category by type from ACCT_TEST_TYPE
+        const testType = ACCT_TEST_TYPE[name];
+        const cat = CATEGORIES.find(c =>
+          testType ? c.type === testType : c.tests.some(t => t.toUpperCase() === name.toUpperCase())
+        );
+        if (cat && sel[cat.id]) {
+          // Add with exact casing from sheet tests list if available, else use map name
+          const sheetName = cat.tests.find(t => t.toUpperCase() === name.toUpperCase()) || name;
+          sel[cat.id].add(sheetName);
+          updateBadge(cat.id);
+          document.getElementById('ti-' + cat.id + '-' + slug(sheetName))?.classList.add('sel');
         }
       });
 
@@ -7195,24 +7224,36 @@
     }
 
     function syncMobTotals() {
-      const last     = recalcTotal._last || {};
-      const hasExtra = last.hasExtra || false;
-      const hasXray  = last.hasXray  || false;
-      const hasDrug  = last.hasDrug  || false;
-      const hasUtz   = last.hasUtz   || false;
-      const isSenior = last.isSenior || false;
+      const last        = recalcTotal._last || {};
+      const hasExtra    = last.hasExtra    || false;
+      const hasXray     = last.hasXray     || false;
+      const hasDrug     = last.hasDrug     || false;
+      const hasUtz      = last.hasUtz      || false;
+      const hasCheckup  = last.hasCheckup  || false;
+      const hasCad      = last.hasCad      || false;
+      const hasKits     = last.hasKits     || false;
+      const showCombined= last.showCombined|| false;
+      const isSenior    = last.isSenior    || false;
 
-      document.getElementById('mob-lab-subtotal-line').style.display   = hasExtra ? 'flex' : 'none';
-      document.getElementById('mob-xray-subtotal-line').style.display  = hasXray  ? 'flex' : 'none';
-      document.getElementById('mob-drug-subtotal-line').style.display  = hasDrug  ? 'flex' : 'none';
-      document.getElementById('mob-us-subtotal-line').style.display    = hasUtz   ? 'flex' : 'none';
-      document.getElementById('mob-simple-subtotal-line').style.display = hasExtra ? 'none' : 'flex';
+      document.getElementById('mob-lab-subtotal-line').style.display     = (hasExtra && (last.labSubtotal||0) > 0) ? 'flex' : 'none';
+      document.getElementById('mob-checkup-subtotal-line').style.display = hasCheckup ? 'flex' : 'none';
+      document.getElementById('mob-cad-subtotal-line').style.display     = hasCad     ? 'flex' : 'none';
+      document.getElementById('mob-kits-subtotal-line').style.display    = hasKits    ? 'flex' : 'none';
+      document.getElementById('mob-xray-subtotal-line').style.display    = hasXray    ? 'flex' : 'none';
+      document.getElementById('mob-drug-subtotal-line').style.display    = hasDrug    ? 'flex' : 'none';
+      document.getElementById('mob-us-subtotal-line').style.display      = hasUtz     ? 'flex' : 'none';
+      document.getElementById('mob-combined-subtotal-line').style.display= showCombined ? 'flex' : 'none';
+      document.getElementById('mob-simple-subtotal-line').style.display  = showCombined ? 'none' : 'flex';
 
-      document.getElementById('mob-lab-subtotal-val').textContent  = document.getElementById('lab-subtotal-val').textContent;
-      document.getElementById('mob-xray-subtotal-val').textContent = document.getElementById('xray-subtotal-val').textContent;
-      document.getElementById('mob-drug-subtotal-val').textContent = document.getElementById('drug-subtotal-val').textContent;
-      document.getElementById('mob-us-subtotal-val').textContent   = document.getElementById('us-subtotal-val').textContent;
-      document.getElementById('mob-subtotal-val').textContent      = document.getElementById('subtotal-val-simple').textContent;
+      document.getElementById('mob-lab-subtotal-val').textContent     = document.getElementById('lab-subtotal-val').textContent;
+      document.getElementById('mob-checkup-subtotal-val').textContent = document.getElementById('checkup-subtotal-val').textContent;
+      document.getElementById('mob-cad-subtotal-val').textContent     = document.getElementById('cad-subtotal-val').textContent;
+      document.getElementById('mob-kits-subtotal-val').textContent    = document.getElementById('kits-subtotal-val').textContent;
+      document.getElementById('mob-xray-subtotal-val').textContent    = document.getElementById('xray-subtotal-val').textContent;
+      document.getElementById('mob-drug-subtotal-val').textContent    = document.getElementById('drug-subtotal-val').textContent;
+      document.getElementById('mob-us-subtotal-val').textContent      = document.getElementById('us-subtotal-val').textContent;
+      document.getElementById('mob-combined-subtotal-val').textContent= document.getElementById('subtotal-val').textContent;
+      document.getElementById('mob-subtotal-val').textContent         = document.getElementById('subtotal-val-simple').textContent;
 
       document.getElementById('mob-grand-total-val').textContent = document.getElementById('grand-total-val').textContent;
       const discLine    = document.getElementById('discount-line');
@@ -7404,7 +7445,8 @@
       });
 
       // Totals
-      const totalSub = (data.subtotal||0) + (data.xraySubtotal||0) + (data.drugSubtotal||0) + (data.utzSubtotal||0);
+      const totalSub = (data.subtotal||0) + (data.xraySubtotal||0) + (data.drugSubtotal||0) + (data.utzSubtotal||0)
+                     + (data.checkupSubtotal||0) + (data.cadSubtotal||0) + (data.kitsSubtotal||0);
       document.getElementById('pos-subtotal').textContent = fmtPeso(totalSub);
       const discRow = document.getElementById('pos-disc-row');
       if (data.discAmt > 0) {
@@ -7415,6 +7457,13 @@
         discRow.style.display = 'none';
       }
       document.getElementById('pos-senior-row').style.display = data.isSenior ? 'flex' : 'none';
+      if (data.isSenior) {
+        const savings = (data.itemsDetail || []).reduce((sum, it) => {
+          return sum + (it.isSeniorPrice && it.regularPrice != null ? it.regularPrice - it.price : 0);
+        }, 0);
+        const savEl = document.getElementById('pos-senior-savings');
+        if (savEl) savEl.textContent = savings > 0 ? '− ' + fmtPeso(savings) : 'Applied';
+      }
       document.getElementById('pos-grand').textContent = fmtPeso(data.grand);
 
       // Populate Amount Due strip
@@ -7491,16 +7540,20 @@
 
       // Sum effective prices per type (base - item discount)
       let labEff = 0, xrayEff = 0, drugEff = 0, utzEff = 0;
+      let checkupEff = 0, cadEff = 0, kitsEff = 0;
       items.forEach((item, idx) => {
         const id        = _itemDiscounts[idx];
         const effective = id ? Math.max(0, item.price - id.discAmt) : item.price;
-        if      (item.catType === 'utz')  utzEff  += effective;
-        else if (item.catType === 'xray') xrayEff += effective;
-        else if (item.catType === 'drug') drugEff += effective;
-        else                              labEff  += effective;
+        if      (item.catType === 'utz')        utzEff      += effective;
+        else if (item.catType === 'xray')       xrayEff     += effective;
+        else if (item.catType === 'drug')       drugEff     += effective;
+        else if (item.catType === 'checkup')    checkupEff  += effective;
+        else if (item.catType === 'cardiology') cadEff      += effective;
+        else if (item.catType === 'kits')       kitsEff     += effective;
+        else                                    labEff      += effective;
       });
 
-      const rawSubtotal = labEff + xrayEff + drugEff + utzEff;
+      const rawSubtotal = labEff + xrayEff + drugEff + utzEff + checkupEff + cadEff + kitsEff;
 
       // Global discount applies to full effective subtotal
       const discRate      = _posData.discRate || 0;
@@ -7511,7 +7564,8 @@
         .reduce((s, d) => s + (d.discAmt || 0), 0);
 
       const totalDiscAmt = globalDiscAmt + itemDiscTotal;
-      const origSubtotal = (_posData.subtotal||0) + (_posData.xraySubtotal||0) + (_posData.drugSubtotal||0) + (_posData.utzSubtotal||0);
+      const origSubtotal = (_posData.subtotal||0) + (_posData.xraySubtotal||0) + (_posData.drugSubtotal||0) + (_posData.utzSubtotal||0)
+                         + (_posData.checkupSubtotal||0) + (_posData.cadSubtotal||0) + (_posData.kitsSubtotal||0);
       const grand        = Math.max(0, origSubtotal - totalDiscAmt);
 
       // Update _posData live values
@@ -7542,10 +7596,13 @@
         _posData.rawPayload.discountAmt   = totalDiscAmt;
         _posData.rawPayload.amount        = grand;
         // Update per-type subtotals in payload too
-        _posData.rawPayload.labSubtotal   = labEff;
-        _posData.rawPayload.xraySubtotal  = xrayEff;
-        _posData.rawPayload.drugSubtotal  = drugEff;
-        _posData.rawPayload.utzSubtotal   = utzEff;
+        _posData.rawPayload.labSubtotal      = labEff;
+        _posData.rawPayload.checkupSubtotal  = checkupEff;
+        _posData.rawPayload.cadSubtotal      = cadEff;
+        _posData.rawPayload.kitsSubtotal     = kitsEff;
+        _posData.rawPayload.xraySubtotal     = xrayEff;
+        _posData.rawPayload.drugSubtotal     = drugEff;
+        _posData.rawPayload.utzSubtotal      = utzEff;
       }
 
       // Update UI
@@ -7593,8 +7650,17 @@
       // Pre-select if this item already has a discount
       const existing = _itemDiscounts[idx];
       if (existing) {
-        const ei = DISCOUNTS.findIndex(d => d.name === existing.discName);
-        if (ei >= 0) _idcSelectedIdx = ei;
+        if (existing.isSpecial) {
+          _idcSelectedIdx = _IDC_CUSTOM_IDX;
+          // Restore price after render — use a short delay so input exists
+          setTimeout(() => {
+            const inp = document.getElementById('idc-custom-special-price');
+            if (inp && existing.specialPrice) inp.value = existing.specialPrice;
+          }, 30);
+        } else {
+          const ei = DISCOUNTS.findIndex(d => d.name === existing.discName);
+          if (ei >= 0) _idcSelectedIdx = ei;
+        }
       }
 
       document.getElementById('item-disc-name').textContent       = item.name;
@@ -7607,12 +7673,13 @@
       document.getElementById('item-disc-modal').classList.add('show');
     }
 
+    const _IDC_CUSTOM_IDX = 9999; // sentinel for Special Discount (Customized)
+
     function _renderIdcList(basePrice) {
       const wrap = document.getElementById('item-disc-list');
-      wrap.innerHTML = DISCOUNTS.map((d, i) => {
+      const rows = DISCOUNTS.map((d, i) => {
         const pct     = Math.round(d.rate * 100);
         const discAmt = basePrice * d.rate;
-        const eff     = Math.max(0, basePrice - discAmt);
         const active  = _idcSelectedIdx === i ? ' active' : '';
         const checked = _idcSelectedIdx === i ? ' checked' : '';
         return `<div class="idc-row${active}" onclick="_idcToggle(${i},${basePrice})">
@@ -7628,7 +7695,103 @@
           </div>
           <span class="idc-row-amt">−${fmtPeso(discAmt)}</span>
         </div>`;
-      }).join('');
+      });
+
+      // Hardcoded: Special Discount (Customized)
+      const customActive  = _idcSelectedIdx === _IDC_CUSTOM_IDX ? ' active' : '';
+      const customChecked = _idcSelectedIdx === _IDC_CUSTOM_IDX ? ' checked' : '';
+      const customAmt     = parseFloat(document.getElementById('idc-custom-amt')?.value) || 0;
+      // Special offer price input (user types the new price, system computes discount)
+      const customSpecialPrice = parseFloat(document.getElementById('idc-custom-special-price')?.value) || 0;
+      const customDiscAmt = customSpecialPrice > 0 ? Math.max(0, basePrice - customSpecialPrice) : 0;
+      const customPct = customSpecialPrice > 0 && basePrice > 0
+        ? Math.round((customDiscAmt / basePrice) * 100 * 10) / 10 : 0;
+      rows.push(`<div class="idc-row${customActive}" onclick="_idcToggleCustom(${basePrice})">
+        <div class="idc-row-top">
+          <label class="idc-toggle" onclick="event.stopPropagation()">
+            <input type="checkbox" id="idc-chk-custom"${customChecked} onchange="_idcToggleCustom(${basePrice})">
+            <span class="idc-slider"></span>
+          </label>
+          <div class="idc-row-info">
+            <div class="idc-row-label">Special Discount (Customized)</div>
+            <div class="idc-row-pct" id="idc-custom-pct-label">${customPct > 0 ? customPct + '% off — special offer price' : 'Enter special offer price below'}</div>
+          </div>
+        </div>
+        <span class="idc-row-amt" id="idc-custom-amt-label">${customDiscAmt > 0 ? '−' + fmtPeso(customDiscAmt) : '—'}</span>
+      </div>
+      <div id="idc-custom-wrap" style="display:${_idcSelectedIdx === _IDC_CUSTOM_IDX ? 'flex' : 'none'};
+        flex-direction:column;gap:6px;padding:10px 12px;background:#faf7ff;
+        border-radius:10px;margin-top:4px;border:1.5px solid #e0d4f7;">
+        <div style="font-size:11px;color:#6F2DBD;font-weight:600;margin-bottom:2px;">
+          Special offer price for this test
+          <span style="color:#aaa;font-weight:400;"> (regular: ${fmtPeso(basePrice)})</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;color:#6F2DBD;font-weight:700;">₱</span>
+          <input id="idc-custom-special-price" type="number" min="0" max="${basePrice}" step="0.01"
+            placeholder="e.g. ${basePrice - 10}"
+            value="${customSpecialPrice > 0 ? customSpecialPrice : ''}"
+            oninput="_idcCustomPriceChange(${basePrice})"
+            style="flex:1;padding:8px 10px;border:1.5px solid #c4aff0;border-radius:7px;
+              font-family:'DM Mono',monospace;font-size:14px;font-weight:700;
+              outline:none;color:#1a1a1a;background:#fff;"
+            onfocus="this.style.borderColor='#6F2DBD'" onblur="this.style.borderColor='#c4aff0'"
+            onclick="event.stopPropagation()"/>
+        </div>
+        <div id="idc-custom-breakdown" style="font-size:11px;color:#888;min-height:16px;">
+          ${customSpecialPrice > 0 && customSpecialPrice < basePrice
+            ? '₱' + basePrice.toFixed(2) + ' → ₱' + customSpecialPrice.toFixed(2) + ' (' + customPct + '% off)'
+            : customSpecialPrice >= basePrice && customSpecialPrice > 0
+              ? '<span style=\'color:#e53935;\'>Price must be lower than regular rate</span>'
+              : ''}
+        </div>
+      </div>`);
+
+      wrap.innerHTML = rows.join('');
+    }
+
+    function _idcToggleCustom(basePrice) {
+      if (_idcSelectedIdx === _IDC_CUSTOM_IDX) {
+        _idcSelectedIdx = null;
+      } else {
+        _idcSelectedIdx = _IDC_CUSTOM_IDX;
+        // Deselect all regular discounts
+        DISCOUNTS.forEach((_, i) => {
+          const chk = document.getElementById('idc-chk-' + i);
+          if (chk) chk.checked = false;
+        });
+      }
+      _renderIdcList(basePrice);
+      _updateIdcResult(basePrice);
+    }
+
+    function _idcCustomPriceChange(basePrice) {
+      const sp = parseFloat(document.getElementById('idc-custom-special-price')?.value) || 0;
+      const discAmt = sp > 0 ? Math.max(0, basePrice - sp) : 0;
+      const pct = sp > 0 && basePrice > 0 ? Math.round((discAmt / basePrice) * 100 * 10) / 10 : 0;
+
+      // Update amt label
+      const amtLbl = document.getElementById('idc-custom-amt-label');
+      if (amtLbl) amtLbl.textContent = discAmt > 0 ? '−' + fmtPeso(discAmt) : '—';
+
+      // Update pct label
+      const pctLbl = document.getElementById('idc-custom-pct-label');
+      if (pctLbl) pctLbl.textContent = pct > 0 ? pct + '% off — special offer price' : 'Enter special offer price below';
+
+      // Update breakdown
+      const bd = document.getElementById('idc-custom-breakdown');
+      if (bd) {
+        if (sp > 0 && sp < basePrice) {
+          bd.innerHTML = '₱' + basePrice.toFixed(2) + ' → ₱' + sp.toFixed(2) + ' (' + pct + '% off)';
+          bd.style.color = '#6F2DBD';
+        } else if (sp >= basePrice && sp > 0) {
+          bd.innerHTML = '<span style="color:#e53935;">Price must be lower than regular rate</span>';
+        } else {
+          bd.innerHTML = '';
+        }
+      }
+
+      _updateIdcResult(basePrice);
     }
 
     function _idcToggle(i, basePrice) {
@@ -7647,6 +7810,16 @@
       if (_idcSelectedIdx === null) {
         el.textContent = 'No discount selected — original price applies';
         el.className   = 'none';
+      } else if (_idcSelectedIdx === _IDC_CUSTOM_IDX) {
+        const sp = parseFloat(document.getElementById('idc-custom-special-price')?.value) || 0;
+        if (sp <= 0 || sp >= basePrice) {
+          el.textContent = sp >= basePrice && sp > 0 ? 'Price must be lower than regular rate' : 'Enter special offer price above';
+          el.className   = 'none';
+        } else {
+          const pct = Math.round(((basePrice - sp) / basePrice) * 100 * 10) / 10;
+          el.innerHTML  = `Special Discount (${pct}% off) → <strong>${fmtPeso(sp)}</strong> <span style="color:#aaa;font-size:11px;text-decoration:line-through;">${fmtPeso(basePrice)}</span>`;
+          el.className  = '';
+        }
       } else {
         const d       = DISCOUNTS[_idcSelectedIdx];
         const pct     = Math.round(d.rate * 100);
@@ -7671,6 +7844,20 @@
       if (_idcSelectedIdx === null) {
         // Remove discount for this item
         delete _itemDiscounts[_idcEditIdx];
+      } else if (_idcSelectedIdx === _IDC_CUSTOM_IDX) {
+        const sp = parseFloat(document.getElementById('idc-custom-special-price')?.value) || 0;
+        if (sp <= 0) { showToast('Please enter the special offer price.', 'warn'); return; }
+        if (sp >= item.price) { showToast('Special price must be lower than regular rate.', 'warn'); return; }
+        const discAmt = item.price - sp;
+        const pct = Math.round((discAmt / item.price) * 100 * 10) / 10;
+        _itemDiscounts[_idcEditIdx] = {
+          discName:     'Special Discount (' + pct + '% off)',
+          discRate:     discAmt / item.price,
+          discAmt:      discAmt,
+          origPrice:    item.price,
+          specialPrice: sp,
+          isSpecial:    true,
+        };
       } else {
         const d       = DISCOUNTS[_idcSelectedIdx];
         const discAmt = item.price * d.rate;
@@ -7883,13 +8070,27 @@
       // Build itemized receipt items (with per-item effective prices after item discounts)
       const _rcptItemsFinal = (_posData.itemsDetail || []).map((it, i) => {
         const id = _itemDiscounts[i];
-        const type = it.catType === 'xray' ? 'xray'
-                   : it.catType === 'drug' ? 'drug'
-                   : it.catType === 'utz'  ? 'utz'
+        const type = it.catType === 'xray'       ? 'xray'
+                   : it.catType === 'drug'       ? 'drug'
+                   : it.catType === 'utz'        ? 'utz'
+                   : it.catType === 'checkup'    ? 'checkup'
+                   : it.catType === 'cardiology' ? 'cardiology'
+                   : it.catType === 'kits'       ? 'kits'
                    : 'lab';
-        return id
-          ? { name: it.name, price: Math.max(0, it.price - id.discAmt), discNote: id.discName, type }
-          : { name: it.name, price: it.price, discNote: '', type };
+        if (id) {
+          const effPrice = Math.max(0, it.price - id.discAmt);
+          return {
+            name: it.name, price: effPrice, discNote: id.discName, type,
+            origPrice: id.origPrice,
+            specialPrice: id.isSpecial ? id.specialPrice : null,
+            isSpecial: id.isSpecial || false,
+          };
+        }
+        return {
+          name: it.name, price: it.price, discNote: '', type,
+          isSeniorPrice: it.isSeniorPrice || false,
+          regularPrice:  it.isSeniorPrice ? it.regularPrice : null,
+        };
       });
 
       const finalPayload = Object.assign({}, _posData.rawPayload, {
@@ -7915,17 +8116,24 @@
             num: '0000', date: finalPayload.date, name: finalPayload.name,
             ageSex: finalPayload.ageSex, contact: finalPayload.contact,
             address: finalPayload.address, referred: finalPayload.referred,
-            items: _rcptItemsFinal,
-            procedures:   finalPayload.procedures,
-            xrayTests:    finalPayload.xrayTests,
-            drugTests:    finalPayload.drugTests,
-            utzTests:     finalPayload.utzTests,
-            labSubtotal:  _posData.subtotal       || 0,
-            xraySubtotal: _posData.xraySubtotal   || 0,
-            drugSubtotal: _posData.drugSubtotal   || 0,
-            utzSubtotal:  _posData.utzSubtotal    || 0,
-            discAmt:      _posData.discAmt        || 0,
+            items:           _rcptItemsFinal,
+            procedures:      finalPayload.procedures,
+            checkupTests:    finalPayload.checkupTests    || '',
+            cardiologyTests: finalPayload.cardiologyTests || '',
+            kitsTests:       finalPayload.kitsTests       || '',
+            xrayTests:       finalPayload.xrayTests,
+            drugTests:       finalPayload.drugTests,
+            utzTests:        finalPayload.utzTests,
+            labSubtotal:     _posData.subtotal            || 0,
+            checkupSubtotal: _posData.checkupSubtotal     || 0,
+            cadSubtotal:     _posData.cadSubtotal         || 0,
+            kitsSubtotal:    _posData.kitsSubtotal        || 0,
+            xraySubtotal:    _posData.xraySubtotal        || 0,
+            drugSubtotal:    _posData.drugSubtotal        || 0,
+            utzSubtotal:     _posData.utzSubtotal         || 0,
+            discAmt:         _posData.discAmt             || 0,
             discountLabel: _posData.discountLabel,
+                        seniorSavings: (_posData.itemsDetail||[]).reduce((s,it)=>s+(it.isSeniorPrice&&it.regularPrice!=null?it.regularPrice-it.price:0),0),
             grand: _posData.grand,
             paymentStatus: finalPayload.paymentStatus,
             paymentType:   finalPayload.paymentType,
@@ -7958,17 +8166,24 @@
               contact:       finalPayload.contact,
               address:       finalPayload.address,
               referred:      finalPayload.referred,
-              items:         _rcptItemsFinal,
-              procedures:    finalPayload.procedures,
-              xrayTests:     finalPayload.xrayTests,
-              drugTests:     finalPayload.drugTests,
-              utzTests:      finalPayload.utzTests,
-              labSubtotal:   _posData.subtotal      || 0,
-              xraySubtotal:  _posData.xraySubtotal  || 0,
-              drugSubtotal:  _posData.drugSubtotal  || 0,
-              utzSubtotal:   _posData.utzSubtotal   || 0,
-              discAmt:       _posData.discAmt       || 0,
+              items:           _rcptItemsFinal,
+              procedures:      finalPayload.procedures,
+              checkupTests:    finalPayload.checkupTests    || '',
+              cardiologyTests: finalPayload.cardiologyTests || '',
+              kitsTests:       finalPayload.kitsTests       || '',
+              xrayTests:       finalPayload.xrayTests,
+              drugTests:       finalPayload.drugTests,
+              utzTests:        finalPayload.utzTests,
+              labSubtotal:     _posData.subtotal            || 0,
+              checkupSubtotal: _posData.checkupSubtotal     || 0,
+              cadSubtotal:     _posData.cadSubtotal         || 0,
+              kitsSubtotal:    _posData.kitsSubtotal        || 0,
+              xraySubtotal:    _posData.xraySubtotal        || 0,
+              drugSubtotal:    _posData.drugSubtotal        || 0,
+              utzSubtotal:     _posData.utzSubtotal         || 0,
+              discAmt:         _posData.discAmt             || 0,
               discountLabel: _posData.discountLabel,
+                          seniorSavings: (_posData.itemsDetail||[]).reduce((s,it)=>s+(it.isSeniorPrice&&it.regularPrice!=null?it.regularPrice-it.price:0),0),
               grand:         _posData.grand,
               paymentStatus: finalPayload.paymentStatus,
               paymentType:   finalPayload.paymentType,
@@ -8238,10 +8453,13 @@
       const row  = (l, r, cls) => `<div class="rp-row${cls?' '+cls:''}"><span class="rp-lbl">${l}</span><span class="rp-val">${r}</span></div>`;
 
       const recNo = 'REC-' + String(d.num || 0).padStart(5, '0');
-      const hasXray  = (d.xraySubtotal  || 0) > 0;
-      const hasDrug  = (d.drugSubtotal  || 0) > 0;
-      const hasUtz   = (d.utzSubtotal   || 0) > 0;
-      const hasMulti = hasXray || hasDrug || hasUtz;
+      const hasXray     = (d.xraySubtotal     || 0) > 0;
+      const hasDrug     = (d.drugSubtotal     || 0) > 0;
+      const hasUtz      = (d.utzSubtotal      || 0) > 0;
+      const hasCheckup  = (d.checkupSubtotal  || 0) > 0;
+      const hasCad      = (d.cadSubtotal      || 0) > 0;
+      const hasKits     = (d.kitsSubtotal     || 0) > 0;
+      const hasMulti    = hasXray || hasDrug || hasUtz || hasCheckup || hasCad || hasKits;
 
       let html = `
         <div class="rp-center rp-bold" style="font-size:13px;letter-spacing:1px;">QUALICHECK</div>
@@ -8265,61 +8483,100 @@
         <div class="rp-gap"></div>`;
 
       // Group items by department
-      const labItems  = (d.items || []).filter(i => !i.type || i.type === 'lab');
-      const xrayItems = (d.items || []).filter(i => i.type === 'xray');
-      const drugItems = (d.items || []).filter(i => i.type === 'drug');
-      const utzItems  = (d.items || []).filter(i => i.type === 'utz');
-      const hasTyped  = (d.items || []).some(i => i.type);
+      const labItems       = (d.items || []).filter(i => !i.type || i.type === 'lab');
+      const checkupItems   = (d.items || []).filter(i => i.type === 'checkup');
+      const cardiologyItems= (d.items || []).filter(i => i.type === 'cardiology');
+      const kitsItems      = (d.items || []).filter(i => i.type === 'kits');
+      const xrayItems      = (d.items || []).filter(i => i.type === 'xray');
+      const drugItems      = (d.items || []).filter(i => i.type === 'drug');
+      const utzItems       = (d.items || []).filter(i => i.type === 'utz');
+      const hasTyped       = (d.items || []).some(i => i.type);
+      const anyExtra       = checkupItems.length || cardiologyItems.length || kitsItems.length || xrayItems.length || drugItems.length || utzItems.length;
+
+      function _renderItems(items) {
+        let h = '';
+        items.forEach(item => {
+          h += row(item.name || '', fmtP(item.price));
+          if (item.discNote) {
+            if (item.isSpecial && item.origPrice != null) {
+              h += `<div class="rp-item-disc" style="color:#1a1a1a;">` +
+                `<span style="text-decoration:line-through;color:#aaa;margin-right:3px;">${fmtP(item.origPrice)}</span>` +
+                `→ ${fmtP(item.price)} <span style="color:#555;">(${item.discNote})</span></div>`;
+            } else {
+              h += `<div class="rp-item-disc">(${item.discNote})</div>`;
+            }
+          }
+        });
+        return h;
+      }
 
       if (hasTyped) {
         if (labItems.length) {
-          if (xrayItems.length || drugItems.length || utzItems.length)
-            html += `<div class="rp-section">— Lab —</div>`;
-          labItems.forEach(item => {
-            html += row(item.name || '', fmtP(item.price));
-            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
-          });
+          if (anyExtra) html += `<div class="rp-section">— Lab —</div>`;
+          html += _renderItems(labItems);
+        }
+        if (checkupItems.length) {
+          html += `<div class="rp-section">— Checkup —</div>`;
+          html += _renderItems(checkupItems);
+        }
+        if (cardiologyItems.length) {
+          html += `<div class="rp-section">— Cardiology —</div>`;
+          html += _renderItems(cardiologyItems);
+        }
+        if (kitsItems.length) {
+          html += `<div class="rp-section">— Kits —</div>`;
+          html += _renderItems(kitsItems);
         }
         if (xrayItems.length) {
           html += `<div class="rp-section">— X-Ray —</div>`;
-          xrayItems.forEach(item => {
-            html += row(item.name || '', fmtP(item.price));
-            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
-          });
+          html += _renderItems(xrayItems);
         }
         if (drugItems.length) {
           html += `<div class="rp-section">— Drug Test —</div>`;
-          drugItems.forEach(item => {
-            html += row(item.name || '', fmtP(item.price));
-            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
-          });
+          html += _renderItems(drugItems);
         }
         if (utzItems.length) {
           html += `<div class="rp-section">— UTZ Tests —</div>`;
-          utzItems.forEach(item => {
-            html += row(item.name || '', fmtP(item.price));
-            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
-          });
+          html += _renderItems(utzItems);
         }
       } else {
         (d.items || []).forEach(item => {
           html += row(item.name || '', fmtP(item.price));
-          if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+          if (item.discNote) {
+              if (item.isSpecial && item.origPrice != null) {
+                html += `<div class="rp-item-disc" style="color:#1a1a1a;">` +
+                  `<span style="text-decoration:line-through;color:#aaa;margin-right:3px;">${fmtP(item.origPrice)}</span>` +
+                  `→ ${fmtP(item.price)} <span style="color:#555;">(${item.discNote})</span></div>`;
+              } else {
+                html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+              }
+            }
+
         });
       }
 
       html += div('-');
 
-      // Subtotals
+      // Per-category subtotals
       if (hasMulti) {
-        if ((d.labSubtotal || 0) > 0)  html += row('Lab Subtotal',      fmtP(d.labSubtotal));
-        if (hasXray)                    html += row('X-Ray Subtotal',     fmtP(d.xraySubtotal));
-        if (hasDrug)                    html += row('Drug Test Subtotal', fmtP(d.drugSubtotal));
-        if (hasUtz)                     html += row('UTZ Total',          fmtP(d.utzSubtotal));
+        if ((d.labSubtotal      || 0) > 0) html += row('Lab',        fmtP(d.labSubtotal));
+        if ((d.checkupSubtotal  || 0) > 0) html += row('Checkup',    fmtP(d.checkupSubtotal));
+        if ((d.cadSubtotal      || 0) > 0) html += row('Cardiology', fmtP(d.cadSubtotal));
+        if ((d.kitsSubtotal     || 0) > 0) html += row('Kits',       fmtP(d.kitsSubtotal));
+        if (hasXray)                        html += row('X-Ray',      fmtP(d.xraySubtotal));
+        if (hasDrug)                        html += row('Drug Test',  fmtP(d.drugSubtotal));
+        if (hasUtz)                         html += row('UTZ',        fmtP(d.utzSubtotal));
+        // Combined SUBTOTAL line — separates category breakdown from discount
+        const combinedSub = (d.labSubtotal||0)+(d.checkupSubtotal||0)+(d.cadSubtotal||0)+(d.kitsSubtotal||0)+(d.xraySubtotal||0)+(d.drugSubtotal||0)+(d.utzSubtotal||0);
+        html += `<div class="rp-row" style="border-top:1px dashed #ccc;margin-top:3px;padding-top:3px;font-weight:700;">` +
+                `<span class="rp-lbl">SUBTOTAL</span><span class="rp-val">${fmtP(combinedSub)}</span></div>`;
       }
 
+      if ((d.seniorSavings || 0) > 0) {
+        html += row('Senior Citizen Discount', '- ' + fmtP(d.seniorSavings));
+      }
       if ((d.discAmt || 0) > 0) {
-        html += row((d.discountLabel || 'Discount'), '-' + fmtP(d.discAmt));
+        html += row((d.discountLabel || 'Discount'), '- ' + fmtP(d.discAmt));
       }
 
       html += div('=');
@@ -8435,64 +8692,86 @@
       txt('Services Rendered\n');
       cmd(CMD.SMALL_OFF);
 
-      // Lab procedures
-      (d.items || []).forEach(item => {
-        const amt   = fmtAmt(item.price);
-        const avail = LW - amt.length - 1;
-        const name  = (item.name || '').slice(0, avail);
-        txt(padLine(name, amt) + '\n');
-        if (item.discNote) {
-          cmd(CMD.SMALL_ON);
-          txt('  (' + item.discNote + ')\n');
-          cmd(CMD.SMALL_OFF);
-        }
-      });
-
-      // X-Ray line(s)
-      if (d.xrayTests && d.xrayTests.trim()) {
-        cmd(CMD.SMALL_ON);
-        txt('-- X-Ray --\n');
-        cmd(CMD.SMALL_OFF);
-        d.xrayTests.split(',').forEach(xt => {
-          const xname = xt.trim().slice(0, LW - 1);
-          txt(xname + '\n');
+      // Helper to render item list with disc notes
+      function _thermalItems(items) {
+        items.forEach(item => {
+          const amt   = fmtAmt(item.price);
+          const avail = LW - amt.length - 1;
+          const name  = (item.name || '').slice(0, avail);
+          txt(padLine(name, amt) + '\n');
+          if (item.discNote) {
+            cmd(CMD.SMALL_ON);
+            txt('  (' + item.discNote + ')\n');
+            cmd(CMD.SMALL_OFF);
+          }
         });
       }
 
-      // Drug Test line(s)
-      if (d.drugTests && d.drugTests.trim()) {
-        cmd(CMD.SMALL_ON);
-        txt('-- Drug Test --\n');
-        cmd(CMD.SMALL_OFF);
-        d.drugTests.split(',').forEach(dt => {
-          const dname = dt.trim().slice(0, LW - 1);
-          txt(dname + '\n');
-        });
-      }
+      const _tLabItems  = (d.items || []).filter(i => !i.type || i.type === 'lab');
+      const _tCkItems   = (d.items || []).filter(i => i.type === 'checkup');
+      const _tCadItems  = (d.items || []).filter(i => i.type === 'cardiology');
+      const _tKitItems  = (d.items || []).filter(i => i.type === 'kits');
+      const _tXrayItems = (d.items || []).filter(i => i.type === 'xray');
+      const _tDrugItems = (d.items || []).filter(i => i.type === 'drug');
+      const _tUtzItems  = (d.items || []).filter(i => i.type === 'utz');
+      const _tHasExtra  = _tCkItems.length||_tCadItems.length||_tKitItems.length||_tXrayItems.length||_tDrugItems.length||_tUtzItems.length;
 
-      // UTZ line(s)
-      if (d.utzTests && d.utzTests.trim()) {
-        cmd(CMD.SMALL_ON);
-        txt('-- UTZ Tests --\n');
-        cmd(CMD.SMALL_OFF);
-        d.utzTests.split(',').forEach(ut => {
-          const uname = ut.trim().slice(0, LW - 1);
-          txt(uname + '\n');
-        });
+      if (_tLabItems.length) {
+        if (_tHasExtra) { cmd(CMD.SMALL_ON); txt('-- Lab --\n'); cmd(CMD.SMALL_OFF); }
+        _thermalItems(_tLabItems);
+      }
+      if (_tCkItems.length) {
+        cmd(CMD.SMALL_ON); txt('-- Checkup --\n'); cmd(CMD.SMALL_OFF);
+        _thermalItems(_tCkItems);
+      }
+      if (_tCadItems.length) {
+        cmd(CMD.SMALL_ON); txt('-- Cardiology --\n'); cmd(CMD.SMALL_OFF);
+        _thermalItems(_tCadItems);
+      }
+      if (_tKitItems.length) {
+        cmd(CMD.SMALL_ON); txt('-- Kits --\n'); cmd(CMD.SMALL_OFF);
+        _thermalItems(_tKitItems);
+      }
+      if (_tXrayItems.length || (d.xrayTests && d.xrayTests.trim())) {
+        cmd(CMD.SMALL_ON); txt('-- X-Ray --\n'); cmd(CMD.SMALL_OFF);
+        if (_tXrayItems.length) { _thermalItems(_tXrayItems); }
+        else { d.xrayTests.split(',').forEach(xt => { txt(xt.trim().slice(0, LW - 1) + '\n'); }); }
+      }
+      if (_tDrugItems.length || (d.drugTests && d.drugTests.trim())) {
+        cmd(CMD.SMALL_ON); txt('-- Drug Test --\n'); cmd(CMD.SMALL_OFF);
+        if (_tDrugItems.length) { _thermalItems(_tDrugItems); }
+        else { d.drugTests.split(',').forEach(dt => { txt(dt.trim().slice(0, LW - 1) + '\n'); }); }
+      }
+      if (_tUtzItems.length || (d.utzTests && d.utzTests.trim())) {
+        cmd(CMD.SMALL_ON); txt('-- UTZ Tests --\n'); cmd(CMD.SMALL_OFF);
+        if (_tUtzItems.length) { _thermalItems(_tUtzItems); }
+        else { d.utzTests.split(',').forEach(ut => { txt(ut.trim().slice(0, LW - 1) + '\n'); }); }
       }
 
       txt(div('-'));
 
       // ── TOTALS ────────────────────────────────────
-      const hasXray = d.xraySubtotal > 0;
-      const hasDrug = d.drugSubtotal > 0;
-      const hasUtz  = d.utzSubtotal  > 0;
-      const hasMulti = hasXray || hasDrug || hasUtz;
+      const hasXray  = d.xraySubtotal     > 0;
+      const hasDrug  = d.drugSubtotal     > 0;
+      const hasUtz   = d.utzSubtotal      > 0;
+      const hasCkup  = d.checkupSubtotal  > 0;
+      const hasCad   = d.cadSubtotal      > 0;
+      const hasKits  = d.kitsSubtotal     > 0;
+      const hasMulti = hasXray || hasDrug || hasUtz || hasCkup || hasCad || hasKits;
       if (hasMulti) {
-        if (d.labSubtotal > 0)  txt(padLine('Lab Subtotal',      fmtAmt(d.labSubtotal))  + '\n');
-        if (hasXray)            txt(padLine('X-Ray Subtotal',     fmtAmt(d.xraySubtotal)) + '\n');
-        if (hasDrug)            txt(padLine('Drug Test Subtotal', fmtAmt(d.drugSubtotal)) + '\n');
-        if (hasUtz)             txt(padLine('UTZ Total',          fmtAmt(d.utzSubtotal))  + '\n');
+        if (d.labSubtotal > 0)  txt(padLine('Lab',       fmtAmt(d.labSubtotal))     + '\n');
+        if (hasCkup)            txt(padLine('Checkup',   fmtAmt(d.checkupSubtotal)) + '\n');
+        if (hasCad)             txt(padLine('Cardiology',fmtAmt(d.cadSubtotal))     + '\n');
+        if (hasKits)            txt(padLine('Kits',      fmtAmt(d.kitsSubtotal))    + '\n');
+        if (hasXray)            txt(padLine('X-Ray',     fmtAmt(d.xraySubtotal))    + '\n');
+        if (hasDrug)            txt(padLine('Drug Test', fmtAmt(d.drugSubtotal))    + '\n');
+        if (hasUtz)             txt(padLine('UTZ',       fmtAmt(d.utzSubtotal))     + '\n');
+        // SUBTOTAL line
+        const combinedSub2 = (d.labSubtotal||0)+(d.checkupSubtotal||0)+(d.cadSubtotal||0)+(d.kitsSubtotal||0)+(d.xraySubtotal||0)+(d.drugSubtotal||0)+(d.utzSubtotal||0);
+        txt(div('-'));
+        cmd(CMD.BOLD_ON);
+        txt(padLine('SUBTOTAL', fmtAmt(combinedSub2)) + '\n');
+        cmd(CMD.BOLD_OFF);
       }
 
       if (d.discAmt > 0) {
@@ -8743,9 +9022,9 @@
             <span id="pos-disc-label">Discount</span>
             <span id="pos-disc-amt">—₱0.00</span>
           </div>
-          <div class="pos-total-row" id="pos-senior-row" style="display:none;">
-            <span>Senior Pricing <span class="pos-senior-badge">Applied</span></span>
-            <span style="color:#9B72D0;font-size:13px;">Rates adjusted</span>
+          <div class="pos-total-row disc" id="pos-senior-row" style="display:none;">
+            <span>🧓 Senior Citizen Discount <span class="pos-senior-badge">SC</span></span>
+            <span id="pos-senior-savings" style="color:#e53935;font-weight:700;">—</span>
           </div>
           <div class="pos-total-row grand">
             <span>Total Amount</span>
