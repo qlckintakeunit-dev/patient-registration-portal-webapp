@@ -1250,7 +1250,7 @@
 
     .test-item {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 9px;
       padding: 9px 10px;
       cursor: pointer;
@@ -1916,7 +1916,7 @@
       width: 100%;
       max-width: 860px;
       max-height: calc(100vh - 32px);
-      align-items: flex-start;
+      align-items: center;
     }
 
     /* ── Left: receipt paper ── */
@@ -2038,11 +2038,12 @@
       font-size: 12px;
       color: rgba(255,255,255,0.45);
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 8px;
-      line-height: 1.5;
+      line-height: 1.6;
+      white-space: normal;
     }
-    .rp-hint svg { flex-shrink:0; margin-top:1px; opacity:0.6; }
+    .rp-hint svg { flex-shrink:0; margin-top:2px; opacity:0.6; }
 
     .rp-exit-btn {
       width: 100%;
@@ -2170,7 +2171,7 @@
     .idc-row:hover { background: #faf7ff; border-color: #c4aff0; }
     .idc-row.active { background: #f0e8ff; border-color: #8B5CF6; }
     .idc-row-top {
-      display: flex; align-items: flex-start; gap: 7px; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 7px; margin-bottom: 4px;
     }
     .idc-row-info { flex: 1; min-width: 0; }
     .idc-row-label {
@@ -4765,7 +4766,7 @@
     /* ════════════════════════════════════════════════
        CONFIG
     ════════════════════════════════════════════════ */
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-MdVtNdMs2yFF2g7sCt_1Z_RcEMGOiYYrFFGSKwSWz1wO7-5k9TH_rW9nLunfiuA1ZA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMrczonRaHj5ixx8qGBMWVISUNxEsjTuV0FePgdebHUA4ysrtkiwiHNmDIrT0tEs9Qgg/exec';
 
     /* ════════════════════════════════════════════════
        STEP NAVIGATION
@@ -7637,9 +7638,13 @@
       // Build itemized receipt items (with per-item effective prices after item discounts)
       const _rcptItemsFinal = (_posData.itemsDetail || []).map((it, i) => {
         const id = _itemDiscounts[i];
+        const type = it.catType === 'xray' ? 'xray'
+                   : it.catType === 'drug' ? 'drug'
+                   : it.catType === 'utz'  ? 'utz'
+                   : 'lab';
         return id
-          ? { name: it.name, price: Math.max(0, it.price - id.discAmt), discNote: id.discName }
-          : { name: it.name, price: it.price, discNote: '' };
+          ? { name: it.name, price: Math.max(0, it.price - id.discAmt), discNote: id.discName, type }
+          : { name: it.name, price: it.price, discNote: '', type };
       });
 
       const finalPayload = Object.assign({}, _posData.rawPayload, {
@@ -8014,28 +8019,48 @@
         <div class="rp-small" style="color:#888;">Services Rendered</div>
         <div class="rp-gap"></div>`;
 
-      // Lab items
-      (d.items || []).forEach(item => {
-        html += row(item.name || '', fmtP(item.price));
-        if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
-      });
+      // Group items by department
+      const labItems  = (d.items || []).filter(i => !i.type || i.type === 'lab');
+      const xrayItems = (d.items || []).filter(i => i.type === 'xray');
+      const drugItems = (d.items || []).filter(i => i.type === 'drug');
+      const utzItems  = (d.items || []).filter(i => i.type === 'utz');
+      const hasTyped  = (d.items || []).some(i => i.type);
 
-      // X-Ray
-      if (d.xrayTests && d.xrayTests.trim()) {
-        html += `<div class="rp-section">— X-Ray —</div>`;
-        d.xrayTests.split(',').forEach(x => { html += `<div>${x.trim()}</div>`; });
-      }
-
-      // Drug Test
-      if (d.drugTests && d.drugTests.trim()) {
-        html += `<div class="rp-section">— Drug Test —</div>`;
-        d.drugTests.split(',').forEach(x => { html += `<div>${x.trim()}</div>`; });
-      }
-
-      // UTZ
-      if (d.utzTests && d.utzTests.trim()) {
-        html += `<div class="rp-section">— UTZ Tests —</div>`;
-        d.utzTests.split(',').forEach(x => { html += `<div>${x.trim()}</div>`; });
+      if (hasTyped) {
+        if (labItems.length) {
+          if (xrayItems.length || drugItems.length || utzItems.length)
+            html += `<div class="rp-section">— Lab —</div>`;
+          labItems.forEach(item => {
+            html += row(item.name || '', fmtP(item.price));
+            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+          });
+        }
+        if (xrayItems.length) {
+          html += `<div class="rp-section">— X-Ray —</div>`;
+          xrayItems.forEach(item => {
+            html += row(item.name || '', fmtP(item.price));
+            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+          });
+        }
+        if (drugItems.length) {
+          html += `<div class="rp-section">— Drug Test —</div>`;
+          drugItems.forEach(item => {
+            html += row(item.name || '', fmtP(item.price));
+            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+          });
+        }
+        if (utzItems.length) {
+          html += `<div class="rp-section">— UTZ Tests —</div>`;
+          utzItems.forEach(item => {
+            html += row(item.name || '', fmtP(item.price));
+            if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+          });
+        }
+      } else {
+        (d.items || []).forEach(item => {
+          html += row(item.name || '', fmtP(item.price));
+          if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+        });
       }
 
       html += div('-');
