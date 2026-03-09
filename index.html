@@ -1891,6 +1891,206 @@
       border-radius:99px; width:0%; transition:width 0.35s ease;
     }
     #print-progress-bar.error { background:#ef5350; }
+
+    /* ════════════════════════════════════════════════
+       RECEIPT PREVIEW MODAL
+    ════════════════════════════════════════════════ */
+    #receipt-preview-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: rgba(10, 5, 25, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #receipt-preview-overlay.show { display: flex; animation: rpFadeIn 0.3s ease; }
+    @keyframes rpFadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .rp-shell {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 860px;
+      max-height: calc(100vh - 32px);
+      align-items: flex-start;
+    }
+
+    /* ── Left: receipt paper ── */
+    .rp-paper-wrap {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .rp-paper {
+      background: #fff;
+      border-radius: 6px;
+      width: 280px;
+      padding: 18px 16px 24px;
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-size: 11.5px;
+      line-height: 1.55;
+      color: #111;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08);
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+    }
+    .rp-paper::-webkit-scrollbar { width: 4px; }
+    .rp-paper::-webkit-scrollbar-thumb { background: #ddd; border-radius:4px; }
+
+    /* Paper tear edge top */
+    .rp-paper-wrap::before {
+      content: '';
+      display: block;
+      width: 280px;
+      height: 10px;
+      background: repeating-linear-gradient(
+        90deg,
+        #fff 0px, #fff 8px,
+        transparent 8px, transparent 12px
+      );
+      filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.2));
+    }
+    /* Paper tear edge bottom */
+    .rp-paper-wrap::after {
+      content: '';
+      display: block;
+      width: 280px;
+      height: 10px;
+      background: repeating-linear-gradient(
+        90deg,
+        #fff 0px, #fff 8px,
+        transparent 8px, transparent 12px
+      );
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+    }
+
+    /* Receipt typography helpers */
+    .rp-center  { text-align: center; }
+    .rp-bold    { font-weight: 700; }
+    .rp-small   { font-size: 10px; }
+    .rp-div     { letter-spacing: -0.5px; color: #555; margin: 4px 0; white-space: pre; }
+    .rp-row     { display: flex; justify-content: space-between; gap: 4px; }
+    .rp-row .rp-lbl { flex: 1; }
+    .rp-row .rp-val { text-align: right; white-space: nowrap; }
+    .rp-row.grand { font-size: 14px; font-weight: 800; margin: 4px 0 2px; }
+    .rp-item-disc { font-size: 10px; color: #888; margin-left: 8px; font-style: italic; }
+    .rp-section { margin: 6px 0 2px; font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.8px; }
+    .rp-gap { height: 6px; }
+
+    /* ── Right: print status panel ── */
+    .rp-right {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: calc(100vh - 140px);
+    }
+
+    .rp-status-card {
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 20px 22px;
+      color: #fff;
+    }
+    .rp-status-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 14px;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .rp-prog-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+    .rp-prog-lbl { font-size: 13px; font-weight: 600; }
+    .rp-prog-pct { font-size: 12px; opacity: 0.65; }
+    .rp-prog-track {
+      background: rgba(255,255,255,0.12);
+      border-radius: 99px;
+      height: 9px;
+      overflow: hidden;
+    }
+    .rp-prog-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #8E44EC, #c084fc);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+    .rp-prog-bar.error { background: linear-gradient(90deg,#ef5350,#ff8a80); }
+    .rp-prog-bar.done  { background: linear-gradient(90deg,#1e8c3a,#4caf50); }
+    .rp-prog-sub { font-size: 11px; opacity: 0.55; margin-top: 7px; }
+
+    .rp-hint {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .rp-hint svg { flex-shrink:0; margin-top:1px; opacity:0.6; }
+
+    .rp-exit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #6F2DBD;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: background 0.15s, transform 0.1s;
+      box-shadow: 0 4px 18px rgba(111,45,189,0.45);
+      margin-top: auto;
+    }
+    .rp-exit-btn:hover { background: #8E44EC; transform: translateY(-1px); }
+    .rp-exit-btn:active { transform: translateY(0); }
+
+    .rp-reprint-btn {
+      width: 100%;
+      padding: 11px;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.8);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+    .rp-reprint-btn:hover { background: rgba(255,255,255,0.14); }
+
+    @media (max-width: 640px) {
+      .rp-shell { flex-direction: column; align-items: center; }
+      .rp-right { width: 100%; max-width: 280px; }
+      .rp-paper { max-height: 55vh; }
+    }
+
     .recent-row {
       background:#fff; border-radius:12px; padding:14px 16px;
       display:flex; align-items:center; gap:12px; flex-wrap:wrap;
@@ -3107,26 +3307,32 @@
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
-    /* Header strip */
+    /* Header strip — merged with amount due into one block */
     .pos-right-header {
-      padding: 16px 24px 14px;
-      border-bottom: 1px solid #ebebeb;
+      padding: 18px 24px 16px;
       flex-shrink: 0;
-      background: #fff;
+      background: #2d1a52;
+      text-align: center;
     }
     .pos-right-title {
-      font-size: 11px;
+      font-size: 18px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.6px;
-      color: #888;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.9);
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin-bottom: 0;
+    }
+    .pos-right-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+      margin: 14px 0 0;
     }
 
-    /* Amount-due strip */
+    /* Amount-due strip — lives inside the same dark header block */
     .pos-due-strip {
       background: #2d1a52;
-      padding: 20px 24px 18px;
+      padding: 14px 24px 22px;
       flex-shrink: 0;
       display: flex;
       align-items: baseline;
@@ -3138,15 +3344,17 @@
       font-weight: 600;
       letter-spacing: 1.6px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.4);
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
     .pos-due-amt {
-      font-size: 34px;
-      font-weight: 700;
+      font-size: 36px;
+      font-weight: 800;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       color: #ffffff;
       letter-spacing: -1.5px;
+      font-variant-numeric: lining-nums;
+      font-feature-settings: "zero" 0;
     }
 
     /* Scrollable inner body */
@@ -3154,7 +3362,7 @@
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 18px 22px 10px;
+      padding: 16px 22px 8px;
       background: #fafafa;
     }
     .pos-right-body::-webkit-scrollbar { width: 4px; }
@@ -3174,40 +3382,70 @@
       font-weight: 700;
       letter-spacing: 1.4px;
       text-transform: uppercase;
-      color: #888;
-      margin-bottom: 9px;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #aaa;
+      margin-bottom: 8px;
+      font-family: 'DM Sans', sans-serif;
     }
     .pos-method-pills {
       display: flex;
-      gap: 7px;
-      margin-bottom: 16px;
+      gap: 6px;
+      margin-bottom: 14px;
+      background: #f4f1fa;
+      border-radius: 10px;
+      padding: 4px;
     }
     .pos-method-pill {
       flex: 1;
-      padding: 10px 6px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 8px;
-      background: #fff;
+      padding: 9px 6px;
+      border: none;
+      border-radius: 7px;
+      background: transparent;
       font-size: 13px;
       font-weight: 600;
-      color: #444;
+      color: #888;
       cursor: pointer;
       text-align: center;
-      transition: border-color 0.12s, background 0.12s, color 0.12s;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+      font-family: 'DM Sans', sans-serif;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    .pos-method-pill:hover { border-color: #bbb; background: #f9f9f9; }
+    .pos-method-pill:hover { color: #6F2DBD; }
     .pos-method-pill.active {
-      background: #6F2DBD;
-      border-color: #6F2DBD;
-      color: #fff;
+      background: #fff;
+      color: #6F2DBD;
+      font-weight: 700;
+      box-shadow: 0 1px 6px rgba(111,45,189,0.15);
     }
-    .pos-method-pill.disabled {
-      opacity: 0.35;
-      pointer-events: none;
+    .pos-method-pill.disabled { opacity: 0.35; pointer-events: none; }
+
+    /* No-payment row — sits outside the pill bar */
+    .pos-nopay-row {
+      margin-bottom: 14px;
+      margin-top: -6px;
+    }
+    .pos-nopay-pill {
+      width: 100%;
+      padding: 9px;
+      border: 1.5px dashed #ffc0c0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      color: #c62828;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.12s, border-color 0.12s;
+      font-family: 'DM Sans', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pos-nopay-pill:hover { background: #fff5f5; border-color: #e57373; }
+    .pos-nopay-pill.active {
+      background: #ffebee;
+      border-color: #e53935;
+      border-style: solid;
+      color: #c62828;
     }
 
     /* Tendered section */
@@ -3216,105 +3454,110 @@
       font-weight: 700;
       letter-spacing: 1.4px;
       text-transform: uppercase;
-      color: #888;
+      color: #aaa;
       margin-bottom: 7px;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'DM Sans', sans-serif;
     }
 
-    /* Large amount box */
+    /* Unified amount input — single element, works on both desktop and touch */
     .pos-amount-display {
       width: 100%;
       padding: 14px 16px;
-      border: 2px solid #6F2DBD;
-      border-radius: 10px;
-      font-size: 32px;
+      border: 2px solid rgba(0,0,0,0.18);
+      border-radius: 12px;
+      font-size: 34px;
       font-weight: 700;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: lining-nums;
+      font-feature-settings: "zero" 0;
       background: #fff;
       color: #2d1a52;
       text-align: right;
-      min-height: 60px;
+      min-height: 64px;
       cursor: text;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background 0.15s;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      letter-spacing: -0.5px;
+      letter-spacing: -1px;
       box-sizing: border-box;
     }
+    .pos-amount-display:focus-within,
+    .pos-amount-display.active { border-color: #6F2DBD; background: #faf8ff; }
     .pos-amount-display.locked {
-      background: #f5f5f5;
-      color: #2d1a52;
-      border-color: #ccc;
-      cursor: default;
+      background: #f5f5f5; color: #2d1a52; border-color: rgba(0,0,0,0.1); cursor: default;
     }
     .pos-amount-display.locked-zero {
-      background: #f5f5f5;
-      color: #bbb;
-      border-color: #e0e0e0;
-      cursor: default;
+      background: #f5f5f5; color: #ccc; border-color: rgba(0,0,0,0.08); cursor: default;
     }
 
     .pos-amount-input-desktop {
       width: 100%;
       padding: 14px 16px;
-      border: 2px solid #6F2DBD;
-      border-radius: 10px;
-      font-size: 32px;
+      border: 2px solid rgba(0,0,0,0.18);
+      border-radius: 12px;
+      font-size: 34px;
       font-weight: 700;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: lining-nums;
+      font-feature-settings: "zero" 0;
       background: #fff;
       color: #2d1a52;
       text-align: right;
-      min-height: 60px;
+      min-height: 64px;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background 0.15s;
       -moz-appearance: textfield;
-      letter-spacing: -0.5px;
+      letter-spacing: -1px;
       box-sizing: border-box;
     }
     .pos-amount-input-desktop::-webkit-outer-spin-button,
     .pos-amount-input-desktop::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .pos-amount-input-desktop:focus { border-color: #6F2DBD; }
-    .pos-amount-input-desktop:disabled {
-      background: #f5f5f5;
+    .pos-amount-input-desktop:focus { border-color: #6F2DBD; background: #faf8ff; }
+    .pos-amount-input-desktop::placeholder {
       color: #bbb;
-      border-color: #e0e0e0;
-      cursor: default;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-align: center;
+    }
+    .pos-amount-input-desktop:disabled {
+      background: #f5f5f5; color: #ccc; border-color: rgba(0,0,0,0.08); cursor: default;
     }
 
-    /* Change / Balance strip */
+    /* Change / Balance strip — card style */
     .pos-change-strip {
-      display: flex;
-      align-items: stretch;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1.5px solid #e8e8e8;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
       margin-top: 10px;
       margin-bottom: 14px;
-      background: #fff;
     }
     .pos-change-cell {
-      flex: 1;
-      padding: 11px 14px;
+      background: #f8f6ff;
+      border: 1.5px solid #ede8ff;
+      border-radius: 10px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
       gap: 3px;
     }
-    .pos-change-cell + .pos-change-cell { border-left: 1.5px solid #e8e8e8; }
     .pos-change-cell-lbl {
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 1.4px;
       text-transform: uppercase;
-      color: #aaa;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #bbb;
+      font-family: 'DM Sans', sans-serif;
     }
     .pos-change-cell-val {
       font-size: 18px;
       font-weight: 700;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: lining-nums;
+      font-feature-settings: "zero" 0;
       color: #3d2370;
+      letter-spacing: -0.5px;
     }
     .pos-change-cell-val.balance-due { color: #d32f2f; }
     .pos-change-cell-val.change-back { color: #1b7a3e; }
@@ -3329,111 +3572,133 @@
     }
     .pos-key {
       background: #fff;
-      border: 1.5px solid #e4e4e4;
-      border-radius: 8px;
+      border: 1.5px solid #ede8ff;
+      border-radius: 10px;
       padding: 15px 8px;
       font-size: 20px;
       font-weight: 500;
-      color: #3d2370;
+      color: #2d1a52;
       cursor: pointer;
       text-align: center;
-      transition: background 0.1s, transform 0.07s;
+      transition: background 0.1s, transform 0.07s, border-color 0.1s;
       user-select: none;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: lining-nums;
+      font-feature-settings: "zero" 0;
       -webkit-tap-highlight-color: transparent;
     }
-    .pos-key:active { background: #f0f0f0; transform: scale(0.96); }
-    .pos-key.dot { font-size: 22px; font-weight: 700; }
+    .pos-key:hover  { background: #f4f1fa; border-color: #c4aff0; }
+    .pos-key:active { background: #ede8ff; transform: scale(0.95); }
+    .pos-key.dot { font-size: 22px; font-weight: 700; font-family: 'DM Sans', sans-serif; }
     .pos-key.del {
-      background: #fff5f5;
-      border-color: #ffd7d7;
-      color: #d32f2f;
-      font-size: 15px;
+      background: #fff5f5; border-color: #ffd7d7;
+      color: #d32f2f; font-size: 15px; font-family: 'DM Sans', sans-serif;
     }
-    .pos-key.del:active { background: #ffe8e8; }
+    .pos-key.del:hover  { background: #ffe8e8; }
+    .pos-key.del:active { background: #ffcdd2; }
     .pos-key.clear-all {
-      background: #fffbf0;
-      border-color: #ffe5a0;
-      color: #b45309;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      background: #f8f6ff; border-color: #c4aff0;
+      color: #6F2DBD; font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; font-family: 'DM Sans', sans-serif;
+    }
+    .pos-key.clear-all:hover { background: #ede8ff; }
+
+    /* Footer buttons */
+    .pos-right-footer {
+      flex-shrink: 0;
+      padding: 12px 20px 16px;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+      border-top: 1px solid #eeebf7;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     /* Confirm button */
     .pos-confirm-btn {
       width: 100%;
-      padding: 16px;
-      background: #6F2DBD;
+      padding: 15px;
+      background: linear-gradient(135deg, #6F2DBD, #8E44EC);
       color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 15px;
       font-weight: 700;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background 0.15s, transform 0.1s;
+      transition: opacity 0.15s, transform 0.1s;
       letter-spacing: 0.3px;
+      box-shadow: 0 4px 16px rgba(111,45,189,0.28);
     }
-    .pos-confirm-btn:hover { background: #8E44EC; }
+    .pos-confirm-btn:hover  { opacity: 0.9; }
     .pos-confirm-btn:active { transform: scale(0.98); }
-    .pos-confirm-btn:disabled { background: #aaa; cursor: not-allowed; }
-
-    .pos-back-btn {
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      color: #666;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.12s;
+    .pos-confirm-btn:disabled {
+      background: #ccc; cursor: not-allowed; box-shadow: none; opacity: 1;
     }
-    .pos-back-btn:hover { background: #f5f5f5; }
 
+    /* Print receipt button — shown after save */
     .pos-print-btn {
       width: 100%;
-      padding: 11px;
-      background: #fff;
+      padding: 12px;
+      background: #f0faf4;
       color: #1b7a3e;
       border: 1.5px solid #a8d5ba;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 700;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
-      margin-top: 8px;
       transition: background 0.12s;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 6px;
     }
-    .pos-print-btn:hover { background: #f0faf4; }
+    .pos-print-btn:hover { background: #dcf0e4; }
+
+    /* Secondary row — back + cancel side by side */
+    .pos-footer-secondary {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .pos-back-btn {
+      padding: 10px 14px;
+      background: #f8f6ff;
+      color: #6F2DBD;
+      border: 1.5px solid #e0d6f7;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: background 0.12s;
+      white-space: nowrap;
+    }
+    .pos-back-btn:hover { background: #ede8ff; }
 
     .pos-cancel-btn {
-      width: 100%;
-      padding: 10px;
+      padding: 10px 14px;
       background: transparent;
       color: #d32f2f;
       border: 1.5px solid #ffd7d7;
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 600;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
-      margin-top: 8px;
       transition: background 0.12s;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
     }
     .pos-cancel-btn:hover { background: #fff5f5; }
 
@@ -3625,10 +3890,10 @@
         height: auto;
         overflow: visible;
       }
-      .pos-right-body { overflow: visible; flex: none; padding: 14px 16px 10px; }
-      .pos-right-footer { padding: 12px 16px 20px; }
-      .pos-due-strip { padding: 14px 16px; }
-      .pos-due-amt { font-size: 26px; }
+      .pos-right-body { overflow: visible; flex: none; padding: 12px 16px 8px; }
+      .pos-right-footer { padding: 10px 16px max(14px, env(safe-area-inset-bottom)); gap: 7px; }
+      .pos-due-strip { padding: 14px 16px 18px; }
+      .pos-due-amt { font-size: 28px; }
       .pos-patient-name { font-size: 17px; }
       .pos-patient-meta { font-size: 12px; }
       .pos-section-title { font-size: 10px; }
@@ -3642,12 +3907,12 @@
       .pos-item-row { font-size: 13px; padding: 8px 0; }
       .pos-total-row { font-size: 13px; padding: 6px 0; }
       .pos-total-row.grand { font-size: 17px; }
-      .pos-amount-display {
+      .pos-amount-display, .pos-amount-input-desktop {
         font-size: 26px;
         padding: 11px 14px;
         min-height: 52px;
       }
-      .pos-change-strip { margin-top: 8px; margin-bottom: 12px; }
+      .pos-change-strip { margin-top: 8px; margin-bottom: 12px; gap: 6px; }
       .pos-change-cell-val { font-size: 15px; }
       .pos-keyboard { gap: 6px; margin-bottom: 10px; }
       .pos-key {
@@ -3657,9 +3922,9 @@
       }
       .pos-key.del { font-size: 16px; }
       .pos-key.clear-all { font-size: 12px; padding: 13px 8px; }
-      .pos-confirm-btn { padding: 14px; font-size: 15px; border-radius: 9px; }
-      .pos-back-btn { font-size: 13px; padding: 10px; margin-top: 7px; }
-      .pos-cancel-btn { font-size: 13px; padding: 10px; margin-top: 7px; }
+      .pos-confirm-btn { padding: 14px; font-size: 15px; border-radius: 10px; }
+      .pos-back-btn { font-size: 13px; padding: 10px 12px; }
+      .pos-cancel-btn { font-size: 12px; padding: 10px 12px; }
       /* Cancel modal — bottom sheet */
       .cancel-modal-card {
         position: fixed;
@@ -4202,14 +4467,62 @@
         <div style="font-size:11px;color:#aaa;margin-top:5px;" id="print-progress-sub">Starting…</div>
       </div>
 
-      <!-- List header -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;">Today's Session</span>
+      <!-- List header + search -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;">Today's Registrations</span>
         <span id="recent-count-badge" style="background:#ede8ff;color:#6F2DBD;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">0</span>
+        <div id="recent-sheet-badge" style="display:none;background:#fff3cd;color:#856404;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;border:1px solid #ffc107;">
+          ⚡ Loaded from sheet
+        </div>
+        <div id="recent-loading-badge" style="display:none;background:#e8eaf6;color:#3949ab;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">
+          ↻ Fetching today's records…
+        </div>
+      </div>
+
+      <!-- Search & filter bar -->
+      <div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:12px;
+        box-shadow:0 1px 6px rgba(111,45,189,0.08);border:1px solid #ede8ff;
+        display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="position:relative;flex:1;min-width:180px;">
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;"
+            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="recent-search" type="text" placeholder="Search name or no…"
+            oninput="_renderRecentList()"
+            style="width:100%;padding:8px 10px 8px 32px;border:1.5px solid #e0d6f7;border-radius:8px;
+              font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:#1a1a1a;
+              transition:border 0.15s;"
+            onfocus="this.style.borderColor='#6F2DBD'" onblur="this.style.borderColor='#e0d6f7'"/>
+        </div>
+        <select id="recent-filter-status" onchange="_renderRecentList()"
+          style="padding:8px 12px;border:1.5px solid #e0d6f7;border-radius:8px;
+            font-family:'DM Sans',sans-serif;font-size:13px;color:#1a1a1a;
+            background:#fff;outline:none;cursor:pointer;">
+          <option value="">All Status</option>
+          <option value="FULLY PAID">Fully Paid</option>
+          <option value="PARTLY PAID">Partly Paid</option>
+          <option value="UNPAID">Unpaid</option>
+          <option value="NO PAYMENT">No Payment</option>
+          <option value="PENDING">Pending</option>
+        </select>
+        <button onclick="_clearRecentSearch()"
+          style="padding:8px 12px;border:1.5px solid #e0d6f7;border-radius:8px;
+            font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#888;
+            background:#fff;cursor:pointer;white-space:nowrap;transition:all 0.15s;"
+          onmouseover="this.style.borderColor='#6F2DBD';this.style.color='#6F2DBD'"
+          onmouseout="this.style.borderColor='#e0d6f7';this.style.color='#888'">
+          ✕ Clear
+        </button>
       </div>
 
       <!-- Registrant list -->
       <div id="recent-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <div id="recent-empty" style="display:none;text-align:center;padding:40px 20px;color:#bbb;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:10px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <div style="font-size:14px;font-weight:600;color:#ccc;">No results found</div>
+        <div style="font-size:12px;margin-top:4px;">Try a different name or clear the filter</div>
+      </div>
 
       <!-- Bottom action -->
       <div style="margin-top:28px;text-align:center;border-top:1px solid #e8e0f7;padding-top:24px;">
@@ -4223,6 +4536,59 @@
 
     </div>
   </div><!-- /#page-recent -->
+
+  <!-- ═══════════ RECEIPT PREVIEW MODAL ═══════════ -->
+  <div id="receipt-preview-overlay">
+    <div class="rp-shell">
+
+      <!-- LEFT: receipt paper -->
+      <div class="rp-paper-wrap">
+        <div class="rp-paper" id="rp-paper-content">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- RIGHT: print status + exit -->
+      <div class="rp-right">
+
+        <div class="rp-status-card">
+          <div class="rp-status-title">🖨 Print Status</div>
+          <div class="rp-prog-label-row">
+            <span class="rp-prog-lbl" id="rp-prog-lbl">Preparing receipt…</span>
+            <span class="rp-prog-pct" id="rp-prog-pct">0%</span>
+          </div>
+          <div class="rp-prog-track">
+            <div class="rp-prog-bar" id="rp-prog-bar"></div>
+          </div>
+          <div class="rp-prog-sub" id="rp-prog-sub">Starting…</div>
+        </div>
+
+        <div class="rp-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          If the printer is offline, you can screenshot this receipt as a backup. Tap <strong>&nbsp;Exit Preview&nbsp;</strong> when ready.
+        </div>
+
+        <button class="rp-reprint-btn" id="rp-reprint-btn" onclick="_rpReprint()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Reprint Receipt
+        </button>
+
+        <button class="rp-exit-btn" id="rp-exit-btn" onclick="_rpExit()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Exit Preview → Go to Patient List
+        </button>
+
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"><span id="toast-msg"></span></div>
 
@@ -5353,10 +5719,11 @@
         paymentStatus: receiptData ? receiptData.paymentStatus : 'PENDING',
         paymentType:   receiptData ? receiptData.paymentType   : '',
         ts:            new Date().toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' }),
+        fromSheet:     false,
         receiptData,
       };
       _recentList.unshift(entry);
-      if (_recentList.length > 20) _recentList.length = 20;
+      if (_recentList.length > 50) _recentList.length = 50;
 
       document.getElementById('recent-banner-name').textContent = name;
       document.getElementById('recent-banner-num').textContent  = '#' + padded;
@@ -5365,111 +5732,163 @@
                    .filter(Boolean).join(' · ');
       document.getElementById('recent-banner-meta').textContent = meta || 'Registered just now';
 
+      const sheetBadge = document.getElementById('recent-sheet-badge');
+      if (sheetBadge) sheetBadge.style.display = 'none';
+
       _renderRecentList();
       document.getElementById('page-recent').classList.add('active');
-      if (receiptData) setTimeout(() => _recentPrint(0), 300);
+      _onRecentPageOpen();
+      // Note: auto-print is now handled by the receipt preview modal (_rpOpen)
     }
 
     function _renderRecentList() {
-      const wrap  = document.getElementById('recent-list');
+      const wrap   = document.getElementById('recent-list');
+      const empty  = document.getElementById('recent-empty');
+      const search = (document.getElementById('recent-search')?.value || '').toLowerCase().trim();
+      const filter = (document.getElementById('recent-filter-status')?.value || '');
+
       document.getElementById('recent-count-badge').textContent = _recentList.length;
 
-      wrap.innerHTML = _recentList.map((r, i) => {
-        const sc  = _SBADGE[r.paymentStatus] || _SBADGE['PENDING'];
-        const lat = i === 0;
-        const amt = (r.grand || 0).toLocaleString('en-PH', { minimumFractionDigits:2 });
-        return `<div class="recent-row${lat ? ' latest' : ''}">
-          <div class="recent-row-num${lat ? ' latest' : ''}">${r.padded}</div>
-          <div class="recent-row-info">
-            <div class="recent-row-name">${r.name}</div>
-            <div class="recent-row-meta">${[r.ageSex, r.ts].filter(Boolean).join(' · ')}</div>
-          </div>
-          <div class="recent-row-amt">
-            <div class="recent-row-price">₱${amt}</div>
-            <div class="recent-status-badge" style="background:${sc.bg};color:${sc.fg};">${r.paymentStatus}</div>
-          </div>
-          <button class="recent-reprint-btn" id="rprint-${i}" onclick="_recentPrint(${i})">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="6 9 6 2 18 2 18 9"/>
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-              <rect x="6" y="14" width="12" height="8"/>
-            </svg>
-            ${lat ? 'Print Receipt' : 'Reprint'}
-          </button>
-        </div>`;
-      }).join('');
+      const filtered = _recentList.filter((r, i) => {
+        const matchSearch = !search ||
+          (r.name || '').toLowerCase().includes(search) ||
+          (r.padded || '').includes(search);
+        const matchStatus = !filter || (r.paymentStatus || '').toUpperCase() === filter.toUpperCase();
+        return matchSearch && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        wrap.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+      } else {
+        if (empty) empty.style.display = 'none';
+        wrap.innerHTML = filtered.map((r, i) => {
+          const origIdx = _recentList.indexOf(r);
+          const sc  = _SBADGE[r.paymentStatus] || _SBADGE['PENDING'];
+          const lat = origIdx === 0;
+          const amt = (r.grand || 0).toLocaleString('en-PH', { minimumFractionDigits:2 });
+          const fromSheet = r.fromSheet ? ' <span style="font-size:9px;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;font-weight:700;vertical-align:middle;">SHEET</span>' : '';
+          return `<div class="recent-row${lat ? ' latest' : ''}">
+            <div class="recent-row-num${lat ? ' latest' : ''}">${r.padded}</div>
+            <div class="recent-row-info">
+              <div class="recent-row-name">${r.name}${fromSheet}</div>
+              <div class="recent-row-meta">${[r.ageSex, r.ts].filter(Boolean).join(' · ')}</div>
+            </div>
+            <div class="recent-row-amt">
+              <div class="recent-row-price">₱${amt}</div>
+              <div class="recent-status-badge" style="background:${sc.bg};color:${sc.fg};">${r.paymentStatus}</div>
+            </div>
+            <button class="recent-reprint-btn" id="rprint-${origIdx}" onclick="_recentPrint(${origIdx})">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              ${lat && !r.fromSheet ? 'Print Receipt' : 'Reprint'}
+            </button>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    function _clearRecentSearch() {
+      const s = document.getElementById('recent-search');
+      const f = document.getElementById('recent-filter-status');
+      if (s) s.value = '';
+      if (f) f.value = '';
+      _renderRecentList();
     }
 
     async function _recentPrint(idx) {
       const r = _recentList[idx];
       if (!r || !r.receiptData) { showToast('No receipt data for this entry.', 'err'); return; }
+      _rpOpen(r.receiptData, idx);
+    }
 
-      // Disable all reprint buttons while printing
-      document.querySelectorAll('.recent-reprint-btn').forEach(b => b.disabled = true);
+    /* ════════════════════════════════════════════════
+       FETCH TODAY'S RECORDS FROM RECEIPT LOGS SHEET
+       Called when _recentList is empty (page refresh)
+    ════════════════════════════════════════════════ */
+    let _sheetFetchDone = false;
 
-      const wrap  = document.getElementById('print-progress-wrap');
-      const bar   = document.getElementById('print-progress-bar');
-      const lbl   = document.getElementById('print-progress-label');
-      const pct   = document.getElementById('print-progress-pct');
-      const sub   = document.getElementById('print-progress-sub');
+    async function _fetchTodayFromSheet() {
+      if (_sheetFetchDone) return;
+      if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') return;
 
-      const step = (p, l, s) => {
-        bar.style.width = p + '%'; lbl.textContent = l;
-        pct.textContent = p + '%'; if (s !== undefined) sub.textContent = s;
-      };
-
-      bar.classList.remove('error');
-      lbl.style.color = '#6F2DBD';
-      wrap.style.display = 'block';
-      wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
-      step(5, 'Preparing receipt…', 'Building ESC/POS commands…');
+      const loadBadge = document.getElementById('recent-loading-badge');
+      const sheetBadge = document.getElementById('recent-sheet-badge');
+      if (loadBadge) loadBadge.style.display = 'inline-block';
 
       try {
-        step(18, 'Building receipt layout…', 'Rendering items and totals…');
-        const bytes = await buildReceiptBytes(r.receiptData);
+        const res  = await fetch(`${APPS_SCRIPT_URL}?action=gettoday`);
+        const data = await res.json();
+        if (!data.success || !data.records || !data.records.length) {
+          if (loadBadge) loadBadge.style.display = 'none';
+          return;
+        }
 
-        step(42, 'Loading print driver…', 'Fetching QZ Tray library…');
-        await loadQzScript();
+        // Populate _recentList from sheet records (oldest first → reverse so newest is index 0)
+        data.records.reverse().forEach(rec => {
+          const entry = {
+            num:           rec.num,
+            padded:        String(rec.num).padStart(4, '0'),
+            name:          rec.name,
+            ageSex:        rec.ageSex,
+            referred:      rec.referred,
+            grand:         rec.grand,
+            paymentStatus: rec.paymentStatus,
+            paymentType:   rec.paymentType,
+            ts:            rec.ts || '',
+            fromSheet:     true,
+            receiptData: {
+              num:           rec.num,
+              date:          rec.date,
+              name:          rec.name,
+              ageSex:        rec.ageSex,
+              referred:      rec.referred,
+              // Itemized from RECEIPT LOGS JSON
+              items:         rec.items        || [],
+              procedures:    rec.procedures   || '',
+              xrayTests:     rec.xrayTests    || '',
+              drugTests:     rec.drugTests    || '',
+              utzTests:      rec.utzTests     || '',
+              labSubtotal:   rec.labSubtotal  || 0,
+              xraySubtotal:  rec.xraySubtotal || 0,
+              drugSubtotal:  rec.drugSubtotal || 0,
+              utzSubtotal:   rec.utzSubtotal  || 0,
+              discAmt:       rec.discAmt      || 0,
+              discountLabel: rec.discountLabel|| '',
+              grand:         rec.grand        || 0,
+              paymentStatus: rec.paymentStatus,
+              paymentType:   rec.paymentType,
+              paymentAmt:    rec.paymentAmt   || 0,
+              balance:       rec.balance      || 0,
+            },
+          };
+          _recentList.push(entry);  // push (already reversed, so index 0 = newest)
+        });
 
-        step(60, 'Connecting to QZ Tray…', 'Opening WebSocket on localhost:8181…');
-        await connectQZ();
+        if (_recentList.length > 50) _recentList.length = 50;
 
-        step(80, 'Sending to printer…', `Sending to "${QZ_PRINTER_NAME}"…`);
-        const cfg = qz.configs.create(QZ_PRINTER_NAME, { encoding:'RAW', copies:1, colorType:'blackwhite' });
-        await qz.print(cfg, bytesToQzData(bytes));
+        _sheetFetchDone = true;
+        if (loadBadge) loadBadge.style.display = 'none';
+        if (sheetBadge) sheetBadge.style.display = 'inline-block';
 
-        step(100, '✓ Receipt printed!', 'The paper is printing now.');
-        showToast('Receipt printed!', 'ok');
-        setTimeout(() => { wrap.style.display = 'none'; step(0,'Preparing receipt…','Starting…'); }, 3500);
+        // Update banner to most recent record
+        if (_recentList.length > 0) {
+          const latest = _recentList[0];
+          document.getElementById('recent-banner-name').textContent = latest.name;
+          document.getElementById('recent-banner-num').textContent  = '#' + latest.padded;
+          const meta = [latest.ageSex, latest.referred ? 'Ref: ' + latest.referred : '']
+                       .filter(Boolean).join(' · ');
+          document.getElementById('recent-banner-meta').textContent = meta || 'Loaded from sheet';
+        }
 
-      } catch (err) {
-        console.error('Print error:', err);
-        _qzConnected = false;
-        const msg = err.message || '';
-        let errMsg = 'Print failed: ' + msg;
-        if (msg.includes('Unable to establish') || msg.includes('connect'))
-          errMsg = 'QZ Tray is not running — start it from the system tray, then tap Reprint.';
-        else if (msg.includes('not found') || msg.includes('printer'))
-          errMsg = `Printer "${QZ_PRINTER_NAME}" not found — check the printer name, then tap Reprint.`;
+        _renderRecentList();
 
-        bar.style.width = '100%';
-        bar.classList.add('error');
-        lbl.style.color = '#c62828';
-        lbl.textContent = '⚠ Print failed — tap Reprint to try again';
-        pct.textContent = '';
-        sub.textContent = errMsg;
-        showToast(errMsg, 'err');
-
-        // After 8 s, collapse the bar — but stay on this page
-        setTimeout(() => {
-          wrap.style.display = 'none';
-          bar.classList.remove('error');
-          bar.style.width = '0%';
-          lbl.style.color = '#6F2DBD';
-          step(0, 'Preparing receipt…', 'Starting…');
-        }, 8000);
-      } finally {
-        document.querySelectorAll('.recent-reprint-btn').forEach(b => b.disabled = false);
+      } catch(e) {
+        if (loadBadge) loadBadge.style.display = 'none';
+        console.warn('Could not fetch today\'s records from sheet:', e);
       }
     }
 
@@ -5480,6 +5899,13 @@
       document.getElementById('logout-btn').classList.add('visible');
       clearForm();
       goToStep1();
+    }
+
+    /* Called whenever page-recent becomes visible — fetches sheet if list is empty */
+    function _onRecentPageOpen() {
+      if (_recentList.length === 0 && !_sheetFetchDone) {
+        _fetchTodayFromSheet();
+      }
     }
 
     /* Legacy stubs — kept so nothing else breaks */
@@ -6795,7 +7221,7 @@
         keyboard.style.opacity = '1';
         keyboard.style.pointerEvents = '';
         const deskInp = document.getElementById('pos-amount-input-desktop');
-        if (deskInp) { deskInp.value = ''; deskInp.disabled = false; deskInp.placeholder = '0.00'; }
+        if (deskInp) { deskInp.value = ''; deskInp.disabled = false; deskInp.placeholder = 'Enter Amount'; deskInp.style.textAlign = 'center'; }
       }
 
       posUpdateDisplay();
@@ -7028,15 +7454,18 @@
                     && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     function applyPosKeyboardVisibility() {
-      const kbd       = document.getElementById('pos-keyboard');
-      const amtInput  = document.getElementById('pos-amount-input-desktop');
+      const kbd        = document.getElementById('pos-keyboard');
+      const amtInput   = document.getElementById('pos-amount-input-desktop');
+      const amtDisplay = document.getElementById('pos-amount-display');
       if (!kbd) return;
       if (IS_DESKTOP) {
         kbd.style.display      = 'none';
-        if (amtInput) amtInput.style.display = 'block';
+        if (amtInput)   amtInput.style.display   = 'block';
+        if (amtDisplay) amtDisplay.style.display  = 'none';  // ← hide touch display on desktop
       } else {
         kbd.style.display      = '';
-        if (amtInput) amtInput.style.display = 'none';
+        if (amtInput)   amtInput.style.display   = 'none';
+        if (amtDisplay) amtDisplay.style.display  = 'flex';  // ← show touch display on mobile
       }
     }
     /* ════════════════════════════════════════════════
@@ -7076,7 +7505,7 @@
         if (tendSec)     tendSec.style.opacity = '1';
         if (changeStrip) changeStrip.style.display = '';
         applyPosKeyboardVisibility();
-        if (IS_DESKTOP && deskInp) { deskInp.disabled = false; deskInp.placeholder = '0.00'; deskInp.focus(); }
+        if (IS_DESKTOP && deskInp) { deskInp.disabled = false; deskInp.placeholder = 'Enter amount'; deskInp.style.textAlign = deskInp.value ? 'right' : 'center'; deskInp.focus(); }
       }
       posUpdateDisplay();
     }
@@ -7117,6 +7546,8 @@
       posUpdateDisplay();
     }
 
+    let _posChangeAmt = 0; // change to give back — stored for receipt
+
     /* ════════════════════════════════════════════════
        UPDATE DISPLAY — format number with commas
     ════════════════════════════════════════════════ */
@@ -7127,34 +7558,49 @@
       const chgEl   = document.getElementById('pos-change-val');
 
       // Format tendered display
-      let formatted = '0';
+      let formatted = '';
       if (raw !== '' && raw !== '.') {
         const parts = raw.split('.');
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         formatted = parts.join('.');
         if (raw.endsWith('.') && !formatted.includes('.')) formatted += '.';
       }
-      if (display) display.textContent = formatted;
+      if (display) {
+        if (formatted === '') {
+          display.textContent = 'Enter amount';
+          display.style.color = '#bbb';
+          display.style.fontSize = '16px';
+          display.style.fontWeight = '500';
+          display.style.letterSpacing = '0';
+          display.style.justifyContent = 'center';
+        } else {
+          display.textContent = formatted;
+          display.style.color = '';
+          display.style.fontSize = '';
+          display.style.fontWeight = '';
+          display.style.letterSpacing = '';
+          display.style.justifyContent = '';
+        }
+      }
 
       // Compute balance / change
       const paid  = parseFloat(raw) || 0;
       const total = _posData ? _posData.grand : 0;
       const diff  = paid - total; // positive = change back, negative = still owes
 
+      _posChangeAmt = diff > 0 ? diff : 0; // store for receipt
+
       if (balEl) {
         if (diff >= 0) {
-          // Fully paid or overpaid — balance is ₱0.00
           balEl.textContent = fmtPeso(0);
           balEl.className   = 'pos-change-cell-val settled';
         } else {
-          // Still owes
           balEl.textContent = fmtPeso(Math.abs(diff));
           balEl.className   = 'pos-change-cell-val balance-due';
         }
       }
       if (chgEl) {
         if (diff > 0) {
-          // Overpaid — show change
           chgEl.textContent = fmtPeso(diff);
           chgEl.className   = 'pos-change-cell-val change-back';
         } else {
@@ -7188,11 +7634,20 @@
         sheetStatus = 'NO PAYMENT';   // Zero entered
       }
 
+      // Build itemized receipt items (with per-item effective prices after item discounts)
+      const _rcptItemsFinal = (_posData.itemsDetail || []).map((it, i) => {
+        const id = _itemDiscounts[i];
+        return id
+          ? { name: it.name, price: Math.max(0, it.price - id.discAmt), discNote: id.discName }
+          : { name: it.name, price: it.price, discNote: '' };
+      });
+
       const finalPayload = Object.assign({}, _posData.rawPayload, {
         paymentType:   _posIsCharged ? 'CHARGED' : payType,
         paymentStatus: sheetStatus,
         paymentAmount: _posIsCharged ? 0 : paid,
         balance:       _posIsCharged ? 0 : balance,
+        itemsJson:     JSON.stringify(_rcptItemsFinal),  // ← itemized for RECEIPT LOGS
       });
 
       btn.disabled = true;
@@ -7206,16 +7661,11 @@
       if (APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         setTimeout(() => {
           resetBtn();
-          // Build receipt items with per-item effective prices
-          const _rcptItems = (_posData.itemsDetail || []).map((it, i) => {
-            const id = _itemDiscounts[i];
-            return id ? Object.assign({}, it, { price: Math.max(0, it.price - id.discAmt), discNote: id.discName }) : it;
-          });
           _lastReceiptData = {
             num: '0000', date: finalPayload.date, name: finalPayload.name,
             ageSex: finalPayload.ageSex, contact: finalPayload.contact,
             address: finalPayload.address, referred: finalPayload.referred,
-            items: _rcptItems,
+            items: _rcptItemsFinal,
             procedures:   finalPayload.procedures,
             xrayTests:    finalPayload.xrayTests,
             drugTests:    finalPayload.drugTests,
@@ -7231,6 +7681,7 @@
             paymentType:   finalPayload.paymentType,
             paymentAmt:    finalPayload.paymentAmount,
             balance:       finalPayload.balance,
+            changeAmt:     _posChangeAmt,
           };
           document.getElementById('pos-print-btn').style.display = 'flex';
           showSuccessAndReset(finalPayload.name, '0000');
@@ -7248,11 +7699,7 @@
           resetBtn();
           if (d.success) {
             // Build receipt data for printing
-            // Build receipt items with per-item effective prices
-            const _rcptItemsLive = (_posData.itemsDetail || []).map((it, i) => {
-              const id = _itemDiscounts[i];
-              return id ? Object.assign({}, it, { price: Math.max(0, it.price - id.discAmt), discNote: id.discName }) : it;
-            });
+            // Use the already-built _rcptItemsFinal (built above finalPayload)
             _lastReceiptData = {
               num:           d.number,
               date:          finalPayload.date,
@@ -7261,7 +7708,7 @@
               contact:       finalPayload.contact,
               address:       finalPayload.address,
               referred:      finalPayload.referred,
-              items:         _rcptItemsLive,
+              items:         _rcptItemsFinal,
               procedures:    finalPayload.procedures,
               xrayTests:     finalPayload.xrayTests,
               drugTests:     finalPayload.drugTests,
@@ -7277,6 +7724,7 @@
               paymentType:   finalPayload.paymentType,
               paymentAmt:    finalPayload.paymentAmount,
               balance:       finalPayload.balance,
+              changeAmt:     _posChangeAmt,
             };
             // Show print button
             document.getElementById('pos-print-btn').style.display = 'flex';
@@ -7289,11 +7737,13 @@
     }
 
     function showSuccessAndReset(name, num) {
-      // Go to the Recent Registrants page — DO NOT clear the form yet.
-      // Staff can reprint freely. Form clears only when "Register Next Patient" is clicked.
+      // Show receipt preview modal first, then go to Recent page on exit
       document.getElementById('page-pos').classList.remove('active');
       document.getElementById('logout-btn').classList.add('visible');
+      // Pre-add to recent list so it's ready when modal exits
       showRecentPage(name, num, _lastReceiptData);
+      // Now show the receipt preview + start printing
+      _rpOpen(_lastReceiptData, 0);
     }
 
     /* ════════════════════════════════════════════════
@@ -7302,11 +7752,12 @@
     function onDesktopAmountInput(inp) {
       if (_posAmountLocked) { inp.value = _posRawAmount; return; }
       const v = inp.value.replace(/[^0-9.]/g, '');
-      // Allow only one decimal point, max 2 decimal places
       const parts = v.split('.');
       if (parts.length > 2) inp.value = parts[0] + '.' + parts.slice(1).join('');
       if (parts[1] && parts[1].length > 2) inp.value = parts[0] + '.' + parts[1].slice(0, 2);
       _posRawAmount = inp.value || '';
+      // Right-align when typing, center when empty (placeholder)
+      inp.style.textAlign = inp.value ? 'right' : 'center';
       posUpdateDisplay();
     }
 
@@ -7430,6 +7881,212 @@
     }
 
     // buildReceiptBytes is now async because logo loading is async
+
+    /* ════════════════════════════════════════════════
+       RECEIPT PREVIEW MODAL
+    ════════════════════════════════════════════════ */
+    let _rpCurrentData  = null;  // receipt data currently shown in modal
+    let _rpCurrentIdx   = 0;     // _recentList index (for reprint context)
+    let _rpPrinting     = false;
+
+    function _rpOpen(receiptData, listIdx) {
+      _rpCurrentData = receiptData;
+      _rpCurrentIdx  = listIdx;
+      _rpPrinting    = false;
+
+      // Render paper
+      _rpRenderPaper(receiptData);
+
+      // Reset progress bar
+      _rpStep(0, 'Preparing receipt…', 'Starting…', '');
+      document.getElementById('rp-prog-bar').classList.remove('error', 'done');
+
+      // Show overlay
+      const overlay = document.getElementById('receipt-preview-overlay');
+      overlay.classList.add('show');
+
+      // Start printing automatically after short delay
+      setTimeout(() => _rpDoPrint(), 400);
+    }
+
+    function _rpExit() {
+      document.getElementById('receipt-preview-overlay').classList.remove('show');
+      _rpCurrentData = null;
+      _rpPrinting    = false;
+      // Scroll recent list to top
+      setTimeout(() => {
+        const pg = document.getElementById('page-recent');
+        if (pg) pg.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 200);
+    }
+
+    function _rpReprint() {
+      if (_rpPrinting) return;
+      document.getElementById('rp-prog-bar').classList.remove('error', 'done');
+      _rpStep(0, 'Preparing receipt…', 'Starting…', '');
+      setTimeout(() => _rpDoPrint(), 200);
+    }
+
+    function _rpStep(pct, lbl, sub, barClass) {
+      const bar = document.getElementById('rp-prog-bar');
+      const l   = document.getElementById('rp-prog-lbl');
+      const p   = document.getElementById('rp-prog-pct');
+      const s   = document.getElementById('rp-prog-sub');
+      bar.style.width    = pct + '%';
+      l.textContent      = lbl;
+      p.textContent      = pct + '%';
+      s.textContent      = sub;
+      bar.className      = 'rp-prog-bar' + (barClass ? ' ' + barClass : '');
+    }
+
+    async function _rpDoPrint() {
+      if (!_rpCurrentData) return;
+      _rpPrinting = true;
+      document.getElementById('rp-reprint-btn').disabled = true;
+
+      try {
+        _rpStep(5,  'Preparing receipt…',       'Building ESC/POS commands…', '');
+        const bytes = await buildReceiptBytes(_rpCurrentData);
+
+        _rpStep(35, 'Building receipt layout…', 'Rendering items and totals…', '');
+        await loadQzScript();
+
+        _rpStep(55, 'Connecting to QZ Tray…',   'Opening WebSocket on localhost:8181…', '');
+        await connectQZ();
+
+        _rpStep(78, 'Sending to printer…',       `Sending to "${QZ_PRINTER_NAME}"…`, '');
+        const cfg = qz.configs.create(QZ_PRINTER_NAME, { encoding:'RAW', copies:1, colorType:'blackwhite' });
+        await qz.print(cfg, bytesToQzData(bytes));
+
+        _rpStep(100, '✓ Receipt printed!', 'Paper is printing now. You may exit.', 'done');
+        showToast('Receipt printed!', 'ok');
+
+      } catch (err) {
+        console.error('Print error:', err);
+        _qzConnected = false;
+        const msg = err.message || '';
+        let errMsg = 'Print failed: ' + msg;
+        if (msg.includes('Unable to establish') || msg.includes('connect'))
+          errMsg = 'QZ Tray is not running — start it from the system tray, then tap Reprint.';
+        else if (msg.includes('not found') || msg.includes('printer'))
+          errMsg = `Printer "${QZ_PRINTER_NAME}" not found — check name in settings.`;
+
+        _rpStep(100, '⚠ Print failed', errMsg, 'error');
+        showToast(errMsg, 'err');
+      } finally {
+        _rpPrinting = false;
+        document.getElementById('rp-reprint-btn').disabled = false;
+      }
+    }
+
+    /* ────────────────────────────────────────────────
+       _rpRenderPaper — builds the visual receipt HTML
+    ──────────────────────────────────────────────── */
+    function _rpRenderPaper(d) {
+      const fmtP = v => '₱' + (parseFloat(v) || 0).toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 });
+      const div  = c => `<div class="rp-div">${c.repeat(32)}</div>`;
+      const row  = (l, r, cls) => `<div class="rp-row${cls?' '+cls:''}"><span class="rp-lbl">${l}</span><span class="rp-val">${r}</span></div>`;
+
+      const recNo = 'REC-' + String(d.num || 0).padStart(5, '0');
+      const hasXray  = (d.xraySubtotal  || 0) > 0;
+      const hasDrug  = (d.drugSubtotal  || 0) > 0;
+      const hasUtz   = (d.utzSubtotal   || 0) > 0;
+      const hasMulti = hasXray || hasDrug || hasUtz;
+
+      let html = `
+        <div class="rp-center rp-bold" style="font-size:13px;letter-spacing:1px;">QUALICHECK</div>
+        <div class="rp-center" style="font-size:10px;margin-top:2px;">Qualicheck Diagnostic Clinic</div>
+        <div class="rp-center rp-small" style="color:#666;">Brgy. San Antonio, Biñan, Laguna</div>
+        <div class="rp-center rp-small" style="color:#666;">Tel: (049) 000-0000</div>
+        <div class="rp-gap"></div>
+        <div class="rp-center rp-bold" style="font-size:12px;letter-spacing:0.5px;">OFFICIAL RECEIPT</div>
+        <div class="rp-center rp-small" style="color:#888;">** NOT A VALID MEDICAL RECORD **</div>
+        ${div('-')}
+        ${row('Receipt No:', recNo)}
+        ${row('Date/Time:', d.date || '')}
+        ${row('Cashier:', 'Front Desk')}
+        ${div('-')}
+        <div class="rp-small" style="color:#888;">Patient</div>
+        <div class="rp-bold" style="font-size:12px;word-break:break-word;">${(d.name || '').toUpperCase()}</div>
+        ${row('Age/Sex:', d.ageSex || '')}
+        ${d.referred && d.referred.trim() ? `<div class="rp-small" style="color:#555;">Ref: ${d.referred}</div>` : ''}
+        ${div('-')}
+        <div class="rp-small" style="color:#888;">Services Rendered</div>
+        <div class="rp-gap"></div>`;
+
+      // Lab items
+      (d.items || []).forEach(item => {
+        html += row(item.name || '', fmtP(item.price));
+        if (item.discNote) html += `<div class="rp-item-disc">(${item.discNote})</div>`;
+      });
+
+      // X-Ray
+      if (d.xrayTests && d.xrayTests.trim()) {
+        html += `<div class="rp-section">— X-Ray —</div>`;
+        d.xrayTests.split(',').forEach(x => { html += `<div>${x.trim()}</div>`; });
+      }
+
+      // Drug Test
+      if (d.drugTests && d.drugTests.trim()) {
+        html += `<div class="rp-section">— Drug Test —</div>`;
+        d.drugTests.split(',').forEach(x => { html += `<div>${x.trim()}</div>`; });
+      }
+
+      // UTZ
+      if (d.utzTests && d.utzTests.trim()) {
+        html += `<div class="rp-section">— UTZ Tests —</div>`;
+        d.utzTests.split(',').forEach(x => { html += `<div>${x.trim()}</div>`; });
+      }
+
+      html += div('-');
+
+      // Subtotals
+      if (hasMulti) {
+        if ((d.labSubtotal || 0) > 0)  html += row('Lab Subtotal',      fmtP(d.labSubtotal));
+        if (hasXray)                    html += row('X-Ray Subtotal',     fmtP(d.xraySubtotal));
+        if (hasDrug)                    html += row('Drug Test Subtotal', fmtP(d.drugSubtotal));
+        if (hasUtz)                     html += row('UTZ Total',          fmtP(d.utzSubtotal));
+      }
+
+      if ((d.discAmt || 0) > 0) {
+        html += row((d.discountLabel || 'Discount'), '-' + fmtP(d.discAmt));
+      }
+
+      html += div('=');
+      html += row('TOTAL', fmtP(d.grand), 'grand');
+      html += div('=');
+
+      // Payment
+      const status = (d.paymentStatus || 'PENDING').toUpperCase();
+      html += row('Method:', d.paymentType || 'CASH');
+
+      if (status === 'FULLY PAID') {
+        html += row('Amount Paid:', fmtP(d.paymentAmt));
+        if ((d.changeAmt || 0) > 0) html += row('Change:', fmtP(d.changeAmt));
+        html += row('Balance:', '₱0.00');
+        html += `<div class="rp-center rp-bold" style="margin:4px 0;">** FULLY PAID **</div>`;
+      } else if (status === 'PARTLY PAID') {
+        html += row('Amount Paid:', fmtP(d.paymentAmt));
+        html += row('BALANCE DUE:', fmtP(d.balance));
+      } else if (status === 'UNPAID' || status === 'NO PAYMENT') {
+        html += row('BALANCE DUE:', fmtP(d.grand));
+        html += `<div class="rp-center rp-bold" style="margin:4px 0;">** PROMISSORY NOTE **</div>`;
+      } else {
+        html += row('Status:', status);
+      }
+
+      html += div('-');
+      html += `
+        <div class="rp-gap"></div>
+        <div class="rp-center rp-small">Thank you for trusting</div>
+        <div class="rp-center rp-bold rp-small">Qualicheck Diagnostic Clinic</div>
+        <div class="rp-center rp-small" style="color:#888;">Results are strictly confidential.</div>
+        <div class="rp-center rp-small" style="color:#888;">For inquiries call (049) 000-0000</div>
+        <div class="rp-gap"></div>`;
+
+      document.getElementById('rp-paper-content').innerHTML = html;
+    }
+
     async function buildReceiptBytes(d) {
       const chunks = [];
       const cmd  = arr => chunks.push(new Uint8Array(arr));
@@ -7565,7 +8222,7 @@
         if (d.labSubtotal > 0)  txt(padLine('Lab Subtotal',      fmtAmt(d.labSubtotal))  + '\n');
         if (hasXray)            txt(padLine('X-Ray Subtotal',     fmtAmt(d.xraySubtotal)) + '\n');
         if (hasDrug)            txt(padLine('Drug Test Subtotal', fmtAmt(d.drugSubtotal)) + '\n');
-        if (hasUtz)             txt(padLine('UTZ Subtotal',       fmtAmt(d.utzSubtotal))  + '\n');
+        if (hasUtz)             txt(padLine('UTZ Total',          fmtAmt(d.utzSubtotal))  + '\n');
       }
 
       if (d.discAmt > 0) {
@@ -7593,6 +8250,9 @@
 
       if (status === 'FULLY PAID') {
         txt(padLine('Amount Paid:', fmtAmt(d.paymentAmt)) + '\n');
+        if (d.changeAmt > 0) {
+          txt(padLine('Change:', fmtAmt(d.changeAmt)) + '\n');
+        }
         txt(padLine('Balance:', '0.00') + '\n');
         cmd(CMD.BOLD_ON);
         txt(ctr('** FULLY PAID **') + '\n');
@@ -7830,6 +8490,7 @@
         <!-- Header -->
         <div class="pos-right-header">
           <div class="pos-right-title">Payment</div>
+          <div class="pos-right-divider"></div>
         </div>
 
         <!-- Amount Due strip — always visible -->
@@ -7858,10 +8519,9 @@
             <div class="pos-method-pill" data-method="CARD" onclick="posPillSelect(this)">Card</div>
           </div>
 
-          <!-- "No Payment" pill — shown when user taps it; replaces the amount entry -->
-          <div class="pos-method-pills" style="margin-top:-6px;">
-            <div class="pos-method-pill" id="pos-pill-nopay" data-method="NONE" onclick="posPillSelect(this)"
-              style="border-color:#ffd7d7;color:#d32f2f;">
+          <!-- "No Payment" pill -->
+          <div class="pos-nopay-row">
+            <div class="pos-nopay-pill" id="pos-pill-nopay" data-method="NONE" onclick="posPillSelect(this)">
               No Payment (Promissory Note)
             </div>
           </div>
@@ -7869,10 +8529,10 @@
           <!-- Amount Tendered -->
           <div class="pos-tendered-label" style="margin-top:14px;" id="pos-tendered-section">Amount Tendered</div>
           <!-- Touch display (mobile/tablet) -->
-          <div class="pos-amount-display" id="pos-amount-display">0</div>
+          <div class="pos-amount-display" id="pos-amount-display" style="color:#bbb;font-size:16px;font-weight:500;letter-spacing:0;justify-content:center;">Enter amount</div>
           <!-- Desktop text input -->
           <input type="number" id="pos-amount-input-desktop" class="pos-amount-input-desktop"
-            placeholder="0.00" min="0" step="0.01"
+            placeholder="Enter amount" min="0" step="0.01"
             oninput="onDesktopAmountInput(this)"
             style="display:none;" />
 
@@ -7913,21 +8573,21 @@
 
         <!-- Footer — always visible -->
         <div class="pos-right-footer">
-
-
           <button class="pos-confirm-btn" id="pos-confirm-btn" onclick="posConfirm()">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             Confirm &amp; Save
           </button>
           <button class="pos-print-btn" id="pos-print-btn" onclick="printReceipt()" style="display:none;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Print Receipt
           </button>
-          <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
-          <button class="pos-cancel-btn" onclick="posCancelRegistration()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-            Cancel Registration
-          </button>
+          <div class="pos-footer-secondary">
+            <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
+            <button class="pos-cancel-btn" onclick="posCancelRegistration()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Cancel
+            </button>
+          </div>
         </div>
 
       </div><!-- /.pos-right -->
