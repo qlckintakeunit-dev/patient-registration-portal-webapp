@@ -5114,11 +5114,18 @@
           <div class="rp-prog-sub" id="rp-prog-sub">Starting…</div>
         </div>
 
-        <div class="rp-hint">
+        <div class="rp-hint" id="rp-hint-default">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
           If the printer is offline, you can screenshot this receipt as a backup.
+        </div>
+        <div class="rp-hint" id="rp-hint-android" style="display:none;background:rgba(25,118,210,0.13);border-color:rgba(25,118,210,0.25);color:#e3f2fd;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2">
+            <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          Android detected — printing via <strong>RawBT</strong> to JK-580H Bluetooth.
+          Make sure RawBT is installed and JK-580H is set as the default printer.
         </div>
 
         <button class="rp-reprint-btn" id="rp-reprint-btn" onclick="_rpReprint()">
@@ -9020,17 +9027,28 @@
       _rpPrinting = true;
       document.getElementById('rp-reprint-btn').disabled = true;
 
+      const onAndroid = _isAndroid();
+
       try {
-        _rpStep(5,  'Preparing receipt…',  'Building ESC/POS commands…', '');
+        _rpStep(5,  'Preparing receipt…', 'Building ESC/POS commands…', '');
         const bytes = await buildReceiptBytes(_rpCurrentData);
 
-        _rpStep(40, 'Connecting…',         'Opening QZ Tray WebSocket…', '');
-        // sendToUsbPrinter handles: load script → connect → picker → print
-        _rpStep(70, 'Sending to printer…', _activePrinter ? `Sending to "${_activePrinter}"…` : 'Select a printer…', '');
+        if (onAndroid) {
+          _rpStep(50, 'Sending to RawBT…', 'Handing off to Bluetooth app…', '');
+        } else {
+          _rpStep(40, 'Connecting…',       'Opening QZ Tray WebSocket…', '');
+          _rpStep(70, 'Sending to printer…', _activePrinter ? `Sending to "${_activePrinter}"…` : 'Select a printer…', '');
+        }
+
         await sendToUsbPrinter(bytes);
 
-        _rpStep(100, '✓ Receipt printed!', 'Paper is printing now. You may exit.', 'done');
-        showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
+        if (onAndroid) {
+          _rpStep(100, '✓ Sent to RawBT!', 'RawBT is printing to JK-580H via Bluetooth.', 'done');
+          showToast('Sent to RawBT — printing via Bluetooth!', 'ok');
+        } else {
+          _rpStep(100, '✓ Receipt printed!', 'Paper is printing now. You may exit.', 'done');
+          showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
+        }
         _qzUpdateBadge();
 
       } catch (err) {
@@ -9725,9 +9743,11 @@
       const change = document.getElementById('qz-change-printer');
       if (!badge || !change) return;
       if (_activePrinter) {
-        badge.textContent  = '🖨 ' + _activePrinter;
+        const icon = _isAndroid() ? '📶' : '🖨';
+        badge.textContent    = icon + ' ' + _activePrinter;
         badge.style.display  = 'block';
-        change.style.display = 'block';
+        // Hide "Change Printer" on Android — printer is managed by RawBT settings
+        change.style.display = _isAndroid() ? 'none' : 'block';
       } else {
         badge.style.display  = 'none';
         change.style.display = 'none';
@@ -9762,29 +9782,92 @@
       return [{ type: 'raw', format: 'base64', data: btoa(binary) }];
     }
 
-    async function sendToUsbPrinter(bytes) {
-      await loadQzScript();
-      await connectQZ();
+    /* ════════════════════════════════════════════════
+       DEVICE DETECTION
+    ════════════════════════════════════════════════ */
+    function _isAndroid() {
+      return /Android/i.test(navigator.userAgent);
+    }
 
-      // Show picker if no printer chosen yet this session
-      if (!_activePrinter) {
-        const chosen = await _qzShowPicker();
-        if (!chosen) throw new Error('No printer selected.');
+    /* ════════════════════════════════════════════════
+       RAWBT — Android Bluetooth Printing
+       ─────────────────────────────────────────────
+       RawBT is a free Android app (Play Store) that
+       receives ESC/POS bytes via a rawbt: URI intent
+       and forwards them to a paired Bluetooth printer.
+
+       SETUP (one-time on the tablet):
+         1. Install RawBT from the Play Store
+         2. Open RawBT → Settings → select JK-580H
+            as the default printer (it must be paired
+            in Android Bluetooth settings first)
+         3. That's it — no further config needed
+
+       HOW IT WORKS HERE:
+         buildReceiptBytes() builds the same ESC/POS
+         byte array used for desktop USB printing.
+         We base64-encode it and open a rawbt: URI.
+         Android hands the URI to RawBT which sends
+         it over Bluetooth SPP to the JK-580H.
+    ════════════════════════════════════════════════ */
+    function _bytesToBase64(uint8arr) {
+      let binary = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < uint8arr.length; i += chunkSize) {
+        binary += String.fromCharCode(...uint8arr.subarray(i, i + chunkSize));
       }
+      return btoa(binary);
+    }
 
-      const cfg = qz.configs.create(_activePrinter, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
-      await qz.print(cfg, bytesToQzData(bytes));
+    async function sendViaRawBT(bytes) {
+      const b64  = _bytesToBase64(bytes);
+      const uri  = 'rawbt:base64,' + b64;
+
+      // Open the intent URI — RawBT intercepts it
+      // Use a hidden <a> click so it works inside WebView/Chrome
+      const a = document.createElement('a');
+      a.href  = uri;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 1000);
+
+      // RawBT takes over from here — we can't get a callback,
+      // so we resolve immediately after handing off
+      return Promise.resolve();
+    }
+
+    /* ════════════════════════════════════════════════
+       UNIFIED PRINT ROUTER
+       Auto-detects: Android → RawBT, Desktop → QZ Tray
+    ════════════════════════════════════════════════ */
+    async function sendToUsbPrinter(bytes) {
+      if (_isAndroid()) {
+        await sendViaRawBT(bytes);
+        _activePrinter = 'Bluetooth (RawBT)';
+      } else {
+        // Desktop path — QZ Tray
+        await loadQzScript();
+        await connectQZ();
+        if (!_activePrinter || _activePrinter === 'Bluetooth (RawBT)') {
+          const chosen = await _qzShowPicker();
+          if (!chosen) throw new Error('No printer selected.');
+        }
+        const cfg = qz.configs.create(_activePrinter, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
+        await qz.print(cfg, bytesToQzData(bytes));
+      }
     }
 
     async function printReceipt() {
       const btn = document.getElementById('pos-print-btn');
       if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
       btn.disabled = true;
-      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Printing…`;
+      const printIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`;
+      btn.innerHTML = printIcon + ' Printing…';
       try {
         const bytes = await buildReceiptBytes(_lastReceiptData);
         await sendToUsbPrinter(bytes);
-        showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
+        showToast('Receipt sent to ' + (_activePrinter || 'printer') + '!', 'ok');
         _qzUpdateBadge();
       } catch (err) {
         console.error('Print error:', err);
@@ -9799,12 +9882,22 @@
         }
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt`;
+        btn.innerHTML = printIcon + ' Print Receipt';
       }
     }
 
     let _lastReceiptData = null;
     function updatePrinterBadge() { _qzUpdateBadge(); }
+
+    // Show correct hint in receipt preview based on device
+    (function _initAndroidHints() {
+      if (_isAndroid()) {
+        const def = document.getElementById('rp-hint-default');
+        const adr = document.getElementById('rp-hint-android');
+        if (def) def.style.display = 'none';
+        if (adr) adr.style.display = 'flex';
+      }
+    })();
 
     function posBack() {
       document.getElementById('page-pos').classList.remove('active');
