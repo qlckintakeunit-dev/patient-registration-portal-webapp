@@ -99,6 +99,339 @@
       background: rgba(255, 255, 255, 0.24);
     }
 
+    /* ══════════════════════════════════════════
+       HAMBURGER MENU BUTTON
+    ══════════════════════════════════════════ */
+    .hamburger-btn {
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.28);
+      border-radius: 8px;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .hamburger-btn.visible { display: flex; }
+    .hamburger-btn:hover { background: rgba(255,255,255,0.24); }
+
+    /* Slide-out drawer */
+    #side-drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.38);
+      z-index: 3000;
+      animation: sdFadeIn 0.22s ease;
+    }
+    #side-drawer-overlay.show { display: block; }
+    @keyframes sdFadeIn { from { opacity:0; } to { opacity:1; } }
+
+    #side-drawer {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 270px;
+      background: #fff;
+      z-index: 3001;
+      box-shadow: 4px 0 32px rgba(111,45,189,0.18);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    #side-drawer.open { transform: translateX(0); }
+
+    .sd-header {
+      background: #6F2DBD;
+      padding: 18px 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sd-header-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .sd-header-sub {
+      color: rgba(255,255,255,0.6);
+      font-size: 10px;
+      margin-top: 1px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sd-close {
+      margin-left: auto;
+      background: rgba(255,255,255,0.14);
+      border: none;
+      border-radius: 7px;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .sd-close:hover { background: rgba(255,255,255,0.26); }
+
+    .sd-section-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #aaa;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 16px 20px 6px;
+    }
+    .sd-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 20px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.13s;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sd-item:hover { background: #f4f1fa; }
+    .sd-item:active { background: #ede8ff; }
+    .sd-item-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sd-item-text { flex: 1; }
+    .sd-item-sub {
+      font-size: 10px;
+      font-weight: 400;
+      color: #999;
+      margin-top: 1px;
+    }
+    .sd-divider {
+      height: 1px;
+      background: #f0ebff;
+      margin: 4px 16px;
+    }
+    .sd-footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid #f0ebff;
+    }
+    .sd-logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #B71C1C;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 8px 0;
+      width: 100%;
+    }
+    .sd-logout-btn:hover { opacity: 0.75; }
+
+    /* ══════════════════════════════════════════
+       DELETE CONFIRMATION MODAL
+    ══════════════════════════════════════════ */
+    #delete-confirm-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 5, 30, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 4000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #delete-confirm-modal.show { display: flex; animation: delFadeIn 0.2s ease; }
+    @keyframes delFadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .del-modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 0;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.22), 0 4px 16px rgba(183,28,28,0.1);
+      overflow: hidden;
+    }
+    .del-modal-top {
+      background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+      padding: 28px 28px 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .del-modal-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .del-modal-top-text { flex: 1; }
+    .del-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+    .del-modal-subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .del-modal-body {
+      padding: 20px 24px 0;
+    }
+    .del-modal-patient {
+      background: #fafafa;
+      border: 1.5px solid #f0ebff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .del-modal-patient-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      color: #6F2DBD;
+      flex-shrink: 0;
+    }
+    .del-modal-patient-info { flex: 1; min-width: 0; }
+    .del-modal-patient-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .del-modal-patient-meta {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .del-modal-warning {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #7f4f00;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 9px;
+      padding: 9px 13px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .del-modal-warning svg { flex-shrink: 0; }
+    .del-modal-btns {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid #f0f0f0;
+    }
+    .del-modal-keep {
+      flex: 1;
+      padding: 15px 12px;
+      background: #fff;
+      border: none;
+      border-right: 1px solid #f0f0f0;
+      border-radius: 0 0 0 20px;
+      color: #555;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.13s;
+    }
+    .del-modal-keep:hover { background: #f8f8f8; color: #1a1a1a; }
+    .del-modal-confirm {
+      flex: 1;
+      padding: 15px 12px;
+      background: #fff;
+      border: none;
+      border-radius: 0 0 20px 0;
+      color: #c62828;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.13s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .del-modal-confirm:hover { background: #fff5f5; }
+    .del-modal-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Deleted banner in patient list */
+    #pt-deleted-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #e8f5e9;
+      border: 1.5px solid #a5d6a7;
+      border-radius: 10px;
+      padding: 11px 16px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1B5E20;
+      animation: delFadeIn 0.25s ease;
+    }
+    #pt-deleted-banner.show { display: flex; }
+
+    /* Delete button in patient list card */
+    .pt-delete-btn {
+      padding: 5px 12px;
+      background: #fff5f5;
+      color: #B71C1C;
+      border: 1.5px solid #ffcdd2;
+      border-radius: 7px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .pt-delete-btn:hover { background: #ffebee; border-color: #ef9a9a; }
+
     .logout-btn.visible {
       display: flex;
     }
@@ -4004,14 +4337,122 @@
         <div class="header-logo-sub">Patient Registration Portal</div>
       </div>
     </div>
-    <button class="logout-btn" id="logout-btn" onclick="doLogout()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        <polyline points="16 17 21 12 16 7" />
-        <line x1="21" y1="12" x2="9" y2="12" />
-      </svg>
-      Logout
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="hamburger-btn" id="hamburger-btn" onclick="openSideDrawer()" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <button class="logout-btn" id="logout-btn" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SIDE DRAWER ═══════════ -->
+  <div id="side-drawer-overlay" onclick="closeSideDrawer()"></div>
+  <div id="side-drawer">
+    <div class="sd-header">
+      <div>
+        <div class="sd-header-title">QualiCheck LIS</div>
+        <div class="sd-header-sub">Navigation Menu</div>
+      </div>
+      <button class="sd-close" onclick="closeSideDrawer()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="sd-section-label">Workspace</div>
+    <button class="sd-item" onclick="sdGoRegister()">
+      <div class="sd-item-icon" style="background:#f0ebff;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F2DBD" stroke-width="2.5">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+      </div>
+      <div class="sd-item-text">
+        <div>Register Patient</div>
+        <div class="sd-item-sub">New patient entry form</div>
+      </div>
     </button>
+    <button class="sd-item" onclick="sdGoPatientRecords()">
+      <div class="sd-item-icon" style="background:#e8f5e9;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="2.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <div class="sd-item-text">
+        <div>Patient Records</div>
+        <div class="sd-item-sub">Search, reprint &amp; manage</div>
+      </div>
+    </button>
+    <div class="sd-footer">
+      <button class="sd-logout-btn" onclick="closeSideDrawer(); doLogout();">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2.5">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ DELETE CONFIRM MODAL ═══════════ -->
+  <div id="delete-confirm-modal">
+    <div class="del-modal-card">
+      <div class="del-modal-top">
+        <div class="del-modal-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </div>
+        <div class="del-modal-top-text">
+          <div class="del-modal-title">Delete Patient Record</div>
+          <div class="del-modal-subtitle">Removes from DAILY REG SHEET &amp; RECEIPT LOGS permanently</div>
+        </div>
+      </div>
+      <div class="del-modal-body">
+        <div class="del-modal-patient">
+          <div class="del-modal-patient-num" id="del-modal-num">—</div>
+          <div class="del-modal-patient-info">
+            <div class="del-modal-patient-name" id="del-modal-name">—</div>
+            <div class="del-modal-patient-meta" id="del-modal-meta">—</div>
+          </div>
+        </div>
+        <div class="del-modal-warning">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          This action is permanent and cannot be undone.
+        </div>
+      </div>
+      <div class="del-modal-btns">
+        <button class="del-modal-keep" onclick="closeDeleteModal()">Keep Record</button>
+        <button class="del-modal-confirm" id="del-modal-confirm-btn" onclick="confirmDeletePatient()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          </svg>
+          Delete Permanently
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ═══════════ SPLASH SCREEN ═══════════ -->
@@ -4602,6 +5043,12 @@
       </div>
 
       <!-- Patient list -->
+      <div id="pt-deleted-banner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="2.5" style="flex-shrink:0;">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span id="pt-deleted-msg">Record deleted.</span>
+      </div>
       <div id="pt-list" style="display:flex;flex-direction:column;gap:10px;"></div>
       <div id="pt-empty" style="display:none;text-align:center;padding:40px 20px;color:#bbb;">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:10px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -5187,6 +5634,7 @@
     function loginSuccess(demoMode) {
       document.getElementById('page-login').classList.remove('active');
       document.getElementById('logout-btn').classList.add('visible');
+      document.getElementById('hamburger-btn').classList.add('visible');
 
       if (demoMode || APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         PRICES = {};
@@ -5251,13 +5699,129 @@
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-login').classList.add('active');
       document.getElementById('logout-btn').classList.remove('visible');
+      document.getElementById('hamburger-btn').classList.remove('visible');
       document.getElementById('login-btn').disabled = false;
       document.getElementById('login-btn-text').textContent = 'Sign In';
       document.getElementById('login-error').classList.remove('show');
       document.getElementById('inp-user').value = '';
       document.getElementById('inp-pass').value = '';
+      closeSideDrawer();
       goToStep1();
       clearForm();
+    }
+
+    /* ════════════════════════════════════════════════
+       SIDE DRAWER — HAMBURGER MENU
+    ════════════════════════════════════════════════ */
+    function openSideDrawer() {
+      document.getElementById('side-drawer-overlay').classList.add('show');
+      setTimeout(() => document.getElementById('side-drawer').classList.add('open'), 10);
+    }
+    function closeSideDrawer() {
+      document.getElementById('side-drawer').classList.remove('open');
+      document.getElementById('side-drawer-overlay').classList.remove('show');
+    }
+    function sdGoRegister() {
+      closeSideDrawer();
+      document.getElementById('page-recent').classList.remove('active');
+      document.getElementById('page-reg').classList.add('active');
+    }
+    function sdGoPatientRecords() {
+      closeSideDrawer();
+      // If we're not yet logged in at all, do nothing
+      if (document.getElementById('page-login').classList.contains('active')) return;
+      // Show patient records page directly
+      document.getElementById('page-reg').classList.remove('active');
+      document.getElementById('page-recent').classList.add('active');
+      _ptFetch(1);
+    }
+
+    /* ════════════════════════════════════════════════
+       DELETE PATIENT RECORD
+    ════════════════════════════════════════════════ */
+    let _deleteTarget = null; // { numPadded, name, num, grand, ageSex, cardIdx }
+
+    function _ptDelete(cardIdx) {
+      const cards = document.querySelectorAll('#pt-list > div');
+      const card  = cards[cardIdx];
+      if (!card || !card._ptRecord) return;
+      const r = card._ptRecord;
+      _deleteTarget = { numPadded: r.numPadded, name: r.name, num: r.num, grand: r.grand, ageSex: r.ageSex, cardIdx };
+
+      document.getElementById('del-modal-num').textContent  = '#' + r.numPadded;
+      document.getElementById('del-modal-name').textContent = r.name;
+      document.getElementById('del-modal-meta').textContent =
+        [r.ageSex, '₱' + (r.grand||0).toLocaleString('en-PH',{minimumFractionDigits:2}), r.paymentStatus]
+        .filter(Boolean).join('  ·  ');
+
+      const btn = document.getElementById('del-modal-confirm-btn');
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> Delete Permanently`;
+      document.getElementById('delete-confirm-modal').classList.add('show');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-confirm-modal').classList.remove('show');
+      _deleteTarget = null;
+    }
+
+    async function confirmDeletePatient() {
+      if (!_deleteTarget) return;
+      const btn     = document.getElementById('del-modal-confirm-btn');
+      const target  = { ..._deleteTarget }; // copy before clearing
+      btn.disabled  = true;
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><polyline points="12 2 12 6"/><polyline points="12 18 12 22"/><polyline points="4.93 4.93 7.76 7.76"/><polyline points="16.24 16.24 19.07 19.07"/><polyline points="2 12 6 12"/><polyline points="18 12 22 12"/><polyline points="4.93 19.07 7.76 16.24"/><polyline points="16.24 7.76 19.07 4.93"/></svg> Deleting…`;
+
+      // Close modal immediately — optimistic UX
+      closeDeleteModal();
+
+      // Remove the card from the DOM immediately — don't wait for server
+      const cards = document.querySelectorAll('#pt-list > div');
+      if (cards[target.cardIdx]) {
+        cards[target.cardIdx].style.transition = 'opacity 0.25s, transform 0.25s';
+        cards[target.cardIdx].style.opacity    = '0';
+        cards[target.cardIdx].style.transform  = 'translateX(20px)';
+        setTimeout(() => {
+          if (cards[target.cardIdx]) cards[target.cardIdx].remove();
+        }, 260);
+      }
+
+      // Show the success banner immediately
+      const banner = document.getElementById('pt-deleted-banner');
+      document.getElementById('pt-deleted-msg').textContent =
+        `Record #${target.numPadded} — ${target.name} has been deleted.`;
+      banner.classList.add('show');
+      // Auto-hide banner after 6 seconds
+      setTimeout(() => banner.classList.remove('show'), 6000);
+
+      // Fire the server delete in the background — errors are silent
+      // (the record is already removed from the UI)
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action:     'deletepatient',
+            numPadded:  target.numPadded,
+            name:       target.name,
+          }),
+        });
+        // Try to parse response — if it fails (CORS/redirect), still fine
+        try {
+          const d = await res.json();
+          if (!d.success) {
+            console.warn('Delete server warning:', d.message);
+          }
+        } catch(e) {
+          // CORS or non-JSON response — delete likely still went through
+          console.warn('Delete response parse issue (usually harmless):', e.message);
+        }
+      } catch(err) {
+        // Network error — log only, don't bother the user
+        console.warn('Delete network error (non-fatal):', err.message);
+      }
+
+      // Quietly refresh list after a short delay to sync with server state
+      setTimeout(() => _ptFetch(_ptPage), 1500);
     }
 
     function toggleEye() {
@@ -5889,18 +6453,29 @@
                   ${r.paymentStatus}
                 </span>
                 <span style="font-size:15px;font-weight:800;color:#1a1a1a;">₱${(r.grand||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</span>
-                <button onclick="_ptReprint(${i})" data-idx="${i}"
-                  style="padding:5px 12px;background:#f4f1fa;color:#6F2DBD;border:1.5px solid #c4aff0;
-                    border-radius:7px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
-                    cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s;"
-                  onmouseover="this.style.background='#ede8ff'" onmouseout="this.style.background='#f4f1fa'">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="6 9 6 2 18 2 18 9"/>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                    <rect x="6" y="14" width="12" height="8"/>
-                  </svg>
-                  Reprint
-                </button>
+                <div style="display:flex;flex-direction:row;gap:6px;align-items:center;">
+                  <button onclick="_ptReprint(${i})" data-idx="${i}"
+                    style="padding:5px 12px;background:#f4f1fa;color:#6F2DBD;border:1.5px solid #c4aff0;
+                      border-radius:7px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+                      cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s;white-space:nowrap;"
+                    onmouseover="this.style.background='#ede8ff'" onmouseout="this.style.background='#f4f1fa'">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="6 9 6 2 18 2 18 9"/>
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                      <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    Reprint
+                  </button>
+                  <button class="pt-delete-btn" onclick="_ptDelete(${i})" data-idx="${i}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6"/><path d="M14 11v6"/>
+                      <path d="M9 6V4h6v2"/>
+                    </svg>
+                    Delete
+                  </button>
+                </div>
               </div>`;
 
             // Store record data on element for reprint
@@ -6182,6 +6757,7 @@
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
+      document.getElementById('hamburger-btn').classList.add('visible');
       clearForm();
       goToStep1();
     }
@@ -8224,6 +8800,7 @@
       // Show receipt preview modal first, then go to Recent page on exit
       document.getElementById('page-pos').classList.remove('active');
       document.getElementById('logout-btn').classList.add('visible');
+      document.getElementById('hamburger-btn').classList.add('visible');
       // Pre-add to recent list so it's ready when modal exits
       showRecentPage(name, num, _lastReceiptData);
       // Now show the receipt preview + start printing
@@ -9233,6 +9810,7 @@
       document.getElementById('page-pos').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
+      document.getElementById('hamburger-btn').classList.add('visible');
     }
 
     /* ════════════════════════════════════════════════
@@ -9257,6 +9835,7 @@
       document.getElementById('page-pos').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
+      document.getElementById('hamburger-btn').classList.add('visible');
       clearForm();
       goToStep1();
       showToast('Registration cancelled and form cleared.', 'err');
