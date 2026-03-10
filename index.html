@@ -8495,9 +8495,9 @@
         <div class="rp-center rp-bold" style="font-size:13px;letter-spacing:1px;">QUALICHECK</div>
         <div class="rp-center" style="font-size:10px;margin-top:2px;">Qualicheck Diagnostic Clinic</div>
         <div class="rp-center rp-small" style="color:#666;">Brgy. San Antonio, Biñan, Laguna</div>
-        <div class="rp-center rp-small" style="color:#666;">Tel: (049) 000-0000</div>
+        <div class="rp-center rp-small" style="color:#666;">Tel: 8367-4160</div>
         <div class="rp-gap"></div>
-        <div class="rp-center rp-bold" style="font-size:12px;letter-spacing:0.5px;">OFFICIAL RECEIPT</div>
+        <div class="rp-center rp-bold" style="font-size:12px;letter-spacing:0.5px;">NOT OFFICIAL RECEIPT</div>
         <div class="rp-center rp-small" style="color:#1a1a1a;">** NOT A VALID MEDICAL RECORD **</div>
         ${div('-')}
         ${row('Receipt No:', recNo)}
@@ -8512,7 +8512,11 @@
         <div class="rp-small" style="color:#1a1a1a;">Services Rendered</div>
         <div class="rp-gap"></div>`;
 
-      // Group items by department
+      // ── Group items by department ─────────────────────
+      // Works for ALL three cases:
+      //  A) In-session registration (items[] with type+price)
+      //  B) Fetched from RECEIPT LOGS (items[] parsed from JSON col F)
+      //  C) Old record — items[] empty, use category text + subtotal fields
       const labItems       = (d.items || []).filter(i => !i.type || i.type === 'lab');
       const checkupItems   = (d.items || []).filter(i => i.type === 'checkup');
       const cardiologyItems= (d.items || []).filter(i => i.type === 'cardiology');
@@ -8520,8 +8524,8 @@
       const xrayItems      = (d.items || []).filter(i => i.type === 'xray');
       const drugItems      = (d.items || []).filter(i => i.type === 'drug');
       const utzItems       = (d.items || []).filter(i => i.type === 'utz');
-      const hasTyped       = (d.items || []).some(i => i.type);
       const anyExtra       = checkupItems.length || cardiologyItems.length || kitsItems.length || xrayItems.length || drugItems.length || utzItems.length;
+      const hasItems       = (d.items || []).length > 0;
 
       function _renderItems(items) {
         let h = '';
@@ -8540,7 +8544,8 @@
         return h;
       }
 
-      if (hasTyped) {
+      if (hasItems) {
+        // Cases A & B — render itemized with name + price per line
         if (labItems.length) {
           if (anyExtra) html += `<div class="rp-section">— Lab —</div>`;
           html += _renderItems(labItems);
@@ -8570,18 +8575,33 @@
           html += _renderItems(utzItems);
         }
       } else {
-        (d.items || []).forEach(item => {
-          html += row(item.name || '', fmtP(item.price));
-          if (item.discNote) {
-              if (item.isSpecial && item.origPrice != null) {
-                html += `<div class="rp-item-disc" style="color:#1a1a1a;">` +
-                  `<span style="text-decoration:line-through;color:#aaa;margin-right:3px;">${fmtP(item.origPrice)}</span>` +
-                  `→ ${fmtP(item.price)} <span style="color:#555;">(${item.discNote})</span></div>`;
-              } else {
-                html += `<div class="rp-item-disc">(${item.discNote})</div>`;
-              }
+        // Case C — old record, no items JSON: show test names + subtotal per category
+        const _catFallback = [
+          { label: 'Lab',        tests: d.procedures,      sub: d.labSubtotal      },
+          { label: 'Checkup',    tests: d.checkupTests,    sub: d.checkupSubtotal  },
+          { label: 'Cardiology', tests: d.cardiologyTests, sub: d.cadSubtotal      },
+          { label: 'Kits',       tests: d.kitsTests,       sub: d.kitsSubtotal     },
+          { label: 'X-Ray',      tests: d.xrayTests,       sub: d.xraySubtotal     },
+          { label: 'Drug Test',  tests: d.drugTests,       sub: d.drugSubtotal     },
+          { label: 'UTZ',        tests: d.utzTests,        sub: d.utzSubtotal      },
+        ].filter(c => c.tests && c.tests.trim());
+        const _multiCat = _catFallback.length > 1;
+        _catFallback.forEach(cat => {
+          if (_multiCat) html += `<div class="rp-section">— ${cat.label} —</div>`;
+          const names = cat.tests.split(',').map(t => t.trim()).filter(Boolean);
+          // If only one test and subtotal > 0, show it inline as name + price
+          if (names.length === 1 && cat.sub > 0) {
+            html += row(names[0], fmtP(cat.sub));
+          } else {
+            names.forEach(tname => {
+              html += `<div class="rp-row"><span class="rp-lbl" style="flex:1;">${tname}</span></div>`;
+            });
+            if (cat.sub > 0) {
+              html += `<div class="rp-row" style="padding-top:2px;">` +
+                `<span class="rp-lbl" style="font-style:italic;">${cat.label} subtotal</span>` +
+                `<span class="rp-val" style="font-weight:600;">${fmtP(cat.sub)}</span></div>`;
             }
-
+          }
         });
       }
 
@@ -8638,7 +8658,7 @@
         <div class="rp-center rp-small">Thank you for trusting</div>
         <div class="rp-center rp-bold rp-small">Qualicheck Diagnostic Clinic</div>
         <div class="rp-center rp-small" style="color:#1a1a1a;">Results are strictly confidential.</div>
-        <div class="rp-center rp-small" style="color:#1a1a1a;">For inquiries call (049) 000-0000</div>
+        <div class="rp-center rp-small" style="color:#1a1a1a;">For inquiries call 8367-4160</div>
         <div class="rp-gap"></div>`;
 
       document.getElementById('rp-paper-content').innerHTML = html;
@@ -8673,13 +8693,13 @@
       txt(ctr('Qualicheck Diagnostic Clinic') + '\n');
       cmd(CMD.SMALL_ON);
       txt(ctr('Brgy. San Antonio, Binan, Laguna') + '\n');
-      txt(ctr('Tel: (049) 000-0000') + '\n');
+      txt(ctr('Tel: 8367-4160') + '\n');
       cmd(CMD.SMALL_OFF);
       cmd(CMD.FEED_1);
 
       // ── RECEIPT TITLE ─────────────────────────────
       cmd(CMD.BOLD_ON);
-      txt(ctr('OFFICIAL RECEIPT') + '\n');
+      txt(ctr('NOT OFFICIAL RECEIPT') + '\n');
       cmd(CMD.BOLD_OFF);
       cmd(CMD.SMALL_ON);
       txt(ctr('** NOT A VALID MEDICAL RECORD **') + '\n');
@@ -8739,6 +8759,9 @@
         });
       }
 
+      // ── Group items by department (same logic as preview) ──
+      // A) In-session / fetched with items JSON → itemized name+price per line
+      // B) Old record, items[] empty → category text fields + subtotal fallback
       const _tLabItems  = (d.items || []).filter(i => !i.type || i.type === 'lab');
       const _tCkItems   = (d.items || []).filter(i => i.type === 'checkup');
       const _tCadItems  = (d.items || []).filter(i => i.type === 'cardiology');
@@ -8746,38 +8769,66 @@
       const _tXrayItems = (d.items || []).filter(i => i.type === 'xray');
       const _tDrugItems = (d.items || []).filter(i => i.type === 'drug');
       const _tUtzItems  = (d.items || []).filter(i => i.type === 'utz');
+      const _tHasItems  = (d.items || []).length > 0;
       const _tHasExtra  = _tCkItems.length||_tCadItems.length||_tKitItems.length||_tXrayItems.length||_tDrugItems.length||_tUtzItems.length;
 
-      if (_tLabItems.length) {
-        if (_tHasExtra) { cmd(CMD.SMALL_ON); txt('-- Lab --\n'); cmd(CMD.SMALL_OFF); }
-        _thermalItems(_tLabItems);
-      }
-      if (_tCkItems.length) {
-        cmd(CMD.SMALL_ON); txt('-- Checkup --\n'); cmd(CMD.SMALL_OFF);
-        _thermalItems(_tCkItems);
-      }
-      if (_tCadItems.length) {
-        cmd(CMD.SMALL_ON); txt('-- Cardiology --\n'); cmd(CMD.SMALL_OFF);
-        _thermalItems(_tCadItems);
-      }
-      if (_tKitItems.length) {
-        cmd(CMD.SMALL_ON); txt('-- Kits --\n'); cmd(CMD.SMALL_OFF);
-        _thermalItems(_tKitItems);
-      }
-      if (_tXrayItems.length || (d.xrayTests && d.xrayTests.trim())) {
-        cmd(CMD.SMALL_ON); txt('-- X-Ray --\n'); cmd(CMD.SMALL_OFF);
-        if (_tXrayItems.length) { _thermalItems(_tXrayItems); }
-        else { d.xrayTests.split(',').forEach(xt => { txt(xt.trim().slice(0, LW - 1) + '\n'); }); }
-      }
-      if (_tDrugItems.length || (d.drugTests && d.drugTests.trim())) {
-        cmd(CMD.SMALL_ON); txt('-- Drug Test --\n'); cmd(CMD.SMALL_OFF);
-        if (_tDrugItems.length) { _thermalItems(_tDrugItems); }
-        else { d.drugTests.split(',').forEach(dt => { txt(dt.trim().slice(0, LW - 1) + '\n'); }); }
-      }
-      if (_tUtzItems.length || (d.utzTests && d.utzTests.trim())) {
-        cmd(CMD.SMALL_ON); txt('-- UTZ Tests --\n'); cmd(CMD.SMALL_OFF);
-        if (_tUtzItems.length) { _thermalItems(_tUtzItems); }
-        else { d.utzTests.split(',').forEach(ut => { txt(ut.trim().slice(0, LW - 1) + '\n'); }); }
+      if (_tHasItems) {
+        // Cases A & B with JSON — itemized
+        if (_tLabItems.length) {
+          if (_tHasExtra) { cmd(CMD.SMALL_ON); txt('-- Lab --\n'); cmd(CMD.SMALL_OFF); }
+          _thermalItems(_tLabItems);
+        }
+        if (_tCkItems.length) {
+          cmd(CMD.SMALL_ON); txt('-- Checkup --\n'); cmd(CMD.SMALL_OFF);
+          _thermalItems(_tCkItems);
+        }
+        if (_tCadItems.length) {
+          cmd(CMD.SMALL_ON); txt('-- Cardiology --\n'); cmd(CMD.SMALL_OFF);
+          _thermalItems(_tCadItems);
+        }
+        if (_tKitItems.length) {
+          cmd(CMD.SMALL_ON); txt('-- Kits --\n'); cmd(CMD.SMALL_OFF);
+          _thermalItems(_tKitItems);
+        }
+        if (_tXrayItems.length) {
+          cmd(CMD.SMALL_ON); txt('-- X-Ray --\n'); cmd(CMD.SMALL_OFF);
+          _thermalItems(_tXrayItems);
+        }
+        if (_tDrugItems.length) {
+          cmd(CMD.SMALL_ON); txt('-- Drug Test --\n'); cmd(CMD.SMALL_OFF);
+          _thermalItems(_tDrugItems);
+        }
+        if (_tUtzItems.length) {
+          cmd(CMD.SMALL_ON); txt('-- UTZ Tests --\n'); cmd(CMD.SMALL_OFF);
+          _thermalItems(_tUtzItems);
+        }
+      } else {
+        // Case C — old record: category text + subtotal fallback
+        const _tCatFb = [
+          { lbl: 'Lab',        tests: d.procedures,      sub: d.labSubtotal      },
+          { lbl: 'Checkup',    tests: d.checkupTests,    sub: d.checkupSubtotal  },
+          { lbl: 'Cardiology', tests: d.cardiologyTests, sub: d.cadSubtotal      },
+          { lbl: 'Kits',       tests: d.kitsTests,       sub: d.kitsSubtotal     },
+          { lbl: 'X-Ray',      tests: d.xrayTests,       sub: d.xraySubtotal     },
+          { lbl: 'Drug Test',  tests: d.drugTests,       sub: d.drugSubtotal     },
+          { lbl: 'UTZ',        tests: d.utzTests,        sub: d.utzSubtotal      },
+        ].filter(c => c.tests && c.tests.trim());
+        const _tMultiCat = _tCatFb.length > 1;
+        _tCatFb.forEach(cat => {
+          if (_tMultiCat) { cmd(CMD.SMALL_ON); txt('-- ' + cat.lbl + ' --\n'); cmd(CMD.SMALL_OFF); }
+          const names = cat.tests.split(',').map(t => t.trim()).filter(Boolean);
+          if (names.length === 1 && cat.sub > 0) {
+            // Single test — show name + price on same line
+            txt(padLine(names[0].slice(0, LW - fmtAmt(cat.sub).length - 1), fmtAmt(cat.sub)) + '\n');
+          } else {
+            names.forEach(t => { txt(t.slice(0, LW - 1) + '\n'); });
+            if (cat.sub > 0) {
+              cmd(CMD.SMALL_ON);
+              txt(padLine(cat.lbl + ' subtotal', fmtAmt(cat.sub)) + '\n');
+              cmd(CMD.SMALL_OFF);
+            }
+          }
+        });
       }
 
       txt(div('-'));
@@ -8863,7 +8914,7 @@
       txt('Qualicheck Diagnostic Clinic\n');
       cmd(CMD.BOLD_OFF);
       txt('Results are strictly confidential.\n');
-      txt('For inquiries call (049) 000-0000\n');
+      txt('For inquiries call 8367-4160\n');
       cmd(CMD.SMALL_OFF);
       cmd(CMD.FEED_4);
       cmd(CMD.CUT);
