@@ -8322,7 +8322,7 @@
 
     function fmtAmt(n) {
       n = parseFloat(n) || 0;
-      return '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return 'P' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     /* ── Rasterize _logoDataUrl → ESC/POS GS v 0 bytes ──
@@ -8478,7 +8478,7 @@
        _rpRenderPaper — builds the visual receipt HTML
     ──────────────────────────────────────────────── */
     function _rpRenderPaper(d) {
-      const fmtP = v => '₱' + (parseFloat(v) || 0).toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 });
+      const fmtP = v => 'P' + (parseFloat(v) || 0).toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 });
       const div  = c => `<div class="rp-div">${c.repeat(32)}</div>`;
       const row  = (l, r, cls) => `<div class="rp-row${cls?' '+cls:''}"><span class="rp-lbl">${l}</span><span class="rp-val">${r}</span></div>`;
 
