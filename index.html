@@ -5858,10 +5858,13 @@
             const sc = statusColors[r.paymentStatus] || statusColors['PENDING'];
 
             const services = [
-              r.procedures  ? `Lab: ${r.procedures}`   : '',
-              r.xrayTests   ? `X-Ray: ${r.xrayTests}`  : '',
-              r.drugTests   ? `Drug: ${r.drugTests}`    : '',
-              r.utzTests    ? `UTZ: ${r.utzTests}`      : '',
+              r.procedures      ? `Lab: ${r.procedures}`           : '',
+              r.checkupTests    ? `Checkup: ${r.checkupTests}`     : '',
+              r.cardiologyTests ? `Cardio: ${r.cardiologyTests}`   : '',
+              r.kitsTests       ? `Kits: ${r.kitsTests}`           : '',
+              r.xrayTests       ? `X-Ray: ${r.xrayTests}`          : '',
+              r.drugTests       ? `Drug: ${r.drugTests}`           : '',
+              r.utzTests        ? `UTZ: ${r.utzTests}`             : '',
             ].filter(Boolean).join(' · ');
 
             const card = document.createElement('div');
@@ -5935,36 +5938,50 @@
 
       const r = card._ptRecord;
 
-      // If patient has receipt data in memory, use it
+      // If patient has receipt data in memory (same session), use it directly
       if (card._ptHasReceipt && card._ptRecentMatch) {
         _rpOpen(card._ptRecentMatch.receiptData, null);
         return;
       }
 
-      // Build receipt data from DAILY REG SHEET record (no itemized breakdown)
+      // Parse items JSON from receipt logs if the server returned it
+      let items = [];
+      if (r.items && Array.isArray(r.items) && r.items.length > 0) {
+        items = r.items;
+      } else if (r.itemsJson) {
+        try { items = JSON.parse(r.itemsJson); } catch(e) { items = []; }
+      }
+
+      // Build receipt data — use items array when available for full itemized receipt
       const receiptData = {
-        num:           r.num,
-        date:          r.date,
-        name:          r.name,
-        ageSex:        r.ageSex,
-        referred:      r.referred,
-        items:         [],  // no itemized data from sheet
-        procedures:    r.procedures,
-        xrayTests:     r.xrayTests,
-        drugTests:     r.drugTests,
-        utzTests:      r.utzTests,
-        labSubtotal:   r.labSubtotal,
-        xraySubtotal:  r.xraySubtotal,
-        drugSubtotal:  r.drugSubtotal,
-        utzSubtotal:   r.utzSubtotal,
-        discountLabel: r.discountLabel,
-        discAmt:       r.discAmt,
-        grand:         r.grand,
-        paymentStatus: r.paymentStatus,
-        paymentType:   r.paymentType,
-        paymentAmt:    r.paymentAmt,
-        balance:       r.balance,
-        changeAmt:     Math.max(0, r.paymentAmt - r.grand),
+        num:              r.num,
+        date:             r.date,
+        name:             r.name,
+        ageSex:           r.ageSex,
+        referred:         r.referred,
+        items:            items,
+        procedures:       r.procedures      || '',
+        checkupTests:     r.checkupTests    || '',
+        cardiologyTests:  r.cardiologyTests || '',
+        kitsTests:        r.kitsTests       || '',
+        xrayTests:        r.xrayTests       || '',
+        drugTests:        r.drugTests       || '',
+        utzTests:         r.utzTests        || '',
+        labSubtotal:      r.labSubtotal      || 0,
+        checkupSubtotal:  r.checkupSubtotal  || 0,
+        cadSubtotal:      r.cadSubtotal      || 0,
+        kitsSubtotal:     r.kitsSubtotal     || 0,
+        xraySubtotal:     r.xraySubtotal     || 0,
+        drugSubtotal:     r.drugSubtotal     || 0,
+        utzSubtotal:      r.utzSubtotal      || 0,
+        discountLabel:    r.discountLabel    || '',
+        discAmt:          r.discAmt          || 0,
+        grand:            r.grand            || 0,
+        paymentStatus:    r.paymentStatus    || 'PENDING',
+        paymentType:      r.paymentType      || 'CASH',
+        paymentAmt:       r.paymentAmt       || 0,
+        balance:          r.balance          || 0,
+        changeAmt:        Math.max(0, (r.paymentAmt || 0) - (r.grand || 0)),
       };
       _rpOpen(receiptData, null);
     }
@@ -8413,35 +8430,27 @@
       document.getElementById('rp-reprint-btn').disabled = true;
 
       try {
-        _rpStep(5,  'Preparing receipt…',       'Building ESC/POS commands…', '');
+        _rpStep(5,  'Preparing receipt…',  'Building ESC/POS commands…', '');
         const bytes = await buildReceiptBytes(_rpCurrentData);
 
-        _rpStep(35, 'Building receipt layout…', 'Rendering items and totals…', '');
-        await loadQzScript();
-
-        _rpStep(55, 'Connecting to QZ Tray…',   'Opening WebSocket on localhost:8181…', '');
-        await connectQZ();
-
-        _rpStep(72, 'Detecting printer…',        'Scanning for thermal printer…', '');
-        const printer = await detectPrinter();
-
-        _rpStep(88, 'Sending to printer…',       `Sending to "${printer}"…`, '');
-        const cfg = qz.configs.create(printer, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
-        await qz.print(cfg, bytesToQzData(bytes));
+        _rpStep(40, 'Connecting…',         'Opening QZ Tray WebSocket…', '');
+        // sendToUsbPrinter handles: load script → connect → picker → print
+        _rpStep(70, 'Sending to printer…', _activePrinter ? `Sending to "${_activePrinter}"…` : 'Select a printer…', '');
+        await sendToUsbPrinter(bytes);
 
         _rpStep(100, '✓ Receipt printed!', 'Paper is printing now. You may exit.', 'done');
-        showToast('Receipt printed on ' + printer + '!', 'ok');
+        showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
+        _qzUpdateBadge();
 
       } catch (err) {
         console.error('Print error:', err);
-        _qzConnected   = false;
-        _activePrinter = null;
+        _qzConnected = false;
         const msg = err.message || '';
         let errMsg = 'Print failed: ' + msg;
         if (msg.includes('Unable to establish') || msg.includes('connect'))
           errMsg = 'QZ Tray is not running — start it from the system tray, then tap Reprint.';
-        else if (msg.includes('No thermal printer'))
-          errMsg = msg;
+        else if (msg === 'No printer selected.')
+          errMsg = 'Print cancelled — no printer selected.';
 
         _rpStep(100, '⚠ Print failed', errMsg, 'error');
         showToast(errMsg, 'err');
@@ -8872,24 +8881,216 @@
          4. Click Print — done.
 
        PRINTER NAME:
-         Add printer names to KNOWN_PRINTERS array below.
+         Staff picks a printer from a list on first print.
          Windows shows in Control Panel → Devices & Printers.
          e.g. 'POS58' or 'Thermal Printer' or 'POS-58'
     ════════════════════════════════════════════════ */
 
     /* ════════════════════════════════════════════════
-       QZ TRAY PRINTING — auto-detect thermal printer
-       Asks QZ Tray for all installed printers, then
-       picks the first one that matches a known name.
-       Add more printer names to KNOWN_PRINTERS as needed.
+       QZ TRAY PRINTING
+       On first print, fetches ALL printers from Windows
+       via QZ Tray and shows a picker modal. Staff clicks
+       one printer — it's used for the whole session.
+       A "Change Printer" link resets it any time.
     ════════════════════════════════════════════════ */
 
-    // Known thermal printer names — checked in order, first match wins
-    const KNOWN_PRINTERS = ['QUALICHECK POS', 'XP-58C'];
-
     let _qzConnected   = false;
-    let _activePrinter = null; // cached after first detection
+    let _activePrinter = null; // set once per session via picker
 
+    // ── Printer picker modal ──────────────────────
+    (function () {
+      const style = document.createElement('style');
+      style.textContent = `
+        #qz-picker-overlay {
+          display:none; position:fixed; inset:0; z-index:10000;
+          background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+          align-items:center; justify-content:center;
+        }
+        #qz-picker-overlay.show { display:flex; }
+        #qz-picker-card {
+          background:#fff; border-radius:18px; padding:28px 26px 22px;
+          width:100%; max-width:400px; box-shadow:0 24px 80px rgba(0,0,0,0.35);
+          animation:qzCardIn .25s cubic-bezier(.22,1,.36,1);
+        }
+        @keyframes qzCardIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        #qz-picker-title {
+          font-size:16px; font-weight:700; color:#1a1a1a; margin-bottom:4px;
+          display:flex; align-items:center; gap:9px;
+        }
+        #qz-picker-sub { font-size:12px; color:#888; margin-bottom:16px; }
+        #qz-printer-list {
+          border:1.5px solid #ececec; border-radius:10px;
+          max-height:240px; overflow-y:auto; margin-bottom:16px;
+        }
+        .qz-printer-row {
+          display:flex; align-items:center; gap:12px;
+          padding:11px 14px; cursor:pointer;
+          border-bottom:1px solid #f5f5f5; transition:background .1s;
+        }
+        .qz-printer-row:last-child { border-bottom:none; }
+        .qz-printer-row:hover { background:#f4f1fa; }
+        .qz-printer-row.selected { background:#ede8ff; }
+        .qz-radio {
+          width:17px; height:17px; border-radius:50%;
+          border:2px solid #ccc; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;
+        }
+        .qz-printer-row.selected .qz-radio {
+          border-color:#6F2DBD; background:#6F2DBD;
+        }
+        .qz-printer-row.selected .qz-radio::after {
+          content:''; width:6px; height:6px;
+          background:#fff; border-radius:50%; display:block;
+        }
+        .qz-printer-name { font-size:13px; font-weight:600; color:#1a1a1a; }
+        #qz-picker-err {
+          display:none; font-size:12px; color:#c62828;
+          background:#fff3f3; border-radius:8px;
+          padding:9px 13px; margin-bottom:12px; line-height:1.5;
+        }
+        #qz-picker-footer { display:flex; justify-content:flex-end; gap:8px; }
+        #qz-picker-cancel {
+          background:#f5f5f5; border:1.5px solid #ddd; border-radius:8px;
+          padding:9px 20px; font-size:13px; font-weight:600;
+          cursor:pointer; color:#555;
+        }
+        #qz-picker-confirm {
+          background:#6F2DBD; border:none; border-radius:8px;
+          padding:9px 20px; font-size:13px; font-weight:600;
+          cursor:pointer; color:#fff; opacity:.5; pointer-events:none;
+        }
+        #qz-picker-confirm.ready { opacity:1; pointer-events:auto; }
+        #qz-change-printer {
+          display:none; font-size:11px; color:#6F2DBD;
+          text-decoration:underline; cursor:pointer;
+          text-align:center; margin-top:6px; opacity:.8;
+        }
+        #qz-change-printer:hover { opacity:1; }
+        #qz-active-badge {
+          display:none; font-size:11px; color:#555;
+          text-align:center; margin-top:5px;
+        }
+      `;
+      document.head.appendChild(style);
+
+      const overlay = document.createElement('div');
+      overlay.id = 'qz-picker-overlay';
+      overlay.innerHTML = `
+        <div id="qz-picker-card">
+          <div id="qz-picker-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F2DBD" stroke-width="2.2">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Select Receipt Printer
+          </div>
+          <div id="qz-picker-sub">Choose the printer connected to this computer</div>
+          <div id="qz-picker-err"></div>
+          <div id="qz-printer-list">
+            <div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">
+              Loading printers…
+            </div>
+          </div>
+          <div id="qz-picker-footer">
+            <button id="qz-picker-cancel" onclick="_qzPickerCancel()">Cancel</button>
+            <button id="qz-picker-confirm" onclick="_qzPickerConfirm()">Use This Printer</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    })();
+
+    let _qzPickerResolve = null;
+    let _qzPickerSelected = null;
+
+    function _qzShowPicker() {
+      return new Promise(async (resolve) => {
+        _qzPickerResolve  = resolve;
+        _qzPickerSelected = null;
+        document.getElementById('qz-picker-confirm').classList.remove('ready');
+        document.getElementById('qz-picker-err').style.display = 'none';
+        document.getElementById('qz-picker-overlay').classList.add('show');
+
+        const list = document.getElementById('qz-printer-list');
+        list.innerHTML = `<div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">⏳ Connecting to QZ Tray…</div>`;
+
+        try {
+          await loadQzScript();
+          await connectQZ();
+
+          list.innerHTML = `<div style="padding:14px;text-align:center;color:#aaa;font-size:13px;">🔍 Fetching printers from Windows…</div>`;
+
+          // qz.printers.find() with NO argument returns the full list of all printers
+          // qz.printers.find("name") returns only the single best match — not what we want
+          const raw      = await qz.printers.find();
+          const allPrinters = (Array.isArray(raw) ? raw : [raw]).filter(Boolean);
+
+          // Show only QUALICHECK printers (our receipt printers)
+          // If none found under that name, fall back to showing everything
+          const qualicheck = allPrinters.filter(n => n.toUpperCase().includes('QUALICHECK'));
+          const printers   = qualicheck.length ? qualicheck : allPrinters;
+
+          if (!printers.length) {
+            list.innerHTML = `<div style="padding:20px;text-align:center;color:#c62828;font-size:13px;">No printers found in Windows.</div>`;
+            return;
+          }
+
+          list.innerHTML = '';
+          printers.forEach(name => {
+            const row = document.createElement('div');
+            row.className = 'qz-printer-row';
+            row.dataset.name = name;
+            row.innerHTML = `<div class="qz-radio"></div><div class="qz-printer-name">${name}</div>`;
+            row.onclick = () => {
+              document.querySelectorAll('.qz-printer-row').forEach(r => r.classList.remove('selected'));
+              row.classList.add('selected');
+              _qzPickerSelected = name;
+              document.getElementById('qz-picker-confirm').classList.add('ready');
+            };
+            list.appendChild(row);
+          });
+
+        } catch (err) {
+          const errEl = document.getElementById('qz-picker-err');
+          let msg = err.message || String(err);
+          if (msg.includes('Unable to establish') || msg.includes('connect') || msg.includes('refused'))
+            msg = 'Cannot connect to QZ Tray. Make sure it is running in the system tray.';
+          errEl.textContent = msg;
+          errEl.style.display = 'block';
+          list.innerHTML = `<div style="padding:20px;text-align:center;color:#c62828;font-size:13px;">⚠ QZ Tray not reachable.</div>`;
+          _qzConnected = false;
+        }
+      });
+    }
+
+    function _qzPickerCancel() {
+      document.getElementById('qz-picker-overlay').classList.remove('show');
+      if (_qzPickerResolve) { _qzPickerResolve(null); _qzPickerResolve = null; }
+    }
+
+    function _qzPickerConfirm() {
+      if (!_qzPickerSelected) return;
+      _activePrinter = _qzPickerSelected;
+      document.getElementById('qz-picker-overlay').classList.remove('show');
+      if (_qzPickerResolve) { _qzPickerResolve(_activePrinter); _qzPickerResolve = null; }
+      _qzUpdateBadge();
+    }
+
+    function _qzUpdateBadge() {
+      const badge  = document.getElementById('qz-active-badge');
+      const change = document.getElementById('qz-change-printer');
+      if (!badge || !change) return;
+      if (_activePrinter) {
+        badge.textContent  = '🖨 ' + _activePrinter;
+        badge.style.display  = 'block';
+        change.style.display = 'block';
+      } else {
+        badge.style.display  = 'none';
+        change.style.display = 'none';
+      }
+    }
+
+    // ── QZ Tray core helpers ──────────────────────
     function loadQzScript() {
       return new Promise((resolve, reject) => {
         if (window.qz) { resolve(); return; }
@@ -8911,23 +9112,6 @@
       _qzConnected = true;
     }
 
-    async function detectPrinter() {
-      if (_activePrinter) return _activePrinter;
-      const found = await qz.printers.find();
-      const list  = (Array.isArray(found) ? found : [found]).map(n => (n || '').trim());
-      for (const candidate of KNOWN_PRINTERS) {
-        if (list.some(n => n.toLowerCase() === candidate.toLowerCase())) {
-          _activePrinter = candidate;
-          console.log('[QualiCheck] Printer auto-detected:', _activePrinter);
-          return _activePrinter;
-        }
-      }
-      throw new Error(
-        'No thermal printer found. Connected: [' + list.join(', ') + ']. ' +
-        'Expected one of: ' + KNOWN_PRINTERS.join(', ')
-      );
-    }
-
     function bytesToQzData(uint8arr) {
       let binary = '';
       for (let i = 0; i < uint8arr.length; i++) binary += String.fromCharCode(uint8arr[i]);
@@ -8937,8 +9121,14 @@
     async function sendToUsbPrinter(bytes) {
       await loadQzScript();
       await connectQZ();
-      const printer = await detectPrinter();
-      const cfg = qz.configs.create(printer, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
+
+      // Show picker if no printer chosen yet this session
+      if (!_activePrinter) {
+        const chosen = await _qzShowPicker();
+        if (!chosen) throw new Error('No printer selected.');
+      }
+
+      const cfg = qz.configs.create(_activePrinter, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
       await qz.print(cfg, bytesToQzData(bytes));
     }
 
@@ -8951,15 +9141,15 @@
         const bytes = await buildReceiptBytes(_lastReceiptData);
         await sendToUsbPrinter(bytes);
         showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
+        _qzUpdateBadge();
       } catch (err) {
         console.error('Print error:', err);
-        _qzConnected   = false;
-        _activePrinter = null;
+        _qzConnected = false;
         const msg = err.message || '';
         if (msg.includes('Unable to establish') || msg.includes('connect') || msg.includes('refused')) {
           showToast('QZ Tray not running. Start it from the system tray first.', 'err');
-        } else if (msg.includes('No thermal printer')) {
-          showToast(msg, 'err');
+        } else if (msg === 'No printer selected.') {
+          showToast('Print cancelled — no printer selected.', 'err');
         } else {
           showToast('Print failed: ' + msg, 'err');
         }
@@ -8970,7 +9160,7 @@
     }
 
     let _lastReceiptData = null;
-    function updatePrinterBadge() {}
+    function updatePrinterBadge() { _qzUpdateBadge(); }
 
     function posBack() {
       document.getElementById('page-pos').classList.remove('active');
@@ -9143,6 +9333,8 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Print Receipt
           </button>
+          <div id="qz-active-badge"></div>
+          <div id="qz-change-printer" onclick="_activePrinter=null;printReceipt()">⚙ Change Printer</div>
           <div class="pos-footer-secondary">
             <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
             <button class="pos-cancel-btn" onclick="posCancelRegistration()">
