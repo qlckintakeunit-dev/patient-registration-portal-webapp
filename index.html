@@ -5124,7 +5124,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2">
             <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/>
           </svg>
-          <span>Android detected — printing via <strong>RawBT</strong> to JK-580H Bluetooth. Make sure RawBT is installed and JK-580H is set as default printer.</span>
+          <span>Android detected — printing via <strong>RawBT</strong> to KPrinter_448f Bluetooth. Make sure RawBT is installed and KPrinter_448f is set as default printer.</span>
         </div>
 
         <!-- Print mode switcher — lets staff override auto-detection -->
@@ -9053,7 +9053,7 @@
         if (onAndroid) {
           _rpStep(60, 'Sending to RawBT…', 'Opening Bluetooth print app…', '');
           await sendToUsbPrinter(bytes);
-          _rpStep(100, '✓ Sent to RawBT!', 'RawBT is now printing to JK-580H via Bluetooth.', 'done');
+          _rpStep(100, '✓ Sent to RawBT!', 'RawBT is now printing to KPrinter_448f via Bluetooth.', 'done');
           showToast('Sent to RawBT — printing via Bluetooth!', 'ok');
         } else {
           _rpStep(40, 'Connecting…', 'Opening QZ Tray WebSocket…', '');
@@ -9854,7 +9854,7 @@
 
        SETUP (one-time on the tablet):
          1. Install RawBT from the Play Store
-         2. Open RawBT → Settings → select JK-580H
+         2. Open RawBT → Settings → select KPrinter_448f
             as the default printer (it must be paired
             in Android Bluetooth settings first)
          3. That's it — no further config needed
@@ -9864,7 +9864,7 @@
          byte array used for desktop USB printing.
          We base64-encode it and open a rawbt: URI.
          Android hands the URI to RawBT which sends
-         it over Bluetooth SPP to the JK-580H.
+         it over Bluetooth SPP to the KPrinter_448f.
     ════════════════════════════════════════════════ */
     function _bytesToBase64(uint8arr) {
       let binary = '';
