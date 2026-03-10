@@ -5103,7 +5103,7 @@
       <div class="rp-right">
 
         <div class="rp-status-card">
-          <div class="rp-status-title">🖨 Print Status</div>
+          <div class="rp-status-title" id="rp-status-title">🖨 Print Status</div>
           <div class="rp-prog-label-row">
             <span class="rp-prog-lbl" id="rp-prog-lbl">Preparing receipt…</span>
             <span class="rp-prog-pct" id="rp-prog-pct">0%</span>
@@ -5124,8 +5124,22 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2">
             <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/>
           </svg>
-          Android detected — printing via <strong>RawBT</strong> to JK-580H Bluetooth.
-          Make sure RawBT is installed and JK-580H is set as the default printer.
+          <span>Android detected — printing via <strong>RawBT</strong> to JK-580H Bluetooth. Make sure RawBT is installed and JK-580H is set as default printer.</span>
+        </div>
+
+        <!-- Print mode switcher — lets staff override auto-detection -->
+        <div id="rp-mode-switcher" style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.45);text-align:center;">
+          Wrong mode?
+          <button onclick="_setPrintModeOverride('android');_rpReprint();"
+            id="rp-switch-to-android"
+            style="background:none;border:none;color:#90CAF9;font-size:11px;cursor:pointer;text-decoration:underline;padding:0 3px;">
+            Switch to Bluetooth
+          </button>
+          <button onclick="_setPrintModeOverride('desktop');_rpReprint();"
+            id="rp-switch-to-desktop"
+            style="background:none;border:none;color:#c5b4ff;font-size:11px;cursor:pointer;text-decoration:underline;padding:0 3px;">
+            Switch to QZ Tray
+          </button>
         </div>
 
         <button class="rp-reprint-btn" id="rp-reprint-btn" onclick="_rpReprint()">
@@ -8980,6 +8994,9 @@
       // Render paper
       _rpRenderPaper(receiptData);
 
+      // Apply correct print mode hints/title for this device
+      _applyPrintModeUI();
+
       // Reset progress bar
       _rpStep(0, 'Preparing receipt…', 'Starting…', '');
       document.getElementById('rp-prog-bar').classList.remove('error', 'done');
@@ -9030,22 +9047,18 @@
       const onAndroid = _isAndroid();
 
       try {
-        _rpStep(5,  'Preparing receipt…', 'Building ESC/POS commands…', '');
+        _rpStep(5, 'Preparing receipt…', 'Building ESC/POS commands…', '');
         const bytes = await buildReceiptBytes(_rpCurrentData);
 
         if (onAndroid) {
-          _rpStep(50, 'Sending to RawBT…', 'Handing off to Bluetooth app…', '');
-        } else {
-          _rpStep(40, 'Connecting…',       'Opening QZ Tray WebSocket…', '');
-          _rpStep(70, 'Sending to printer…', _activePrinter ? `Sending to "${_activePrinter}"…` : 'Select a printer…', '');
-        }
-
-        await sendToUsbPrinter(bytes);
-
-        if (onAndroid) {
-          _rpStep(100, '✓ Sent to RawBT!', 'RawBT is printing to JK-580H via Bluetooth.', 'done');
+          _rpStep(60, 'Sending to RawBT…', 'Opening Bluetooth print app…', '');
+          await sendToUsbPrinter(bytes);
+          _rpStep(100, '✓ Sent to RawBT!', 'RawBT is now printing to JK-580H via Bluetooth.', 'done');
           showToast('Sent to RawBT — printing via Bluetooth!', 'ok');
         } else {
+          _rpStep(40, 'Connecting…', 'Opening QZ Tray WebSocket…', '');
+          _rpStep(70, 'Sending to printer…', _activePrinter ? `Sending to "${_activePrinter}"…` : 'Select a printer…', '');
+          await sendToUsbPrinter(bytes);
           _rpStep(100, '✓ Receipt printed!', 'Paper is printing now. You may exit.', 'done');
           showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
         }
@@ -9785,8 +9798,51 @@
     /* ════════════════════════════════════════════════
        DEVICE DETECTION
     ════════════════════════════════════════════════ */
+    /* ════════════════════════════════════════════════
+       DEVICE / PRINT MODE DETECTION
+       Covers: Android, Redmi/MIUI, Chrome on Android,
+       Samsung Internet, Xiaomi Browser, WebAPK, etc.
+       Manual override stored in sessionStorage so staff
+       can switch modes if auto-detect is wrong.
+    ════════════════════════════════════════════════ */
     function _isAndroid() {
-      return /Android/i.test(navigator.userAgent);
+      // Manual override takes priority
+      const override = sessionStorage.getItem('print_mode_override');
+      if (override === 'android') return true;
+      if (override === 'desktop') return false;
+
+      const ua = navigator.userAgent;
+      // Standard Android + Redmi/MIUI/Xiaomi browser variants
+      return /Android/i.test(ua) ||
+             /MIUI|MiuiBrowser|XiaoMi|Redmi/i.test(ua) ||
+             // Some Xiaomi browsers drop "Android" but keep Linux ARM
+             (/Linux.*Mobile/i.test(ua) && /Chrome\/\d/i.test(ua) && !/Windows|Macintosh|CrOS/i.test(ua));
+    }
+
+    function _setPrintModeOverride(mode) { // 'android' | 'desktop' | null
+      if (mode) sessionStorage.setItem('print_mode_override', mode);
+      else sessionStorage.removeItem('print_mode_override');
+      // Re-apply UI hints
+      _applyPrintModeUI();
+    }
+
+    function _applyPrintModeUI() {
+      const android = _isAndroid();
+      // Receipt preview hints
+      const def = document.getElementById('rp-hint-default');
+      const adr = document.getElementById('rp-hint-android');
+      if (def) def.style.display = android ? 'none' : 'flex';
+      if (adr) adr.style.display = android ? 'flex' : 'none';
+      // Print status title
+      const title = document.getElementById('rp-status-title');
+      if (title) title.textContent = android ? '📶 Bluetooth Print' : '🖨 Print Status';
+      // Mode switcher — hide the button for the current active mode
+      const swA = document.getElementById('rp-switch-to-android');
+      const swD = document.getElementById('rp-switch-to-desktop');
+      if (swA) swA.style.display = android ? 'none' : 'inline';
+      if (swD) swD.style.display = android ? 'inline' : 'none';
+      // Badge
+      _qzUpdateBadge();
     }
 
     /* ════════════════════════════════════════════════
@@ -9889,15 +9945,8 @@
     let _lastReceiptData = null;
     function updatePrinterBadge() { _qzUpdateBadge(); }
 
-    // Show correct hint in receipt preview based on device
-    (function _initAndroidHints() {
-      if (_isAndroid()) {
-        const def = document.getElementById('rp-hint-default');
-        const adr = document.getElementById('rp-hint-android');
-        if (def) def.style.display = 'none';
-        if (adr) adr.style.display = 'flex';
-      }
-    })();
+    // Apply correct print mode UI on load
+    (function() { _applyPrintModeUI(); })();
 
     function posBack() {
       document.getElementById('page-pos').classList.remove('active');
