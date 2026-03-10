@@ -1980,8 +1980,8 @@
     .rp-row .rp-lbl { flex: 1; }
     .rp-row .rp-val { text-align: right; white-space: nowrap; }
     .rp-row.grand { font-size: 14px; font-weight: 800; margin: 4px 0 2px; }
-    .rp-item-disc { font-size: 10px; color: #888; margin-left: 8px; font-style: italic; }
-    .rp-section { margin: 6px 0 2px; font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.8px; }
+    .rp-item-disc { font-size: 10px; color: #1a1a1a; margin-left: 8px; font-style: italic; }
+    .rp-section { margin: 6px 0 2px; font-size: 10px; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.8px; }
     .rp-gap { height: 6px; }
 
     /* ── Right: print status panel ── */
@@ -5652,7 +5652,8 @@
         else if (cat.type === 'kits')      sel[cat.id].forEach(t => kitsTests.push(t));
         else                               sel[cat.id].forEach(t => labTests.push(t));
       });
-      const allTests = [...labTests, ...xrayTests, ...drugTests, ...utzTests];
+      const allTests = [...labTests, ...xrayTests, ...drugTests, ...utzTests,
+                        ...checkupTests, ...cardiologyTests, ...kitsTests];
       if (!allTests.length) { showToast('Please select at least one procedure.', 'err'); return; }
 
       let labSubtotal = 0, xraySubtotal = 0, drugSubtotal = 0, utzSubtotal = 0;
@@ -7526,6 +7527,7 @@
       document.getElementById('page-reg').classList.remove('active');
       document.getElementById('page-pos').classList.add('active');
       document.getElementById('logout-btn').classList.remove('visible');
+      updatePrinterBadge();
     }
 
     /* ════════════════════════════════════════════════
@@ -8237,6 +8239,7 @@
     // ESC/POS command bytes
     const CMD = {
       INIT:         [ESC, 0x40],
+      DARKNESS:     [GS,  0x7C, 0x08],   // GS | n  — print density 8 (max=8, default=4)
       ALIGN_LEFT:   [ESC, 0x61, 0x00],
       ALIGN_CENTER: [ESC, 0x61, 0x01],
       BOLD_ON:      [ESC, 0x45, 0x01],
@@ -8419,22 +8422,26 @@
         _rpStep(55, 'Connecting to QZ Tray…',   'Opening WebSocket on localhost:8181…', '');
         await connectQZ();
 
-        _rpStep(78, 'Sending to printer…',       `Sending to "${QZ_PRINTER_NAME}"…`, '');
-        const cfg = qz.configs.create(QZ_PRINTER_NAME, { encoding:'RAW', copies:1, colorType:'blackwhite' });
+        _rpStep(72, 'Detecting printer…',        'Scanning for thermal printer…', '');
+        const printer = await detectPrinter();
+
+        _rpStep(88, 'Sending to printer…',       `Sending to "${printer}"…`, '');
+        const cfg = qz.configs.create(printer, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
         await qz.print(cfg, bytesToQzData(bytes));
 
         _rpStep(100, '✓ Receipt printed!', 'Paper is printing now. You may exit.', 'done');
-        showToast('Receipt printed!', 'ok');
+        showToast('Receipt printed on ' + printer + '!', 'ok');
 
       } catch (err) {
         console.error('Print error:', err);
-        _qzConnected = false;
+        _qzConnected   = false;
+        _activePrinter = null;
         const msg = err.message || '';
         let errMsg = 'Print failed: ' + msg;
         if (msg.includes('Unable to establish') || msg.includes('connect'))
           errMsg = 'QZ Tray is not running — start it from the system tray, then tap Reprint.';
-        else if (msg.includes('not found') || msg.includes('printer'))
-          errMsg = `Printer "${QZ_PRINTER_NAME}" not found — check name in settings.`;
+        else if (msg.includes('No thermal printer'))
+          errMsg = msg;
 
         _rpStep(100, '⚠ Print failed', errMsg, 'error');
         showToast(errMsg, 'err');
@@ -8468,18 +8475,18 @@
         <div class="rp-center rp-small" style="color:#666;">Tel: (049) 000-0000</div>
         <div class="rp-gap"></div>
         <div class="rp-center rp-bold" style="font-size:12px;letter-spacing:0.5px;">OFFICIAL RECEIPT</div>
-        <div class="rp-center rp-small" style="color:#888;">** NOT A VALID MEDICAL RECORD **</div>
+        <div class="rp-center rp-small" style="color:#1a1a1a;">** NOT A VALID MEDICAL RECORD **</div>
         ${div('-')}
         ${row('Receipt No:', recNo)}
         ${row('Date/Time:', d.date || '')}
         ${row('Cashier:', 'Front Desk')}
         ${div('-')}
-        <div class="rp-small" style="color:#888;">Patient</div>
+        <div class="rp-small" style="color:#1a1a1a;">Patient</div>
         <div class="rp-bold" style="font-size:12px;word-break:break-word;">${(d.name || '').toUpperCase()}</div>
         ${row('Age/Sex:', d.ageSex || '')}
-        ${d.referred && d.referred.trim() ? `<div class="rp-small" style="color:#555;">Ref: ${d.referred}</div>` : ''}
+        ${d.referred && d.referred.trim() ? `<div class="rp-small" style="color:#1a1a1a;">Ref: ${d.referred}</div>` : ''}
         ${div('-')}
-        <div class="rp-small" style="color:#888;">Services Rendered</div>
+        <div class="rp-small" style="color:#1a1a1a;">Services Rendered</div>
         <div class="rp-gap"></div>`;
 
       // Group items by department
@@ -8607,8 +8614,8 @@
         <div class="rp-gap"></div>
         <div class="rp-center rp-small">Thank you for trusting</div>
         <div class="rp-center rp-bold rp-small">Qualicheck Diagnostic Clinic</div>
-        <div class="rp-center rp-small" style="color:#888;">Results are strictly confidential.</div>
-        <div class="rp-center rp-small" style="color:#888;">For inquiries call (049) 000-0000</div>
+        <div class="rp-center rp-small" style="color:#1a1a1a;">Results are strictly confidential.</div>
+        <div class="rp-center rp-small" style="color:#1a1a1a;">For inquiries call (049) 000-0000</div>
         <div class="rp-gap"></div>`;
 
       document.getElementById('rp-paper-content').innerHTML = html;
@@ -8620,6 +8627,7 @@
       const txt  = str => chunks.push(txtBytes(str));
 
       cmd(CMD.INIT);
+      cmd(CMD.DARKNESS);   // max print density — ensures solid black on thermal paper
       cmd(CMD.ALIGN_CENTER);
 
       // ── LOGO ─────────────────────────────────────
@@ -8864,18 +8872,24 @@
          4. Click Print — done.
 
        PRINTER NAME:
-         Set QZ_PRINTER_NAME below to match exactly what
+         Add printer names to KNOWN_PRINTERS array below.
          Windows shows in Control Panel → Devices & Printers.
          e.g. 'POS58' or 'Thermal Printer' or 'POS-58'
     ════════════════════════════════════════════════ */
 
-    // ── CONFIG — set your printer name here ──────────
-    const QZ_PRINTER_NAME = 'QUALICHECK POS'; // ← change if needed
+    /* ════════════════════════════════════════════════
+       QZ TRAY PRINTING — auto-detect thermal printer
+       Asks QZ Tray for all installed printers, then
+       picks the first one that matches a known name.
+       Add more printer names to KNOWN_PRINTERS as needed.
+    ════════════════════════════════════════════════ */
 
-    // QZ Tray connection state
-    let _qzConnected = false;
+    // Known thermal printer names — checked in order, first match wins
+    const KNOWN_PRINTERS = ['QUALICHECK POS', 'XP-58C'];
 
-    // Load qz-tray.js from CDN (only once)
+    let _qzConnected   = false;
+    let _activePrinter = null; // cached after first detection
+
     function loadQzScript() {
       return new Promise((resolve, reject) => {
         if (window.qz) { resolve(); return; }
@@ -8887,77 +8901,76 @@
       });
     }
 
-    // Connect to QZ Tray WebSocket (localhost:8181)
     async function connectQZ() {
       if (_qzConnected && qz.websocket.isActive()) return;
       _qzConnected = false;
-
-      // QZ Tray uses a self-signed cert — we disable cert validation
-      // for local connections (this is safe for localhost only)
       qz.security.setCertificatePromise((resolve) => resolve());
       qz.security.setSignatureAlgorithm('SHA512');
-      qz.security.setSignaturePromise((toSign) => {
-        return (resolve) => resolve(); // unsigned for local use
-      });
-
+      qz.security.setSignaturePromise(() => (resolve) => resolve());
       await qz.websocket.connect({ retries: 2, delay: 1 });
       _qzConnected = true;
     }
 
-    // Convert our Uint8Array to the hex-string array format QZ Tray expects
-    // QZ sends each element as a literal byte — we use type:'raw' with hex
+    async function detectPrinter() {
+      if (_activePrinter) return _activePrinter;
+      const found = await qz.printers.find();
+      const list  = (Array.isArray(found) ? found : [found]).map(n => (n || '').trim());
+      for (const candidate of KNOWN_PRINTERS) {
+        if (list.some(n => n.toLowerCase() === candidate.toLowerCase())) {
+          _activePrinter = candidate;
+          console.log('[QualiCheck] Printer auto-detected:', _activePrinter);
+          return _activePrinter;
+        }
+      }
+      throw new Error(
+        'No thermal printer found. Connected: [' + list.join(', ') + ']. ' +
+        'Expected one of: ' + KNOWN_PRINTERS.join(', ')
+      );
+    }
+
     function bytesToQzData(uint8arr) {
-      // QZ Tray raw mode accepts an array of objects or strings.
-      // Easiest: pass the whole thing as a single base64 string.
       let binary = '';
-      uint8arr.forEach(b => binary += String.fromCharCode(b));
+      for (let i = 0; i < uint8arr.length; i++) binary += String.fromCharCode(uint8arr[i]);
       return [{ type: 'raw', format: 'base64', data: btoa(binary) }];
     }
 
     async function sendToUsbPrinter(bytes) {
       await loadQzScript();
       await connectQZ();
-
-      const config = qz.configs.create(QZ_PRINTER_NAME, {
-        encoding:  'RAW',
-        copies:    1,
-        colorType: 'blackwhite',
-      });
-
-      const data = bytesToQzData(bytes);
-      await qz.print(config, data);
+      const printer = await detectPrinter();
+      const cfg = qz.configs.create(printer, { copies:1, colorType:'blackwhite', jobName:'QualiCheck Receipt' });
+      await qz.print(cfg, bytesToQzData(bytes));
     }
 
     async function printReceipt() {
       const btn = document.getElementById('pos-print-btn');
       if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
-
       btn.disabled = true;
       btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Printing…`;
-
       try {
         const bytes = await buildReceiptBytes(_lastReceiptData);
         await sendToUsbPrinter(bytes);
-        showToast('Receipt printed!', 'ok');
+        showToast('Receipt printed on ' + _activePrinter + '!', 'ok');
       } catch (err) {
         console.error('Print error:', err);
+        _qzConnected   = false;
+        _activePrinter = null;
         const msg = err.message || '';
-        if (msg.includes('Unable to establish') || msg.includes('connect')) {
-          showToast('QZ Tray not running. Start it first.', 'err');
-        } else if (msg.includes('not found') || msg.includes('printer')) {
-          showToast('Printer "' + QZ_PRINTER_NAME + '" not found. Check name.', 'err');
+        if (msg.includes('Unable to establish') || msg.includes('connect') || msg.includes('refused')) {
+          showToast('QZ Tray not running. Start it from the system tray first.', 'err');
+        } else if (msg.includes('No thermal printer')) {
+          showToast(msg, 'err');
         } else {
           showToast('Print failed: ' + msg, 'err');
         }
-        _qzConnected = false;
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Receipt`;
       }
     }
 
-    // Receipt data is stored after posConfirm succeeds
     let _lastReceiptData = null;
+    function updatePrinterBadge() {}
 
     function posBack() {
       document.getElementById('page-pos').classList.remove('active');
