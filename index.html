@@ -8275,17 +8275,31 @@
     const LOGO_DOTS   = 192;   // target logo width in dots (~half width)
     const LW          = 32;    // text characters per line
 
-    // ── LOGO: paste your base64 data URL here ───────────
-    // To embed your logo:
-    //   1. Go to https://www.base64-image.de/
-    //   2. Upload logo.png
-    //   3. Copy the full data:image/png;base64,xxxx... string
-    //   4. Replace null below with that string (keep the quotes)
-    //
-    // Example:
-    //   const _logoDataUrl = 'data:image/png;base64,iVBORw0KGgo...';
-    //
-    const _logoDataUrl = null; // ← paste base64 string here
+    // ── LOGO: auto-fetched from GitHub on first print ──
+    // Fetched once per session and cached as base64 data URL.
+    // Falls back gracefully — receipt still prints without logo if offline.
+    const LOGO_URL    = 'https://raw.githubusercontent.com/qlckintakeunit-dev/patient-registration-portal-webapp/main/logo.png';
+    let   _logoDataUrl  = null;  // cached after first successful fetch
+    let   _logoFetched  = false; // only attempt once per session
+
+    async function _loadLogo() {
+      if (_logoFetched) return;
+      _logoFetched = true;
+      try {
+        const res  = await fetch(LOGO_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        await new Promise((resolve) => {
+          const reader  = new FileReader();
+          reader.onload  = () => { _logoDataUrl = reader.result; resolve(); };
+          reader.onerror = () => resolve();
+          reader.readAsDataURL(blob);
+        });
+        console.log('[QualiCheck] Logo loaded ✓');
+      } catch(e) {
+        console.warn('[QualiCheck] Logo fetch failed — printing without logo:', e.message);
+      }
+    }
 
     function txtBytes(str) {
       return new TextEncoder().encode(str);
@@ -8640,6 +8654,7 @@
       cmd(CMD.ALIGN_CENTER);
 
       // ── LOGO ─────────────────────────────────────
+      await _loadLogo();   // fetch from GitHub if not yet cached this session
       const logoBytes = await buildLogoBytes();
       if (logoBytes) {
         // Real logo: print raster image
