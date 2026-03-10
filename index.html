@@ -8322,7 +8322,7 @@
 
     function fmtAmt(n) {
       n = parseFloat(n) || 0;
-      return n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     /* ── Rasterize _logoDataUrl → ESC/POS GS v 0 bytes ──
@@ -8858,8 +8858,9 @@
       }
 
       if (d.discAmt > 0) {
-        const dlabel = (d.discountLabel || 'Discount').slice(0, LW - fmtAmt(d.discAmt).length - 3);
-        txt(padLine(dlabel, '-' + fmtAmt(d.discAmt)) + '\n');
+        const _discStr = '-' + fmtAmt(d.discAmt);  // e.g. -₱200.00
+        const dlabel = (d.discountLabel || 'Discount').slice(0, LW - _discStr.length - 1);
+        txt(padLine(dlabel, _discStr) + '\n');
       }
 
       txt(div('='));
