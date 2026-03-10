@@ -8997,6 +8997,9 @@
       // Apply correct print mode hints/title for this device
       _applyPrintModeUI();
 
+      // Hide tap button — will show again if Android print fires
+      _hideAndroidPrintBtn();
+
       // Reset progress bar
       _rpStep(0, 'Preparing receipt…', 'Starting…', '');
       document.getElementById('rp-prog-bar').classList.remove('error', 'done');
@@ -9011,8 +9014,11 @@
 
     function _rpExit() {
       document.getElementById('receipt-preview-overlay').classList.remove('show');
-      _rpCurrentData = null;
-      _rpPrinting    = false;
+      _rpCurrentData     = null;
+      _rpPrinting        = false;
+      _pendingPrintB64   = null;
+      _pendingPrintBytes = null;
+      _hideAndroidPrintBtn();
       // Scroll recent list to top
       setTimeout(() => {
         const pg = document.getElementById('page-recent');
@@ -9876,21 +9882,83 @@
     }
 
     async function sendViaRawBT(bytes) {
-      const b64  = _bytesToBase64(bytes);
-      const uri  = 'rawbt:base64,' + b64;
+      const b64 = _bytesToBase64(bytes);
+      // Store bytes for the tap-to-print fallback button
+      _pendingPrintB64 = b64;
+      _pendingPrintBytes = bytes;
 
-      // Open the intent URI — RawBT intercepts it
-      // Use a hidden <a> click so it works inside WebView/Chrome
-      const a = document.createElement('a');
-      a.href  = uri;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => document.body.removeChild(a), 1000);
+      // Method 1: window.location.href — most reliable in Android Chrome
+      // Chrome allows custom URI schemes via location change (not programmatic clicks)
+      try {
+        window.location.href = 'rawbt:base64,' + b64;
+      } catch(e) {
+        console.warn('RawBT location.href failed:', e);
+      }
 
-      // RawBT takes over from here — we can't get a callback,
-      // so we resolve immediately after handing off
+      // Show the tap-to-print button as a guaranteed fallback
+      // (Chrome sometimes blocks the URI silently — the button always works)
+      _showAndroidPrintBtn(b64);
+
       return Promise.resolve();
+    }
+
+    let _pendingPrintB64   = null;
+    let _pendingPrintBytes = null;
+
+    function _showAndroidPrintBtn(b64) {
+      let btn = document.getElementById('rp-android-tap-btn');
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'rp-android-tap-btn';
+        btn.style.cssText = `
+          display:flex; align-items:center; justify-content:center; gap:10px;
+          width:100%; padding:15px 20px; margin-top:12px;
+          background:linear-gradient(135deg,#1565C0,#1976D2);
+          color:#fff; border:none; border-radius:14px;
+          font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700;
+          cursor:pointer; box-shadow:0 4px 20px rgba(21,101,192,0.4);
+          letter-spacing:-0.2px;
+        `;
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          Tap to Send to KPrinter_448f
+        `;
+        // Insert after the reprint button
+        const reprint = document.getElementById('rp-reprint-btn');
+        if (reprint && reprint.parentNode) {
+          reprint.parentNode.insertBefore(btn, reprint.nextSibling);
+        }
+      }
+      btn.style.display = 'flex';
+      btn.onclick = () => {
+        // Direct user-gesture tap — Chrome always allows this
+        window.location.href = 'rawbt:base64,' + b64;
+        btn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Sent! Check KPrinter_448f…
+        `;
+        btn.style.background = 'linear-gradient(135deg,#1B5E20,#2E7D32)';
+        setTimeout(() => {
+          btn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            Tap to Send to KPrinter_448f
+          `;
+          btn.style.background = 'linear-gradient(135deg,#1565C0,#1976D2)';
+        }, 3000);
+      };
+    }
+
+    function _hideAndroidPrintBtn() {
+      const btn = document.getElementById('rp-android-tap-btn');
+      if (btn) btn.style.display = 'none';
     }
 
     /* ════════════════════════════════════════════════
