@@ -492,6 +492,51 @@
     }
     .edit-section-title:first-child { padding-top: 0; }
 
+    /* ── Accordion sections ── */
+    .edit-accordion {
+      border: 1.5px solid #ede8ff;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .edit-accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      background: #faf7ff;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .edit-accordion-header:hover { background: #f3ecff; }
+    .edit-accordion.open .edit-accordion-header { background: #ede8ff; border-bottom: 1.5px solid #ddd4f7; }
+    .edit-accordion-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .edit-accordion-icon.payment { background: #1B5E20; }
+    .edit-accordion-icon.patient { background: #6F2DBD; }
+    .edit-accordion-icon.procedures { background: #1565C0; }
+    .edit-accordion-label { flex: 1; }
+    .edit-accordion-title {
+      font-size: 13px; font-weight: 700; color: #1a1a1a; line-height: 1.2;
+    }
+    .edit-accordion-sub {
+      font-size: 10px; color: #888; margin-top: 1px; font-weight: 500;
+    }
+    .edit-accordion-chevron {
+      color: #aaa; transition: transform 0.25s; flex-shrink: 0;
+    }
+    .edit-accordion.open .edit-accordion-chevron { transform: rotate(180deg); color: #6F2DBD; }
+    .edit-accordion-body {
+      display: none;
+      padding: 16px 16px 14px;
+      background: #fff;
+    }
+    .edit-accordion.open .edit-accordion-body { display: block; }
+
     .edit-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -4487,6 +4532,13 @@
     .pos-amount-input-desktop:disabled {
       background: #f5f5f5; color: #ccc; border-color: rgba(0,0,0,0.08); cursor: default;
     }
+    @keyframes posAmtShake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-6px); }
+      40%     { transform: translateX(6px); }
+      60%     { transform: translateX(-4px); }
+      80%     { transform: translateX(4px); }
+    }
 
     /* Change / Balance strip — card style */
     .pos-change-strip {
@@ -5029,159 +5081,218 @@
 
       <div class="edit-modal-body" id="edit-modal-body">
 
-        <!-- ─ Patient Info ─ -->
-        <div class="edit-section-title">Patient Information</div>
-        <div class="edit-grid">
-          <div class="edit-field">
-            <label>Name</label>
-            <input type="text" id="edit-f-name" placeholder="DELA CRUZ, JUAN D." oninput="this.value=this.value.toUpperCase()" />
+        <!-- ══ PAYMENT (open by default) ══ -->
+        <div class="edit-accordion open" id="edit-acc-payment">
+          <div class="edit-accordion-header" onclick="toggleEditAccordion('edit-acc-payment')">
+            <div class="edit-accordion-icon payment">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            </div>
+            <div class="edit-accordion-label">
+              <div class="edit-accordion-title">Payment &amp; Amounts</div>
+              <div class="edit-accordion-sub">Status, method, amounts &amp; balance</div>
+            </div>
+            <svg class="edit-accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          <div class="edit-field">
-            <label>Birthday (MM/DD/YYYY)</label>
-            <input type="text" id="edit-f-birthday" placeholder="MM/DD/YYYY" />
-          </div>
-          <div class="edit-field">
-            <label>Age / Sex</label>
-            <input type="text" id="edit-f-agesex" placeholder="e.g. 35 / Female" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-          <div class="edit-field">
-            <label>Operation Type</label>
-            <select id="edit-f-optype">
-              <option value="">— Select —</option>
-              <option value="WALK-IN">Walk-In</option>
-              <option value="ON-SITE">On-Site</option>
-              <option value="HOMESERVICE">Home Service</option>
-              <option value="COLLAB PROJECT">Collab Project</option>
-            </select>
-          </div>
-          <div class="edit-field">
-            <label>Contact No.</label>
-            <input type="text" id="edit-f-contact" placeholder="09XX XXX XXXX" />
-          </div>
-          <div class="edit-field">
-            <label>Referred By</label>
-            <input type="text" id="edit-f-referred" placeholder="Doctor / Clinic" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-          <div class="edit-field full">
-            <label>Address</label>
-            <input type="text" id="edit-f-address" placeholder="City / Municipality" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-          <div class="edit-field full">
-            <label>Company (Accredited)</label>
-            <input type="text" id="edit-f-company" placeholder="Leave blank if none" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-        </div>
-
-        <!-- ─ Procedures ─ -->
-        <div class="edit-section-title">Procedures &amp; Services</div>
-        <div class="edit-grid">
-          <div class="edit-field full">
-            <label>Lab Procedures (comma-separated)</label>
-            <textarea id="edit-f-lab" placeholder="e.g. CBC, URINALYSIS, LIPID PROFILE"></textarea>
-          </div>
-          <div class="edit-field full">
-            <label>Checkup / MedCert (comma-separated)</label>
-            <textarea id="edit-f-checkup" placeholder="e.g. PHYSICAL EXAM, MEDCERT DR. SANTOS"></textarea>
-          </div>
-          <div class="edit-field full">
-            <label>Cardiology (comma-separated)</label>
-            <textarea id="edit-f-cardiology" placeholder="e.g. ECG (ELECTROCARDIAGRAM)"></textarea>
-          </div>
-          <div class="edit-field full">
-            <label>Kits (comma-separated)</label>
-            <textarea id="edit-f-kits" placeholder="e.g. HEPATITIS B KIT"></textarea>
-          </div>
-          <div class="edit-field full">
-            <label>X-Ray Tests (comma-separated)</label>
-            <textarea id="edit-f-xray" placeholder="e.g. CHEST X-RAY (PA)"></textarea>
-          </div>
-          <div class="edit-field full">
-            <label>Drug Tests (comma-separated)</label>
-            <textarea id="edit-f-drug" placeholder="e.g. DRUG TEST (5-PANEL)"></textarea>
-          </div>
-          <div class="edit-field full">
-            <label>UTZ Tests (comma-separated)</label>
-            <textarea id="edit-f-utz" placeholder="e.g. WHOLE ABDOMINAL UTZ"></textarea>
-          </div>
-        </div>
-
-        <!-- ─ Amounts ─ -->
-        <div class="edit-section-title">Amounts &amp; Payment</div>
-        <div class="edit-amount-grid">
-          <div class="edit-field">
-            <label>Lab Subtotal (₱)</label>
-            <input type="number" id="edit-f-labsub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Checkup Subtotal (₱)</label>
-            <input type="number" id="edit-f-checkupsub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Cardiology Subtotal (₱)</label>
-            <input type="number" id="edit-f-cadsub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Kits Subtotal (₱)</label>
-            <input type="number" id="edit-f-kitssub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>X-Ray Subtotal (₱)</label>
-            <input type="number" id="edit-f-xraysub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Drug Subtotal (₱)</label>
-            <input type="number" id="edit-f-drugsub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>UTZ Subtotal (₱)</label>
-            <input type="number" id="edit-f-utzsub" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Discount Label</label>
-            <input type="text" id="edit-f-disclabel" placeholder="e.g. Senior/PWD – 20%" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-          <div class="edit-field">
-            <label>Discount Amount (₱)</label>
-            <input type="number" id="edit-f-discamt" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field" style="grid-column:span 1;">
-            <label>Grand Total (₱)</label>
-            <input type="number" id="edit-f-grand" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Payment Status</label>
-            <select id="edit-f-status">
-              <option value="PENDING">PENDING</option>
-              <option value="FULLY PAID">FULLY PAID</option>
-              <option value="PARTLY PAID">PARTLY PAID</option>
-              <option value="UNPAID">UNPAID</option>
-              <option value="REFUNDED">REFUNDED</option>
-            </select>
-          </div>
-          <div class="edit-field">
-            <label>Payment Method</label>
-            <select id="edit-f-paytype">
-              <option value="CASH">CASH</option>
-              <option value="GCASH">GCASH</option>
-              <option value="G-CASH">G-CASH</option>
-              <option value="CARD">CARD</option>
-              <option value="YAKAP">YAKAP</option>
-              <option value="BSA">BSA</option>
-              <option value="BANK">BANK</option>
-              <option value="CHARGED">CHARGED</option>
-            </select>
-          </div>
-          <div class="edit-field">
-            <label>Amount Paid (₱)</label>
-            <input type="number" id="edit-f-payamt" min="0" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="edit-field">
-            <label>Balance (₱)</label>
-            <input type="number" id="edit-f-balance" min="0" step="0.01" placeholder="0.00" />
+          <div class="edit-accordion-body">
+            <!-- Payment status + method — top priority -->
+            <div class="edit-grid" style="margin-bottom:12px;">
+              <div class="edit-field">
+                <label>Payment Status</label>
+                <select id="edit-f-status">
+                  <option value="PENDING">PENDING</option>
+                  <option value="FULLY PAID">FULLY PAID</option>
+                  <option value="PARTLY PAID">PARTLY PAID</option>
+                  <option value="UNPAID">UNPAID</option>
+                  <option value="REFUNDED">REFUNDED</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <label>Payment Method</label>
+                <select id="edit-f-paytype">
+                  <option value="CASH">CASH</option>
+                  <option value="GCASH">GCASH</option>
+                  <option value="CARD">CARD</option>
+                  <option value="YAKAP">YAKAP</option>
+                  <option value="BSA">BSA</option>
+                  <option value="BANK">BANK</option>
+                  <option value="CHARGED">CHARGED</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <label>Amount Paid (₱)</label>
+                <input type="number" id="edit-f-payamt" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Balance (₱)</label>
+                <input type="number" id="edit-f-balance" min="0" step="0.01" placeholder="0.00" />
+              </div>
+            </div>
+            <!-- Subtotals -->
+            <div class="edit-amount-grid">
+              <div class="edit-field">
+                <label>Grand Total (₱)</label>
+                <input type="number" id="edit-f-grand" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Discount Label</label>
+                <input type="text" id="edit-f-disclabel" placeholder="e.g. Senior/PWD – 20%" oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <div class="edit-field">
+                <label>Discount Amount (₱)</label>
+                <input type="number" id="edit-f-discamt" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Lab Subtotal (₱)</label>
+                <input type="number" id="edit-f-labsub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Checkup Subtotal (₱)</label>
+                <input type="number" id="edit-f-checkupsub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Cardiology Subtotal (₱)</label>
+                <input type="number" id="edit-f-cadsub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Kits Subtotal (₱)</label>
+                <input type="number" id="edit-f-kitssub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>X-Ray Subtotal (₱)</label>
+                <input type="number" id="edit-f-xraysub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>Drug Subtotal (₱)</label>
+                <input type="number" id="edit-f-drugsub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="edit-field">
+                <label>UTZ Subtotal (₱)</label>
+                <input type="number" id="edit-f-utzsub" min="0" step="0.01" placeholder="0.00" />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style="height:8px;"></div>
+        <!-- ══ PATIENT INFORMATION (collapsed) ══ -->
+        <div class="edit-accordion" id="edit-acc-patient">
+          <div class="edit-accordion-header" onclick="toggleEditAccordion('edit-acc-patient')">
+            <div class="edit-accordion-icon patient">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="edit-accordion-label">
+              <div class="edit-accordion-title">Patient Information</div>
+              <div class="edit-accordion-sub">Name, age, address, contact &amp; referral</div>
+            </div>
+            <svg class="edit-accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="edit-accordion-body">
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label>Name</label>
+                <input type="text" id="edit-f-name" placeholder="DELA CRUZ, JUAN D." oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <div class="edit-field">
+                <label>Birthday (MM/DD/YYYY)</label>
+                <input type="text" id="edit-f-birthday" placeholder="MM/DD/YYYY" />
+              </div>
+              <div class="edit-field">
+                <label>Age / Sex</label>
+                <input type="text" id="edit-f-agesex" placeholder="e.g. 35 / Female" oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <div class="edit-field">
+                <label>Operation Type</label>
+                <select id="edit-f-optype">
+                  <option value="">— Select —</option>
+                  <option value="WALK-IN">Walk-In</option>
+                  <option value="ON-SITE">On-Site</option>
+                  <option value="HOMESERVICE">Home Service</option>
+                  <option value="COLLAB PROJECT">Collab Project</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <label>Contact No.</label>
+                <input type="text" id="edit-f-contact" placeholder="09XX XXX XXXX" />
+              </div>
+              <div class="edit-field">
+                <label>Referred By</label>
+                <input type="text" id="edit-f-referred" placeholder="Doctor / Clinic" oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <div class="edit-field full">
+                <label>Address</label>
+                <input type="text" id="edit-f-address" placeholder="City / Municipality" oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <div class="edit-field full">
+                <label>Company (Accredited)</label>
+                <input type="text" id="edit-f-company" placeholder="Leave blank if none" oninput="this.value=this.value.toUpperCase()" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ PROCEDURES (collapsed) ══ -->
+        <div class="edit-accordion" id="edit-acc-procedures">
+          <div class="edit-accordion-header" onclick="toggleEditAccordion('edit-acc-procedures')">
+            <div class="edit-accordion-icon procedures">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
+            <div class="edit-accordion-label">
+              <div class="edit-accordion-title">Procedures &amp; Services</div>
+              <div class="edit-accordion-sub">Lab, checkup, X-ray, drug, UTZ &amp; more</div>
+            </div>
+            <svg class="edit-accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="edit-accordion-body">
+            <div class="edit-grid">
+              <div class="edit-field full">
+                <label>Lab Procedures (comma-separated)</label>
+                <textarea id="edit-f-lab" placeholder="e.g. CBC, URINALYSIS, LIPID PROFILE"></textarea>
+              </div>
+              <div class="edit-field full">
+                <label>Checkup / MedCert (comma-separated)</label>
+                <textarea id="edit-f-checkup" placeholder="e.g. PHYSICAL EXAM, MEDCERT DR. SANTOS"></textarea>
+              </div>
+              <div class="edit-field full">
+                <label>Cardiology (comma-separated)</label>
+                <textarea id="edit-f-cardiology" placeholder="e.g. ECG (ELECTROCARDIAGRAM)"></textarea>
+              </div>
+              <div class="edit-field full">
+                <label>Kits (comma-separated)</label>
+                <textarea id="edit-f-kits" placeholder="e.g. HEPATITIS B KIT"></textarea>
+              </div>
+              <div class="edit-field full">
+                <label>X-Ray Tests (comma-separated)</label>
+                <textarea id="edit-f-xray" placeholder="e.g. CHEST X-RAY (PA)"></textarea>
+              </div>
+              <div class="edit-field full">
+                <label>Drug Tests (comma-separated)</label>
+                <textarea id="edit-f-drug" placeholder="e.g. DRUG TEST (5-PANEL)"></textarea>
+              </div>
+              <div class="edit-field full">
+                <label>UTZ Tests (comma-separated)</label>
+                <textarea id="edit-f-utz" placeholder="e.g. WHOLE ABDOMINAL UTZ"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:4px;"></div>
       </div><!-- /.edit-modal-body -->
 
       <div class="edit-modal-footer">
@@ -6724,15 +6835,21 @@
       stSel.value = (rec.paymentStatus || 'PENDING').toUpperCase();
       if (!stSel.value) stSel.value = 'PENDING';
 
-      // Payment method select
+      // Payment method select — normalize G-CASH → GCASH
       const ptSel = document.getElementById('edit-f-paytype');
-      ptSel.value = (rec.paymentType || 'CASH').toUpperCase();
+      const rawPt = (rec.paymentType || 'CASH').toUpperCase().replace('G-CASH','GCASH');
+      ptSel.value = rawPt;
       if (!ptSel.value) ptSel.value = 'CASH';
 
       // ── Open modal ───────────────────────────────────────────────
       const modal = document.getElementById('edit-patient-modal');
       modal.classList.add('show');
       document.getElementById('edit-modal-body').scrollTop = 0;
+
+      // Reset accordions: Payment open, others closed
+      document.getElementById('edit-acc-payment').classList.add('open');
+      document.getElementById('edit-acc-patient').classList.remove('open');
+      document.getElementById('edit-acc-procedures').classList.remove('open');
 
       // Reset save button
       const saveBtn = document.getElementById('edit-modal-save-btn');
@@ -6743,6 +6860,12 @@
     function closeEditModal() {
       document.getElementById('edit-patient-modal').classList.remove('show');
       closeEditConfirm();
+    }
+
+    function toggleEditAccordion(id) {
+      const acc = document.getElementById(id);
+      if (!acc) return;
+      acc.classList.toggle('open');
     }
 
     function openEditConfirm() {
@@ -9700,6 +9823,50 @@
       const total   = _posData.grand;
       const balance = Math.max(0, total - paid); // amount still owed (never negative)
 
+      // ── Amount validation — block if no amount entered ────────────
+      // Exceptions: CHARGED (waived) and NONE (promissory note)
+      if (!_posIsCharged && payType !== 'NONE' && paid <= 0) {
+        // Shake the amount input and show inline error
+        const amtEl = document.getElementById('pos-amount-input-desktop') ||
+                      document.getElementById('pos-amount-display');
+        if (amtEl) {
+          amtEl.style.borderColor = '#e53935';
+          amtEl.style.boxShadow   = '0 0 0 3px rgba(229,57,53,0.18)';
+          amtEl.style.animation   = 'posAmtShake 0.35s ease';
+          setTimeout(() => {
+            amtEl.style.borderColor = '';
+            amtEl.style.boxShadow   = '';
+            amtEl.style.animation   = '';
+          }, 1800);
+        }
+        // Show toast-style inline error
+        let errEl = document.getElementById('pos-amount-error');
+        if (!errEl) {
+          errEl = document.createElement('div');
+          errEl.id = 'pos-amount-error';
+          errEl.style.cssText = `
+            color:#c62828; background:#fff5f5; border:1.5px solid #ffcdd2;
+            border-radius:8px; padding:9px 14px; font-size:13px; font-weight:600;
+            text-align:center; margin-bottom:10px; display:flex; align-items:center;
+            gap:8px; animation:posAmtShake 0.35s ease;
+          `;
+          errEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Please enter an amount first.`;
+          if (amtEl) amtEl.parentNode.insertBefore(errEl, amtEl);
+        } else {
+          errEl.style.display = 'flex';
+          errEl.style.animation = 'none';
+          void errEl.offsetWidth; // reflow to restart animation
+          errEl.style.animation = 'posAmtShake 0.35s ease';
+        }
+        setTimeout(() => { if (errEl) errEl.style.display = 'none'; }, 3500);
+        return; // ← stop here
+      }
+
+      // Hide error if previously shown
+      const errEl = document.getElementById('pos-amount-error');
+      if (errEl) errEl.style.display = 'none';
+
       // Auto-compute payment status from amount vs total
       let sheetStatus;
       if (_posIsCharged) {
@@ -11185,6 +11352,17 @@
               <span class="pos-change-cell-lbl">Change</span>
               <span class="pos-change-cell-val" id="pos-change-val">₱0.00</span>
             </div>
+          </div>
+
+          <!-- Amount error message -->
+          <div id="pos-amount-error" style="display:none;align-items:center;gap:7px;
+            background:#fff5f5;border:1.5px solid #ffcdd2;border-radius:9px;
+            padding:9px 13px;margin-top:6px;margin-bottom:2px;
+            font-size:12px;font-weight:600;color:#B71C1C;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2.5" style="flex-shrink:0;">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Please enter an amount before saving.
           </div>
 
           <!-- Number Keyboard (touch/tablet) -->
