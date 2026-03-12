@@ -734,6 +734,7 @@
       .edit-modal-header { padding: 18px 18px 14px; }
       .edit-modal-body { padding: 16px 16px 0; }
       .edit-modal-footer { padding: 12px 16px 20px; }
+      #at-two-col { grid-template-columns: 1fr !important; }
     }
     @media (min-width: 601px) and (max-width: 1024px) {
       .edit-modal-card { max-width: 640px; }
@@ -5046,6 +5047,20 @@
         <div class="sd-item-sub">Search, reprint &amp; manage</div>
       </div>
     </button>
+    <div class="sd-divider"></div>
+    <div class="sd-section-label">Catalog</div>
+    <button class="sd-item" onclick="sdGoAddTests()">
+      <div class="sd-item-icon" style="background:#fff3e0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E65100" stroke-width="2.5">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </div>
+      <div class="sd-item-text">
+        <div>Edit Tests</div>
+        <div class="sd-item-sub">Manage categories &amp; pricing</div>
+      </div>
+    </button>
     <div class="sd-footer">
       <button class="sd-logout-btn" onclick="closeSideDrawer(); doLogout();">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2.5">
@@ -6009,6 +6024,8 @@
     </div>
   </div><!-- /#page-recent -->
 
+  </div>
+
   <!-- ═══════════ RECEIPT PREVIEW MODAL ═══════════ -->
   <div id="receipt-preview-overlay">
     <div class="rp-shell">
@@ -6645,6 +6662,7 @@
     function doLogout() {
       document.getElementById('page-reg').classList.remove('active');
       document.getElementById('page-recent').classList.remove('active');
+      document.getElementById('page-add-tests').classList.remove('active');
       document.getElementById('page-login').classList.add('active');
       document.getElementById('logout-btn').classList.remove('visible');
       document.getElementById('hamburger-btn').classList.remove('visible');
@@ -6672,6 +6690,7 @@
     function sdGoRegister() {
       closeSideDrawer();
       document.getElementById('page-recent').classList.remove('active');
+      document.getElementById('page-add-tests').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
     }
     function sdGoPatientRecords() {
@@ -6680,8 +6699,17 @@
       if (document.getElementById('page-login').classList.contains('active')) return;
       // Show patient records page directly
       document.getElementById('page-reg').classList.remove('active');
+      document.getElementById('page-add-tests').classList.remove('active');
       document.getElementById('page-recent').classList.add('active');
       _ptFetch(1);
+    }
+    function sdGoAddTests() {
+      closeSideDrawer();
+      if (document.getElementById('page-login').classList.contains('active')) return;
+      document.getElementById('page-reg').classList.remove('active');
+      document.getElementById('page-recent').classList.remove('active');
+      document.getElementById('page-add-tests').classList.add('active');
+      atInit();
     }
 
     /* ════════════════════════════════════════════════
@@ -11248,6 +11276,7 @@
       goToStep1();
       showToast('Registration cancelled and form cleared.', 'err');
     }
+
 </script>
 
   <!-- ═══════════════════════════════════════════════════
@@ -11453,6 +11482,1291 @@
       </div>
     </div>
   </div>
-</body>
 
+
+  <!-- ═══════════ EDIT TESTS PAGE ═══════════ -->
+  <div class="page" id="page-add-tests" style="min-height:calc(100vh - 62px);background:#f4f1fa;flex-direction:column;align-items:flex-start;padding:0;">
+
+    <style>
+      /* ══ EDIT TESTS PAGE ════════════════════════════════════ */
+      #page-add-tests { overflow-y:auto; }
+      .et-wrap { width:100%; max-width:1100px; margin:0 auto; padding:28px 24px 80px; }
+      @media(max-width:600px){ .et-wrap{ padding:18px 14px 80px; } }
+
+      /* Page header */
+      .et-header {
+        display:flex; align-items:flex-start; justify-content:space-between;
+        gap:14px; flex-wrap:wrap; margin-bottom:26px;
+      }
+      .et-title { font-size:26px; font-weight:900; color:#1a1a1a; letter-spacing:-0.6px; }
+      .et-sub { font-size:13px; color:#888; margin-top:4px; }
+      .et-header-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+      /* Stats bar */
+      .et-stats {
+        display:flex; gap:12px; margin-bottom:22px; flex-wrap:wrap;
+      }
+      .et-stat {
+        background:#fff; border-radius:12px; padding:14px 20px;
+        box-shadow:0 2px 10px rgba(111,45,189,0.07);
+        border:1.5px solid #ede8ff; flex:1; min-width:120px;
+        display:flex; align-items:center; gap:12px;
+      }
+      .et-stat-icon {
+        width:36px; height:36px; border-radius:9px;
+        display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      }
+      .et-stat-val { font-size:22px; font-weight:900; color:#1a1a1a; line-height:1; }
+      .et-stat-lbl { font-size:11px; color:#888; margin-top:2px; font-weight:500; }
+
+      /* Tabs */
+      .et-tabs {
+        display:flex; gap:0; background:#fff; border-radius:14px;
+        box-shadow:0 2px 10px rgba(111,45,189,0.07); border:1.5px solid #ede8ff;
+        margin-bottom:20px; overflow:hidden;
+      }
+      .et-tab {
+        flex:1; padding:14px 16px; border:none; background:transparent;
+        font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; color:#888;
+        cursor:pointer; display:flex; align-items:center; justify-content:center;
+        gap:8px; transition:all 0.18s; position:relative;
+      }
+      .et-tab:not(:last-child) { border-right:1.5px solid #f0ebff; }
+      .et-tab.active {
+        background:linear-gradient(135deg,#6F2DBD,#4A0E8F);
+        color:#fff; font-weight:700;
+      }
+      .et-tab.active.orange-tab { background:linear-gradient(135deg,#E65100,#FF6F00); }
+      .et-tab.active.blue-tab { background:linear-gradient(135deg,#1565C0,#1976D2); }
+      @media(max-width:500px){ .et-tab{ font-size:12px; padding:12px 10px; gap:5px; } }
+
+      /* Tab panels */
+      .et-panel { display:none; }
+      .et-panel.active { display:block; }
+
+      /* Card */
+      .et-card {
+        background:#fff; border-radius:16px;
+        box-shadow:0 2px 14px rgba(111,45,189,0.08); border:1.5px solid #ede8ff;
+        overflow:hidden; margin-bottom:18px;
+      }
+      .et-card-head {
+        padding:18px 22px 14px; display:flex; align-items:center; gap:12px;
+        border-bottom:1.5px solid #f0ebff;
+      }
+      .et-card-icon {
+        width:40px; height:40px; border-radius:11px;
+        display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      }
+      .et-card-title { font-size:16px; font-weight:800; color:#1a1a1a; }
+      .et-card-sub { font-size:12px; color:#999; margin-top:1px; }
+      .et-card-body { padding:20px 22px; }
+
+      /* Form fields */
+      .et-field { margin-bottom:16px; }
+      .et-field:last-of-type { margin-bottom:0; }
+      .et-field label {
+        display:block; font-size:10px; font-weight:800;
+        text-transform:uppercase; letter-spacing:1px; color:#888; margin-bottom:6px;
+      }
+      .et-field input, .et-field select, .et-field textarea {
+        width:100%; padding:11px 14px;
+        border:1.5px solid #e0d6f7; border-radius:10px;
+        font-family:'DM Sans',sans-serif; font-size:14px; color:#1a1a1a;
+        background:#fafafa; outline:none; box-sizing:border-box;
+        transition:border-color 0.15s, box-shadow 0.15s;
+      }
+      .et-field input:focus, .et-field select:focus, .et-field textarea:focus {
+        border-color:#6F2DBD; box-shadow:0 0 0 3px rgba(111,45,189,0.1); background:#fff;
+      }
+      .et-field input[type="number"] { font-family:'DM Mono',monospace; }
+      .et-field textarea { resize:vertical; min-height:72px; font-size:13px; line-height:1.5; }
+      .et-field-hint { font-size:11px; color:#aaa; margin-top:5px; font-style:italic; }
+      .et-field-error { font-size:11px; color:#c62828; margin-top:5px; font-weight:600; display:none; }
+      .et-field input.err, .et-field select.err { border-color:#e53935; box-shadow:0 0 0 3px rgba(229,57,53,0.1); }
+
+      /* Price grid */
+      .et-price-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+      /* Primary button */
+      .et-btn {
+        padding:13px 20px; border:none; border-radius:11px;
+        font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;
+        cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+        transition:opacity 0.15s, transform 0.1s; white-space:nowrap;
+      }
+      .et-btn:hover { opacity:0.88; transform:translateY(-1px); }
+      .et-btn:active { transform:translateY(0); }
+      .et-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+      .et-btn-primary {
+        background:linear-gradient(135deg,#6F2DBD,#4A0E8F); color:#fff;
+        box-shadow:0 6px 20px rgba(111,45,189,0.3); width:100%; justify-content:center;
+      }
+      .et-btn-orange {
+        background:linear-gradient(135deg,#E65100,#FF6F00); color:#fff;
+        box-shadow:0 6px 20px rgba(230,81,0,0.28); width:100%; justify-content:center;
+      }
+      .et-btn-blue {
+        background:linear-gradient(135deg,#1565C0,#1976D2); color:#fff;
+        box-shadow:0 6px 20px rgba(21,101,192,0.28); width:100%; justify-content:center;
+      }
+      .et-btn-ghost {
+        background:#fff; color:#6F2DBD; border:1.5px solid #d0c0f0;
+        box-shadow:none;
+      }
+      .et-btn-ghost:hover { background:#f4f1fa; opacity:1; }
+
+      /* Search bar */
+      .et-search-wrap {
+        display:flex; align-items:center; gap:0;
+        background:#fafafa; border:1.5px solid #e0d6f7; border-radius:11px;
+        transition:border-color 0.15s, box-shadow 0.15s; overflow:hidden;
+        margin-bottom:14px;
+      }
+      .et-search-wrap:focus-within {
+        border-color:#6F2DBD; box-shadow:0 0 0 3px rgba(111,45,189,0.1); background:#fff;
+      }
+      .et-search-icon { padding:0 12px; color:#bbb; flex-shrink:0; display:flex; align-items:center; }
+      .et-search-inp {
+        flex:1; border:none; background:transparent; outline:none;
+        font-family:'DM Sans',sans-serif; font-size:14px; color:#1a1a1a;
+        padding:12px 0;
+      }
+      .et-search-inp::placeholder { color:#bbb; }
+      .et-search-clear {
+        background:none; border:none; cursor:pointer; color:#bbb; padding:0 12px;
+        display:none; align-items:center; transition:color 0.13s;
+      }
+      .et-search-clear:hover { color:#6F2DBD; }
+
+      /* Catalog table */
+      .et-cat-block { margin-bottom:20px; }
+      .et-cat-header {
+        display:flex; align-items:center; gap:10px; padding:10px 14px;
+        border-radius:10px 10px 0 0; margin-bottom:0;
+      }
+      .et-cat-name { font-size:12px; font-weight:800; color:#fff; letter-spacing:0.5px; text-transform:uppercase; flex:1; }
+      .et-cat-badge {
+        background:rgba(255,255,255,0.22); color:#fff;
+        border-radius:20px; padding:2px 10px; font-size:10px; font-weight:700;
+      }
+      .et-cat-table-wrap {
+        border:1.5px solid #ede8ff; border-top:none;
+        border-radius:0 0 11px 11px; overflow:hidden;
+      }
+      .et-cat-table { width:100%; border-collapse:collapse; font-size:13px; }
+      .et-cat-table thead tr { background:#f8f5ff; }
+      .et-cat-table th {
+        font-size:9px; font-weight:800; text-transform:uppercase;
+        letter-spacing:1px; color:#aaa; padding:9px 14px;
+        text-align:left; border-bottom:1.5px solid #f0ebff;
+      }
+      .et-cat-table th:last-child { text-align:center; width:60px; }
+      .et-cat-table td { padding:10px 14px; border-bottom:1px solid #f7f3ff; vertical-align:middle; }
+      .et-cat-table tr:last-child td { border-bottom:none; }
+      .et-cat-table tbody tr { transition:background 0.12s; cursor:default; }
+      .et-cat-table tbody tr:hover td { background:#faf7ff; }
+      .et-tname { font-weight:600; color:#1a1a1a; font-size:13px; }
+      .et-tprice { font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:#1B5E20; }
+      .et-tprice.sen { color:#1565C0; }
+      .et-tprice.na { color:#ccc; font-style:italic; font-family:'DM Sans',sans-serif; font-weight:400; }
+      .et-edit-btn {
+        background:#f0ebff; border:none; border-radius:7px;
+        width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+        cursor:pointer; color:#6F2DBD; transition:background 0.13s, transform 0.1s;
+        flex-shrink:0; margin:0 auto;
+      }
+      .et-edit-btn:hover { background:#e0d4ff; transform:scale(1.08); }
+
+      /* Loading / empty states */
+      .et-loading {
+        display:flex; align-items:center; justify-content:center;
+        gap:10px; padding:36px 0; color:#aaa; font-size:13px;
+      }
+      .et-empty {
+        text-align:center; padding:40px 16px; color:#bbb; font-size:13px; font-style:italic; line-height:1.7;
+      }
+
+      /* Search hits */
+      .et-hit {
+        display:flex; align-items:center; gap:10px;
+        background:#fafafa; border:1.5px solid #f0ebff; border-radius:10px;
+        padding:11px 14px; margin-bottom:8px; transition:all 0.13s; cursor:pointer;
+      }
+      .et-hit:hover { border-color:#c9b3eb; background:#f8f4ff; }
+      .et-hit-cat {
+        font-size:10px; font-weight:700; text-transform:uppercase;
+        background:#f0ebff; color:#6F2DBD; border-radius:5px; padding:2px 8px; flex-shrink:0;
+      }
+      .et-hit-name { flex:1; font-size:14px; font-weight:600; color:#1a1a1a; }
+      .et-hit-prices { display:flex; gap:7px; flex-shrink:0; flex-wrap:wrap; }
+      .et-hit-price {
+        font-size:11px; font-weight:700; font-family:'DM Mono',monospace;
+        background:#e8f5e9; color:#1B5E20; border-radius:5px; padding:2px 8px;
+      }
+      .et-hit-price.sen { background:#e3f2fd; color:#1565C0; }
+      .et-hit-edit {
+        background:#f0ebff; border:none; border-radius:7px;
+        padding:6px 12px; font-family:'DM Sans',sans-serif;
+        font-size:11px; font-weight:700; color:#6F2DBD; cursor:pointer;
+        flex-shrink:0; transition:background 0.13s;
+      }
+      .et-hit-edit:hover { background:#e0d4ff; }
+
+      /* ── EDIT PRICE POPUP ──────────────────────── */
+      #et-edit-modal {
+        display:none; position:fixed; inset:0;
+        background:rgba(15,5,30,0.65); backdrop-filter:blur(8px);
+        -webkit-backdrop-filter:blur(8px); z-index:5500;
+        align-items:center; justify-content:center; padding:20px;
+      }
+      #et-edit-modal.show { display:flex; animation:etFadeIn 0.22s cubic-bezier(0.22,1,0.36,1); }
+      .et-modal-card {
+        background:#fff; border-radius:20px; max-width:420px; width:100%;
+        box-shadow:0 28px 80px rgba(0,0,0,0.25); overflow:hidden;
+      }
+      .et-modal-head {
+        background:linear-gradient(135deg,#4A0E8F,#6F2DBD);
+        padding:22px 24px 18px; display:flex; align-items:flex-start; gap:14px;
+      }
+      .et-modal-head-icon {
+        width:42px; height:42px; background:rgba(255,255,255,0.18);
+        border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      }
+      .et-modal-head-title { font-size:17px; font-weight:800; color:#fff; }
+      .et-modal-head-sub { font-size:12px; color:rgba(255,255,255,0.7); margin-top:3px; line-height:1.4; }
+      .et-modal-body { padding:22px 24px 8px; }
+      .et-modal-current {
+        background:#f8f5ff; border:1.5px solid #e8e0f8; border-radius:12px;
+        padding:13px 16px; margin-bottom:18px; display:flex; gap:16px; flex-wrap:wrap;
+      }
+      .et-modal-cur-item { flex:1; min-width:100px; }
+      .et-modal-cur-lbl { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#aaa; margin-bottom:3px; }
+      .et-modal-cur-val { font-size:15px; font-weight:800; color:#4A0E8F; font-family:'DM Mono',monospace; }
+      .et-modal-cur-val.name { font-family:'DM Sans',sans-serif; color:#1a1a1a; font-size:14px; }
+      .et-modal-inputs { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px; }
+      .et-modal-field { }
+      .et-modal-field label {
+        display:block; font-size:10px; font-weight:800;
+        text-transform:uppercase; letter-spacing:0.9px; margin-bottom:5px;
+      }
+      .et-modal-field label.reg { color:#1B5E20; }
+      .et-modal-field label.sen { color:#1565C0; }
+      .et-modal-field input {
+        width:100%; padding:11px 12px;
+        border:1.5px solid #e0d6f7; border-radius:9px;
+        font-family:'DM Mono',monospace; font-size:15px; font-weight:700;
+        color:#1a1a1a; background:#fafafa; outline:none; box-sizing:border-box;
+        transition:border-color 0.15s, box-shadow 0.15s;
+      }
+      .et-modal-field input.reg:focus { border-color:#2E7D32; box-shadow:0 0 0 3px rgba(46,125,50,0.12); }
+      .et-modal-field input.sen:focus { border-color:#1565C0; box-shadow:0 0 0 3px rgba(21,101,192,0.12); }
+      .et-modal-hint { font-size:11px; color:#aaa; font-style:italic; margin-bottom:18px; }
+      .et-modal-footer {
+        display:flex; border-top:1.5px solid #f0f0f0;
+      }
+      .et-modal-cancel {
+        flex:1; padding:16px; background:#fff; border:none;
+        border-right:1.5px solid #f0f0f0; border-radius:0 0 0 20px;
+        color:#666; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
+        cursor:pointer; transition:background 0.12s;
+      }
+      .et-modal-cancel:hover { background:#f8f8f8; }
+      .et-modal-save {
+        flex:1.5; padding:16px; border:none; border-radius:0 0 20px 0;
+        background:linear-gradient(135deg,#4A0E8F,#6F2DBD); color:#fff;
+        font-family:'DM Sans',sans-serif; font-size:14px; font-weight:800;
+        cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+        transition:opacity 0.15s;
+      }
+      .et-modal-save:hover { opacity:0.88; }
+      .et-modal-save:disabled { opacity:0.4; cursor:not-allowed; }
+
+      /* ── CONFIRM MODAL ─────────────────────────── */
+      #et-confirm-modal {
+        display:none; position:fixed; inset:0;
+        background:rgba(15,5,30,0.7); backdrop-filter:blur(10px);
+        -webkit-backdrop-filter:blur(10px); z-index:6000;
+        align-items:center; justify-content:center; padding:20px;
+      }
+      #et-confirm-modal.show { display:flex; animation:etFadeIn 0.2s ease; }
+      .et-conf-card {
+        background:#fff; border-radius:20px; max-width:400px; width:100%;
+        box-shadow:0 28px 80px rgba(0,0,0,0.28); overflow:hidden;
+      }
+      .et-conf-head {
+        padding:22px 24px 18px; display:flex; gap:14px; align-items:flex-start;
+      }
+      .et-conf-head.edit { background:linear-gradient(135deg,#4A0E8F,#6F2DBD); }
+      .et-conf-head.cat  { background:linear-gradient(135deg,#E65100,#FF6F00); }
+      .et-conf-head.test { background:linear-gradient(135deg,#1565C0,#1976D2); }
+      .et-conf-head-icon {
+        width:42px; height:42px; background:rgba(255,255,255,0.18);
+        border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      }
+      .et-conf-head-title { font-size:17px; font-weight:800; color:#fff; }
+      .et-conf-head-sub { font-size:12px; color:rgba(255,255,255,0.72); margin-top:3px; line-height:1.4; }
+      .et-conf-body { padding:20px 22px 4px; }
+      .et-conf-preview {
+        background:#f8f5ff; border:1.5px solid #ede8ff;
+        border-radius:12px; padding:14px 16px; margin-bottom:14px;
+      }
+      .et-conf-row {
+        display:flex; gap:10px; align-items:baseline; margin-bottom:7px; font-size:13px;
+      }
+      .et-conf-row:last-child { margin-bottom:0; }
+      .et-conf-lbl {
+        font-size:10px; font-weight:800; text-transform:uppercase;
+        letter-spacing:0.8px; color:#aaa; flex-shrink:0; min-width:75px;
+      }
+      .et-conf-val { font-weight:600; color:#1a1a1a; }
+      .et-conf-note {
+        display:flex; gap:8px; align-items:flex-start;
+        font-size:12px; font-weight:600; line-height:1.5;
+        background:#E3F2FD; color:#0D47A1; border:1px solid #90CAF9;
+        border-radius:9px; padding:10px 13px; margin-bottom:18px;
+      }
+      .et-conf-footer { display:flex; border-top:1.5px solid #f0f0f0; }
+      .et-conf-back {
+        flex:1; padding:16px; background:#fff; border:none;
+        border-right:1.5px solid #f0f0f0; border-radius:0 0 0 20px;
+        color:#555; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+        cursor:pointer; transition:background 0.12s;
+      }
+      .et-conf-back:hover { background:#f8f8f8; }
+      .et-conf-proceed {
+        flex:1.5; padding:16px; border:none; border-radius:0 0 20px 0;
+        font-family:'DM Sans',sans-serif; font-size:14px; font-weight:800;
+        cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;
+        transition:opacity 0.15s;
+      }
+      .et-conf-proceed.edit { background:linear-gradient(135deg,#4A0E8F,#6F2DBD); color:#fff; }
+      .et-conf-proceed.cat  { background:linear-gradient(135deg,#E65100,#FF6F00); color:#fff; }
+      .et-conf-proceed.test { background:linear-gradient(135deg,#1565C0,#1976D2); color:#fff; }
+      .et-conf-proceed:disabled { opacity:0.45; cursor:not-allowed; }
+
+      /* ── LOADING SCREEN OVERLAY ─────────────────── */
+      #et-saving-overlay {
+        display:none; position:fixed; inset:0;
+        background:rgba(10,4,22,0.82); backdrop-filter:blur(12px);
+        -webkit-backdrop-filter:blur(12px); z-index:9000;
+        align-items:center; justify-content:center; flex-direction:column; gap:18px;
+      }
+      #et-saving-overlay.show { display:flex; }
+      .et-saving-spinner {
+        width:52px; height:52px; border-radius:50%;
+        border:4px solid rgba(255,255,255,0.15);
+        border-top-color:#c5a5ff;
+        animation:spin 0.8s linear infinite;
+      }
+      .et-saving-label {
+        color:#fff; font-size:15px; font-weight:700; letter-spacing:0.2px;
+      }
+      .et-saving-sub {
+        color:rgba(255,255,255,0.5); font-size:12px; margin-top:-10px; text-align:center;
+      }
+
+      /* ── ADD TESTS CONFIRM MODAL (reuse) ─────────── */
+      #at-confirm-modal {
+        display:none; position:fixed; inset:0;
+        background:rgba(15,5,30,0.6); backdrop-filter:blur(6px);
+        -webkit-backdrop-filter:blur(6px); z-index:5500;
+        align-items:center; justify-content:center; padding:20px;
+      }
+      #at-confirm-modal.show { display:flex; animation:etFadeIn 0.2s ease; }
+      .at-conf-card {
+        background:#fff; border-radius:18px; max-width:440px;
+        width:100%; overflow:hidden; box-shadow:0 24px 80px rgba(0,0,0,0.22);
+      }
+      .at-conf-top { padding:24px 24px 18px; display:flex; gap:14px; align-items:flex-start; }
+      .at-conf-top.cat { background:linear-gradient(135deg,#E65100,#FF6F00); }
+      .at-conf-top.test { background:linear-gradient(135deg,#4A0E8F,#6F2DBD); }
+      .at-conf-icon { width:42px; height:42px; background:rgba(255,255,255,0.2); border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+      .at-conf-title { font-size:18px; font-weight:800; color:#fff; margin-bottom:3px; }
+      .at-conf-sub { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.4; }
+      .at-conf-body { padding:18px 22px 0; }
+      .at-conf-preview { background:#fafafa; border:1.5px solid #f0ebff; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+      .at-conf-preview-row { display:flex; gap:8px; align-items:baseline; margin-bottom:6px; font-size:13px; }
+      .at-conf-preview-row:last-child { margin-bottom:0; }
+      .at-conf-preview-lbl { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:#aaa; flex-shrink:0; min-width:70px; }
+      .at-conf-preview-val { font-weight:600; color:#1a1a1a; }
+      .at-conf-note { display:flex; gap:8px; align-items:flex-start; font-size:12px; color:#0D47A1; background:#E3F2FD; border:1px solid #90CAF9; border-radius:9px; padding:9px 13px; margin-bottom:18px; font-weight:600; line-height:1.4; }
+      .at-conf-btns { display:flex; border-top:1px solid #f0f0f0; }
+      .at-conf-back { flex:1; padding:15px; background:#fff; border:none; border-right:1px solid #f0f0f0; border-radius:0 0 0 18px; color:#555; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.12s; }
+      .at-conf-back:hover { background:#f8f8f8; }
+      .at-conf-proceed { flex:1; padding:15px; background:#fff; border:none; border-radius:0 0 18px 0; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:background 0.12s; }
+      .at-conf-proceed.cat { color:#E65100; }
+      .at-conf-proceed.test { color:#6F2DBD; }
+      .at-conf-proceed:hover { background:#fafafa; }
+      .at-conf-proceed:disabled { opacity:0.45; cursor:not-allowed; }
+
+      /* Toast */
+      #at-toast {
+        position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+        background:#1a1a1a; color:#fff; border-radius:10px; padding:12px 22px;
+        font-size:13px; font-weight:600; box-shadow:0 8px 30px rgba(0,0,0,0.2);
+        opacity:0; transition:opacity 0.25s, transform 0.25s;
+        z-index:7000; pointer-events:none; white-space:nowrap;
+        display:flex; align-items:center; gap:8px;
+      }
+      #at-toast.ok { background:#1B5E20; }
+      #at-toast.err { background:#B71C1C; }
+      #at-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+      @keyframes etFadeIn { from{opacity:0;transform:scale(0.94) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+      @media(max-width:500px){
+        .et-price-grid, .et-modal-inputs { grid-template-columns:1fr; }
+        .et-stats .et-stat:nth-child(n+3) { display:none; }
+      }
+    </style>
+
+    <!-- ── SAVING OVERLAY (blocks all interaction while reloading) ── -->
+    <div id="et-saving-overlay">
+      <div class="et-saving-spinner"></div>
+      <div class="et-saving-label" id="et-saving-label">Saving changes…</div>
+      <div class="et-saving-sub">Please wait — do not close this tab</div>
+    </div>
+
+    <div class="et-wrap">
+
+      <!-- Page header -->
+      <div class="et-header">
+        <div>
+          <div class="et-title">Edit Tests</div>
+          <div class="et-sub">Manage procedure catalog — add categories, tests, and edit pricing</div>
+        </div>
+        <div class="et-header-actions">
+          <button class="et-btn et-btn-ghost" onclick="etRefresh()" id="et-refresh-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+          <button class="et-btn et-btn-ghost" onclick="sdGoRegister()" style="color:#888;border-color:#ddd;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="et-stats" id="et-stats">
+        <div class="et-stat">
+          <div class="et-stat-icon" style="background:linear-gradient(135deg,#6F2DBD,#4A0E8F);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div><div class="et-stat-val" id="et-stat-cats">—</div><div class="et-stat-lbl">Categories</div></div>
+        </div>
+        <div class="et-stat">
+          <div class="et-stat-icon" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div><div class="et-stat-val" id="et-stat-tests">—</div><div class="et-stat-lbl">Total Tests</div></div>
+        </div>
+        <div class="et-stat">
+          <div class="et-stat-icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div><div class="et-stat-val" id="et-stat-avg">—</div><div class="et-stat-lbl">Avg. Reg. Price</div></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="et-tabs">
+        <button class="et-tab active" id="et-tab-catalog" onclick="etSwitchTab('catalog')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Browse &amp; Edit
+        </button>
+        <button class="et-tab orange-tab" id="et-tab-add-cat" onclick="etSwitchTab('add-cat')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          New Category
+        </button>
+        <button class="et-tab blue-tab" id="et-tab-add-test" onclick="etSwitchTab('add-test')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Add New Test
+        </button>
+      </div>
+
+      <!-- ══ TAB: BROWSE & EDIT ══ -->
+      <div class="et-panel active" id="et-panel-catalog">
+
+        <!-- Search -->
+        <div class="et-card">
+          <div class="et-card-head">
+            <div class="et-card-icon" style="background:linear-gradient(135deg,#283593,#3949AB);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div>
+              <div class="et-card-title">Search Tests</div>
+              <div class="et-card-sub">Find any test by name and edit its prices</div>
+            </div>
+          </div>
+          <div class="et-card-body">
+            <div class="et-search-wrap">
+              <div class="et-search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <input class="et-search-inp" id="et-search-inp" type="text"
+                placeholder="Type a test name to search…" autocomplete="off"
+                oninput="etSearch()" />
+              <button class="et-search-clear" id="et-search-clear" onclick="etSearchClear()" style="display:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div id="et-search-results"></div>
+          </div>
+        </div>
+
+        <!-- Catalog -->
+        <div class="et-card">
+          <div class="et-card-head">
+            <div class="et-card-icon" style="background:linear-gradient(135deg,#6F2DBD,#4A0E8F);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div class="et-card-title">Full Catalog</div>
+              <div class="et-card-sub" id="et-catalog-sub">Loading…</div>
+            </div>
+            <select id="et-cat-filter" onchange="etRenderCatalog()"
+              style="padding:8px 12px;border:1.5px solid #e0d6f7;border-radius:8px;
+              font-family:'DM Sans',sans-serif;font-size:12px;color:#1a1a1a;
+              background:#fafafa;outline:none;cursor:pointer;max-width:160px;">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div style="padding:16px 22px;" id="et-catalog-body">
+            <div class="et-loading">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" style="animation:spin 0.9s linear infinite">
+                <polyline points="12 2 12 6"/><polyline points="12 18 12 22"/>
+                <polyline points="4.93 4.93 7.76 7.76"/><polyline points="16.24 16.24 19.07 19.07"/>
+                <polyline points="2 12 6 12"/><polyline points="18 12 22 12"/>
+              </svg>
+              Loading catalog…
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /#et-panel-catalog -->
+
+      <!-- ══ TAB: NEW CATEGORY ══ -->
+      <div class="et-panel" id="et-panel-add-cat">
+        <div class="et-card">
+          <div class="et-card-head">
+            <div class="et-card-icon" style="background:linear-gradient(135deg,#E65100,#FF6F00);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+            </div>
+            <div>
+              <div class="et-card-title">Add New Category</div>
+              <div class="et-card-sub">Creates a new category group in the TESTS &amp; PRICES sheet</div>
+            </div>
+          </div>
+          <div class="et-card-body">
+            <div class="et-field">
+              <label>Category Name</label>
+              <input type="text" id="at-cat-name" placeholder="e.g. HEMATOLOGY, SEROLOGY, URINALYSIS…"
+                autocomplete="off" oninput="this.value=this.value.toUpperCase()" />
+              <div class="et-field-hint">Will be stored in ALL CAPS as a header row.</div>
+            </div>
+            <div class="et-field">
+              <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#8D6E63;margin-bottom:5px;display:flex;align-items:center;gap:6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Notes <span style="color:#ccc;font-weight:400;">(optional)</span>
+              </div>
+              <textarea id="at-cat-notes"
+                style="width:100%;padding:10px 13px;border:1.5px dashed #ffd54f;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:#5d4037;background:#fffdf5;outline:none;resize:vertical;min-height:62px;box-sizing:border-box;transition:border-color 0.15s;"
+                placeholder="e.g. Blood chemistry tests, requires overnight fasting…"
+                onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#ffd54f'"></textarea>
+            </div>
+            <button class="et-btn et-btn-orange" style="margin-top:8px;" onclick="atCatSaveClick()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+              Save New Category
+            </button>
+          </div>
+        </div>
+      </div><!-- /#et-panel-add-cat -->
+
+      <!-- ══ TAB: ADD NEW TEST ══ -->
+      <div class="et-panel" id="et-panel-add-test">
+        <div class="et-card">
+          <div class="et-card-head">
+            <div class="et-card-icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            </div>
+            <div>
+              <div class="et-card-title">Add New Test / Procedure</div>
+              <div class="et-card-sub">Appends a new test row under the selected category</div>
+            </div>
+          </div>
+          <div class="et-card-body">
+            <div class="et-field">
+              <label>Category</label>
+              <select id="at-test-cat">
+                <option value="">— Select a category —</option>
+              </select>
+            </div>
+            <div class="et-field">
+              <label>Test / Procedure Name</label>
+              <input type="text" id="at-test-name" placeholder="e.g. CBC WITH PLATELET COUNT"
+                oninput="this.value=this.value.toUpperCase()" autocomplete="off" />
+            </div>
+            <div class="et-field">
+              <label>Pricing</label>
+              <div class="et-price-grid">
+                <div>
+                  <div style="font-size:10px;font-weight:700;color:#1B5E20;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px;">Regular (₱)</div>
+                  <input type="number" id="at-test-price-r" placeholder="0.00" min="0" step="0.01"
+                    style="width:100%;padding:11px 12px;border:1.5px solid #a5d6a7;border-radius:9px;font-family:'DM Mono',monospace;font-size:14px;font-weight:700;background:#fafafa;outline:none;box-sizing:border-box;transition:border-color 0.15s,box-shadow 0.15s;"
+                    onfocus="this.style.borderColor='#2E7D32';this.style.boxShadow='0 0 0 3px rgba(46,125,50,0.12)'"
+                    onblur="this.style.borderColor='#a5d6a7';this.style.boxShadow=''" />
+                </div>
+                <div>
+                  <div style="font-size:10px;font-weight:700;color:#1565C0;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px;">Senior (₱)</div>
+                  <input type="number" id="at-test-price-s" placeholder="0.00" min="0" step="0.01"
+                    style="width:100%;padding:11px 12px;border:1.5px solid #90CAF9;border-radius:9px;font-family:'DM Mono',monospace;font-size:14px;font-weight:700;background:#fafafa;outline:none;box-sizing:border-box;transition:border-color 0.15s,box-shadow 0.15s;"
+                    onfocus="this.style.borderColor='#1565C0';this.style.boxShadow='0 0 0 3px rgba(21,101,192,0.12)'"
+                    onblur="this.style.borderColor='#90CAF9';this.style.boxShadow=''" />
+                </div>
+              </div>
+              <div class="et-field-hint">Leave Senior blank — it will copy from Regular automatically.</div>
+            </div>
+            <div class="et-field">
+              <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#8D6E63;margin-bottom:5px;display:flex;align-items:center;gap:6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Notes <span style="color:#ccc;font-weight:400;">(optional)</span>
+              </div>
+              <textarea id="at-test-notes"
+                style="width:100%;padding:10px 13px;border:1.5px dashed #ffd54f;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:#5d4037;background:#fffdf5;outline:none;resize:vertical;min-height:62px;box-sizing:border-box;transition:border-color 0.15s;"
+                placeholder="e.g. Requires fasting · Ref: LAB-001 · Blood chemistry…"
+                onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#ffd54f'"></textarea>
+            </div>
+            <button class="et-btn et-btn-blue" style="margin-top:8px;" onclick="atTestSaveClick()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Test
+            </button>
+          </div>
+        </div>
+      </div><!-- /#et-panel-add-test -->
+
+    </div><!-- /.et-wrap -->
+  </div><!-- /#page-add-tests -->
+
+  <!-- ═══════════ EDIT PRICE POPUP ═══════════ -->
+  <div id="et-edit-modal">
+    <div class="et-modal-card">
+      <div class="et-modal-head">
+        <div class="et-modal-head-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="et-modal-head-title">Edit Test Price</div>
+          <div class="et-modal-head-sub" id="et-edit-modal-sub">Update Regular &amp; Senior pricing</div>
+        </div>
+      </div>
+      <div class="et-modal-body">
+        <div class="et-modal-current">
+          <div class="et-modal-cur-item" style="flex:2;min-width:120px;">
+            <div class="et-modal-cur-lbl">Test Name</div>
+            <div class="et-modal-cur-val name" id="et-edit-name">—</div>
+          </div>
+          <div class="et-modal-cur-item">
+            <div class="et-modal-cur-lbl">Current Regular</div>
+            <div class="et-modal-cur-val" id="et-edit-cur-r">—</div>
+          </div>
+          <div class="et-modal-cur-item">
+            <div class="et-modal-cur-lbl">Current Senior</div>
+            <div class="et-modal-cur-val" id="et-edit-cur-s" style="color:#1565C0;">—</div>
+          </div>
+        </div>
+        <div class="et-modal-inputs">
+          <div class="et-modal-field">
+            <label class="reg">New Regular (₱)</label>
+            <input type="number" id="et-edit-inp-r" class="reg" min="0" step="0.01" placeholder="0.00"
+              onfocus="document.getElementById('et-edit-inp-s').placeholder='Same as regular if blank'" />
+          </div>
+          <div class="et-modal-field">
+            <label class="sen">New Senior (₱)</label>
+            <input type="number" id="et-edit-inp-s" class="sen" min="0" step="0.01" placeholder="0.00" />
+          </div>
+        </div>
+        <div class="et-modal-hint">Leave Senior blank to copy from Regular price.</div>
+      </div>
+      <div class="et-modal-footer">
+        <button class="et-modal-cancel" onclick="etCloseEditModal()">← Cancel</button>
+        <button class="et-modal-save" id="et-modal-save-btn" onclick="etEditSaveClick()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="et-modal-save-lbl">Review &amp; Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ EDIT CONFIRM MODAL ═══════════ -->
+  <div id="et-confirm-modal">
+    <div class="et-conf-card">
+      <div class="et-conf-head edit" id="et-conf-head">
+        <div class="et-conf-head-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" id="et-conf-icon">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="et-conf-head-title" id="et-conf-title">Confirm</div>
+          <div class="et-conf-head-sub" id="et-conf-sub">Review before saving</div>
+        </div>
+      </div>
+      <div class="et-conf-body">
+        <div class="et-conf-preview" id="et-conf-preview"></div>
+        <div class="et-conf-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="et-conf-note">After saving, the page will reload to sync with the sheet.</span>
+        </div>
+      </div>
+      <div class="et-conf-footer">
+        <button class="et-conf-back" onclick="etCloseConfirm()">← Go Back</button>
+        <button class="et-conf-proceed edit" id="et-conf-proceed" onclick="etConfirmProceed()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="et-conf-proceed-lbl">Yes, Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ADD TESTS CONFIRM MODAL (category/test add) ═══════════ -->
+  <div id="at-confirm-modal">
+    <div class="at-conf-card">
+      <div class="at-conf-top cat" id="at-conf-top">
+        <div class="at-conf-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" id="at-conf-icon-svg">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="at-conf-title" id="at-conf-title">Confirm</div>
+          <div class="at-conf-sub" id="at-conf-sub">Review before saving</div>
+        </div>
+      </div>
+      <div class="at-conf-body">
+        <div class="at-conf-preview" id="at-conf-preview"></div>
+        <div class="at-conf-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="at-conf-note-text">After saving, the page will reload to reflect the updated catalog.</span>
+        </div>
+      </div>
+      <div class="at-conf-btns">
+        <button class="at-conf-back" onclick="atConfClose()">← Go Back</button>
+        <button class="at-conf-proceed cat" id="at-conf-proceed-btn" onclick="atConfProceed()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="at-conf-proceed-lbl">Yes, Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="at-toast">
+    <svg id="at-toast-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span id="at-toast-msg">Saved!</span>
+  </div>
+
+  <script>
+  /* ════════════════════════════════════════════════════════
+     EDIT TESTS PAGE — JavaScript
+  ════════════════════════════════════════════════════════ */
+
+  // ── State ──────────────────────────────────────────────
+  let _etCatalog   = {};   // { catName: [{name, r, s},...] }
+  let _etConfMode  = '';   // 'cat' | 'test' | 'edit-price'
+  let _etConfData  = {};   // pending save payload
+  let _atConfMode  = '';   // 'cat' | 'test'
+  let _atConfData  = {};
+
+  // ── Init (called when page becomes active) ─────────────
+  function atInit() {
+    etRefresh();
+  }
+
+  // ── Tab switching ──────────────────────────────────────
+  function etSwitchTab(tab) {
+    ['catalog','add-cat','add-test'].forEach(t => {
+      document.getElementById('et-panel-' + t).classList.toggle('active', t === tab);
+      const btn = document.getElementById('et-tab-' + t);
+      btn.classList.toggle('active', t === tab);
+    });
+  }
+
+  // ── Refresh catalog from sheet ─────────────────────────
+  async function etRefresh() {
+    const btn = document.getElementById('et-refresh-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refreshing…';
+    }
+
+    document.getElementById('et-catalog-body').innerHTML =
+      '<div class="et-loading"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" style="animation:spin 0.9s linear infinite"><polyline points="12 2 12 6"/><polyline points="12 18 12 22"/><polyline points="4.93 4.93 7.76 7.76"/><polyline points="16.24 16.24 19.07 19.07"/><polyline points="2 12 6 12"/><polyline points="18 12 22 12"/></svg>Loading catalog…</div>';
+    document.getElementById('et-catalog-sub').textContent = 'Loading…';
+
+    try {
+      const d = await fetch(APPS_SCRIPT_URL + '?action=getprices').then(r => r.json());
+      _etCatalog = {};
+      if (d.success && d.categories) {
+        Object.entries(d.categories).forEach(([cat, tests]) => {
+          _etCatalog[cat] = tests.map(t => ({
+            name: t,
+            r: (d.prices[t.toUpperCase()] || {}).r ?? null,
+            s: (d.prices[t.toUpperCase()] || {}).s ?? null,
+          }));
+        });
+        // Sync to global state so registration form stays fresh
+        PRICES = d.prices || PRICES;
+        if (d.categories) _buildCategoriesFromSheet(d.categories, d.prices);
+      }
+    } catch(e) {
+      // Fallback from global PRICES/CATEGORIES
+      if (typeof CATEGORIES !== 'undefined' && CATEGORIES.length) {
+        CATEGORIES.forEach(cat => {
+          _etCatalog[cat.name] = (cat.tests || []).map(t => ({
+            name: t,
+            r: (PRICES[t.toUpperCase()] || {}).r ?? null,
+            s: (PRICES[t.toUpperCase()] || {}).s ?? null,
+          }));
+        });
+      }
+    }
+
+    etUpdateStats();
+    etPopulateSelects();
+    etRenderCatalog();
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refresh';
+    }
+  }
+
+  function etUpdateStats() {
+    const cats  = Object.keys(_etCatalog).length;
+    const tests = Object.values(_etCatalog).reduce((s, a) => s + a.length, 0);
+    const prices = Object.values(_etCatalog).flatMap(a => a.map(t => t.r)).filter(v => v != null && v > 0);
+    const avg   = prices.length ? (prices.reduce((a,b) => a+b, 0) / prices.length) : 0;
+
+    document.getElementById('et-stat-cats').textContent  = cats;
+    document.getElementById('et-stat-tests').textContent = tests;
+    document.getElementById('et-stat-avg').textContent   = avg > 0 ? '₱' + Math.round(avg).toLocaleString() : '—';
+  }
+
+  function etPopulateSelects() {
+    const cats   = Object.keys(_etCatalog);
+    const selAT  = document.getElementById('at-test-cat');
+    const selFilt = document.getElementById('et-cat-filter');
+
+    selAT.innerHTML   = '<option value="">— Select a category —</option>';
+    selFilt.innerHTML = '<option value="">All Categories</option>';
+    cats.forEach(c => {
+      const o1 = document.createElement('option'); o1.value = c; o1.textContent = c; selAT.appendChild(o1);
+      const o2 = document.createElement('option'); o2.value = c; o2.textContent = c; selFilt.appendChild(o2);
+    });
+  }
+
+  // ── Render catalog table ───────────────────────────────
+  const _etCatColors = [
+    '#4A0E8F','#1565C0','#00695C','#AD1457','#E65100',
+    '#00838F','#5D4037','#283593','#2E7D32','#6A1B9A'
+  ];
+
+  function etRenderCatalog() {
+    const bodyEl = document.getElementById('et-catalog-body');
+    const subEl  = document.getElementById('et-catalog-sub');
+    const filter = document.getElementById('et-cat-filter').value;
+    const cats   = filter ? { [filter]: _etCatalog[filter] || [] } : _etCatalog;
+    const keys   = Object.keys(cats);
+
+    if (!keys.length) {
+      bodyEl.innerHTML = '<div class="et-empty">No catalog data.<br>Add your first category using the "New Category" tab.</div>';
+      subEl.textContent = '0 categories · 0 tests';
+      return;
+    }
+
+    const allKeys = Object.keys(_etCatalog);
+    const total = Object.values(_etCatalog).reduce((s,a) => s + a.length, 0);
+    subEl.textContent = allKeys.length + ' categories · ' + total + ' tests';
+
+    let html = '';
+    keys.forEach(cat => {
+      const tests = cats[cat] || [];
+      const ci    = allKeys.indexOf(cat);
+      const col   = _etCatColors[ci % _etCatColors.length];
+      html += `
+        <div class="et-cat-block">
+          <div class="et-cat-header" style="background:${col};">
+            <span class="et-cat-name">${escH(cat)}</span>
+            <span class="et-cat-badge">${tests.length} test${tests.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div class="et-cat-table-wrap">
+            <table class="et-cat-table">
+              <thead><tr>
+                <th style="width:48%">Test Name</th>
+                <th style="width:18%;text-align:right;">Regular</th>
+                <th style="width:18%;text-align:right;">Senior</th>
+                <th style="width:16%;text-align:center;">Edit</th>
+              </tr></thead>
+              <tbody>
+                ${tests.length ? tests.map(t => {
+                  const rp = (t.r != null && t.r > 0) ? '₱' + Number(t.r).toLocaleString('en-PH',{minimumFractionDigits:2}) : null;
+                  const sp = (t.s != null && t.s > 0) ? '₱' + Number(t.s).toLocaleString('en-PH',{minimumFractionDigits:2}) : null;
+                  const rH  = rp ? rp : '—';
+                  const sH  = sp ? sp : '—';
+                  const rC  = rp ? '' : ' na';
+                  const sC  = sp ? ' sen' : ' na';
+                  const escCat  = escH(cat).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                  const escName = escH(t.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                  return `<tr>
+                    <td class="et-tname">${escH(t.name)}</td>
+                    <td class="et-tprice${rC}" style="text-align:right;">${rH}</td>
+                    <td class="et-tprice${sC}" style="text-align:right;">${sH}</td>
+                    <td style="text-align:center;">
+                      <button class="et-edit-btn" onclick="etOpenEditModal('${escCat}','${escName}',${t.r ?? 0},${t.s ?? 0})" title="Edit price">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>`;
+                }).join('') : `<tr><td colspan="4" style="text-align:center;color:#ccc;font-style:italic;padding:14px;">No tests yet — add via the "Add New Test" tab.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    });
+    bodyEl.innerHTML = html;
+  }
+
+  // ── Search ─────────────────────────────────────────────
+  function etSearch() {
+    const q   = document.getElementById('et-search-inp').value.trim().toUpperCase();
+    const res = document.getElementById('et-search-results');
+    const clr = document.getElementById('et-search-clear');
+    clr.style.display = q ? 'flex' : 'none';
+
+    if (!q) { res.innerHTML = ''; return; }
+
+    const hits = [];
+    Object.entries(_etCatalog).forEach(([cat, tests]) => {
+      tests.forEach(t => {
+        if (t.name.toUpperCase().includes(q)) hits.push({ cat, ...t });
+      });
+    });
+
+    if (!hits.length) {
+      res.innerHTML = `<div style="text-align:center;padding:16px 0;color:#aaa;font-size:13px;font-style:italic;">No test found matching "<strong>${escH(q)}</strong>"</div>`;
+    } else {
+      res.innerHTML = `<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:10px;">${hits.length} result${hits.length>1?'s':''} found</div>` +
+        hits.map(h => {
+          const rp = h.r != null ? '₱' + Number(h.r).toLocaleString('en-PH',{minimumFractionDigits:2}) : null;
+          const sp = h.s != null ? '₱' + Number(h.s).toLocaleString('en-PH',{minimumFractionDigits:2}) : null;
+          const escCat  = escH(h.cat).replace(/'/g,"\\'");
+          const escName = escH(h.name).replace(/'/g,"\\'");
+          return `<div class="et-hit">
+            <span class="et-hit-cat">${escH(h.cat)}</span>
+            <span class="et-hit-name">${escH(h.name)}</span>
+            <div class="et-hit-prices">
+              ${rp ? `<span class="et-hit-price">${rp}</span>` : ''}
+              ${sp ? `<span class="et-hit-price sen">${sp}</span>` : ''}
+            </div>
+            <button class="et-hit-edit" onclick="etOpenEditModal('${escCat}','${escName}',${h.r ?? 0},${h.s ?? 0})">
+              Edit Price
+            </button>
+          </div>`;
+        }).join('');
+    }
+  }
+
+  function etSearchClear() {
+    document.getElementById('et-search-inp').value = '';
+    document.getElementById('et-search-results').innerHTML = '';
+    document.getElementById('et-search-clear').style.display = 'none';
+  }
+
+  // ── Edit Price Modal ───────────────────────────────────
+  function etOpenEditModal(cat, name, curR, curS) {
+    document.getElementById('et-edit-modal-sub').textContent = cat + ' → ' + name;
+    document.getElementById('et-edit-name').textContent = name;
+    document.getElementById('et-edit-cur-r').textContent = curR > 0 ? '₱' + Number(curR).toLocaleString('en-PH',{minimumFractionDigits:2}) : '—';
+    document.getElementById('et-edit-cur-s').textContent = curS > 0 ? '₱' + Number(curS).toLocaleString('en-PH',{minimumFractionDigits:2}) : '—';
+    document.getElementById('et-edit-inp-r').value = curR > 0 ? curR : '';
+    document.getElementById('et-edit-inp-s').value = curS > 0 ? curS : '';
+
+    const btn = document.getElementById('et-modal-save-btn');
+    btn.disabled = false;
+    document.getElementById('et-modal-save-lbl').textContent = 'Review & Save';
+
+    // Store for confirm step
+    _etConfData = { cat, name, oldR: curR, oldS: curS };
+
+    document.getElementById('et-edit-modal').classList.add('show');
+    setTimeout(() => document.getElementById('et-edit-inp-r').focus(), 120);
+  }
+
+  function etCloseEditModal() {
+    document.getElementById('et-edit-modal').classList.remove('show');
+  }
+
+  function etEditSaveClick() {
+    const newR = parseFloat(document.getElementById('et-edit-inp-r').value);
+    const newSv = document.getElementById('et-edit-inp-s').value;
+    const newS = newSv !== '' ? parseFloat(newSv) : newR;
+
+    if (isNaN(newR) || newR <= 0) {
+      document.getElementById('et-edit-inp-r').style.borderColor = '#e53935';
+      atToast('Please enter a valid Regular price.', 'err');
+      return;
+    }
+
+    _etConfData.newR = newR;
+    _etConfData.newS = newS || newR;
+
+    // Build confirm preview
+    const prev = document.getElementById('et-conf-preview');
+    prev.innerHTML =
+      _etConfRow('Category', _etConfData.cat) +
+      _etConfRow('Test Name', _etConfData.name) +
+      _etConfRow('Old Regular', _etConfData.oldR > 0 ? '₱' + Number(_etConfData.oldR).toLocaleString('en-PH',{minimumFractionDigits:2}) : '—') +
+      _etConfRow('New Regular', '₱' + newR.toLocaleString('en-PH',{minimumFractionDigits:2})) +
+      _etConfRow('Old Senior',  _etConfData.oldS > 0 ? '₱' + Number(_etConfData.oldS).toLocaleString('en-PH',{minimumFractionDigits:2}) : '—') +
+      _etConfRow('New Senior',  '₱' + (newS || newR).toLocaleString('en-PH',{minimumFractionDigits:2}));
+
+    document.getElementById('et-conf-title').textContent = 'Confirm Price Update';
+    document.getElementById('et-conf-sub').textContent   = _etConfData.name + ' — updating both price tiers';
+    document.getElementById('et-conf-note').textContent  = 'After saving, the page will reload so the registration form picks up the new price.';
+
+    const proc = document.getElementById('et-conf-proceed');
+    proc.className = 'et-conf-proceed edit';
+    proc.disabled  = false;
+    document.getElementById('et-conf-proceed-lbl').textContent = 'Yes, Update Price';
+    document.getElementById('et-conf-head').className = 'et-conf-head edit';
+    _etConfMode = 'edit-price';
+
+    document.getElementById('et-edit-modal').classList.remove('show');
+    document.getElementById('et-confirm-modal').classList.add('show');
+  }
+
+  function _etConfRow(lbl, val) {
+    return `<div class="et-conf-row"><span class="et-conf-lbl">${escH(lbl)}</span><span class="et-conf-val">${escH(String(val))}</span></div>`;
+  }
+
+  function etCloseConfirm() {
+    document.getElementById('et-confirm-modal').classList.remove('show');
+    // Re-open edit modal if coming from edit flow
+    if (_etConfMode === 'edit-price') {
+      document.getElementById('et-edit-modal').classList.add('show');
+    }
+  }
+
+  // ── Confirm proceed ────────────────────────────────────
+  async function etConfirmProceed() {
+    const proc = document.getElementById('et-conf-proceed');
+    proc.disabled = true;
+    document.getElementById('et-conf-proceed-lbl').textContent = 'Saving…';
+
+    document.getElementById('et-confirm-modal').classList.remove('show');
+
+    // Show full-screen loading overlay
+    etShowSavingOverlay('Saving to sheet…');
+
+    try {
+      const payload = JSON.stringify({
+  action:       'edittest',
+  categoryName: _etConfData.cat,
+  testName:     _etConfData.name,
+  priceRegular: _etConfData.newR,
+  priceSenior:  _etConfData.newS || _etConfData.newR,
+});
+
+// GAS does not support CORS preflight — use no-cors + text/plain
+// to avoid the OPTIONS request. Response is opaque but that's OK
+// since we reload the page on success anyway.
+await fetch(APPS_SCRIPT_URL, {
+  method:  'POST',
+  headers: { 'Content-Type': 'text/plain' },
+  body:    payload,
+});
+// no-cors gives opaque response — we can't read it, so just proceed
+
+      etShowSavingOverlay('Reloading catalog…');
+      atToast('Price updated! Reloading…', 'ok');
+
+      setTimeout(() => location.reload(), 1400);
+
+    } catch(err) {
+      document.getElementById('et-saving-overlay').classList.remove('show');
+      proc.disabled = false;
+      document.getElementById('et-conf-proceed-lbl').textContent = 'Retry';
+      document.getElementById('et-confirm-modal').classList.add('show');
+      atToast('Error: ' + err.message, 'err');
+    }
+  }
+
+  function etShowSavingOverlay(msg) {
+    document.getElementById('et-saving-label').textContent = msg || 'Saving…';
+    document.getElementById('et-saving-overlay').classList.add('show');
+  }
+
+  // ════════════════════════════════════════════════════════
+  //  ADD CATEGORY / ADD TEST (re-used from original logic)
+  // ════════════════════════════════════════════════════════
+
+  function atCatSaveClick() {
+    const name  = (document.getElementById('at-cat-name').value || '').trim().toUpperCase();
+    const notes = (document.getElementById('at-cat-notes').value || '').trim();
+
+    if (!name) {
+      document.getElementById('at-cat-name').style.borderColor = '#e53935';
+      setTimeout(() => document.getElementById('at-cat-name').style.borderColor = '', 2000);
+      atToast('Please enter a category name.', 'err'); return;
+    }
+    if (_etCatalog[name] !== undefined) {
+      atToast('Category "' + name + '" already exists.', 'err'); return;
+    }
+
+    _atConfMode = 'cat';
+    _atConfData = { name, notes };
+
+    const top = document.getElementById('at-conf-top');
+    top.className = 'at-conf-top cat';
+    document.getElementById('at-conf-icon-svg').innerHTML =
+      '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>';
+    document.getElementById('at-conf-title').textContent = 'Add New Category';
+    document.getElementById('at-conf-sub').textContent   = 'This will add a new category row to TESTS & PRICES.';
+    document.getElementById('at-conf-proceed-btn').className = 'at-conf-proceed cat';
+
+    const prev = document.getElementById('at-conf-preview');
+    prev.innerHTML = _atConfRow('Category Name', name) + (notes ? _atConfRow('Notes', notes) : '');
+    document.getElementById('at-conf-note-text').textContent = 'After saving, the page will reload to sync the updated catalog.';
+
+    const btn = document.getElementById('at-conf-proceed-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span id="at-conf-proceed-lbl">Yes, Add Category</span>';
+
+    document.getElementById('at-confirm-modal').classList.add('show');
+  }
+
+  function atTestSaveClick() {
+    const cat   = (document.getElementById('at-test-cat').value || '').trim();
+    const name  = (document.getElementById('at-test-name').value || '').trim().toUpperCase();
+    const prR   = parseFloat(document.getElementById('at-test-price-r').value) || null;
+    const prS   = parseFloat(document.getElementById('at-test-price-s').value) || prR;
+    const notes = (document.getElementById('at-test-notes').value || '').trim();
+
+    if (!cat)  { atToast('Please select a category.', 'err'); return; }
+    if (!name) { atToast('Please enter the test name.', 'err'); return; }
+    if (!prR)  { atToast('Please enter the Regular price.', 'err'); return; }
+
+    const existing = (_etCatalog[cat] || []).find(t => t.name.toUpperCase() === name);
+    if (existing) { atToast('"' + name + '" already exists in ' + cat + '.', 'err'); return; }
+
+    _atConfMode = 'test';
+    _atConfData = { cat, name, prR, prS: prS || prR, notes };
+
+    const top = document.getElementById('at-conf-top');
+    top.className = 'at-conf-top test';
+    document.getElementById('at-conf-icon-svg').innerHTML =
+      '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>';
+    document.getElementById('at-conf-title').textContent = 'Add New Test';
+    document.getElementById('at-conf-sub').textContent   = cat + ' — new test will be appended.';
+    document.getElementById('at-conf-proceed-btn').className = 'at-conf-proceed test';
+
+    const prev = document.getElementById('at-conf-preview');
+    prev.innerHTML =
+      _atConfRow('Category', cat) +
+      _atConfRow('Test Name', name) +
+      _atConfRow('Regular', prR ? '₱' + prR.toLocaleString('en-PH',{minimumFractionDigits:2}) : '—') +
+      _atConfRow('Senior',  (prS||prR) ? '₱' + (prS||prR).toLocaleString('en-PH',{minimumFractionDigits:2}) : '—') +
+      (notes ? _atConfRow('Notes', notes) : '');
+    document.getElementById('at-conf-note-text').textContent = 'After saving, the page will reload so the new test appears in the registration form.';
+
+    const btn = document.getElementById('at-conf-proceed-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span id="at-conf-proceed-lbl">Yes, Save Test</span>';
+
+    document.getElementById('at-confirm-modal').classList.add('show');
+  }
+
+  function _atConfRow(lbl, val) {
+    return `<div class="at-conf-preview-row"><span class="at-conf-preview-lbl">${escH(lbl)}</span><span class="at-conf-preview-val">${escH(String(val))}</span></div>`;
+  }
+
+  async function atConfProceed() {
+    const btn = document.getElementById('at-conf-proceed-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><polyline points="12 2 12 6"/><polyline points="12 18 12 22"/><polyline points="4.93 4.93 7.76 7.76"/><polyline points="16.24 16.24 19.07 19.07"/><polyline points="2 12 6 12"/><polyline points="18 12 22 12"/></svg> Saving…';
+
+    document.getElementById('at-confirm-modal').classList.remove('show');
+    etShowSavingOverlay(_atConfMode === 'cat' ? 'Adding category…' : 'Adding test…');
+
+    try {
+      if (_atConfMode === 'cat') {
+        await _atSaveCategory(_atConfData);
+      } else {
+        await _atSaveTest(_atConfData);
+      }
+      atToast((_atConfMode === 'cat' ? 'Category "' + _atConfData.name : 'Test "' + _atConfData.name) + '" saved! Reloading…', 'ok');
+      setTimeout(() => location.reload(), 1400);
+    } catch(err) {
+      document.getElementById('et-saving-overlay').classList.remove('show');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Retry';
+      document.getElementById('at-confirm-modal').classList.add('show');
+      atToast('Error: ' + err.message, 'err');
+    }
+  }
+
+  function atConfClose() {
+    document.getElementById('at-confirm-modal').classList.remove('show');
+    _atConfMode = '';
+    _atConfData = {};
+  }
+
+  async function _atSaveCategory(data) {
+await fetch(APPS_SCRIPT_URL, {
+  method:  'POST',
+  headers: { 'Content-Type': 'text/plain' },
+  body:    JSON.stringify({ action: 'addcategory', categoryName: data.name, notes: data.notes || '' }),
+});
+  }
+
+  async function _atSaveTest(data) {
+await fetch(APPS_SCRIPT_URL, {
+  method:  'POST',
+  headers: { 'Content-Type': 'text/plain' },
+  body:    JSON.stringify({
+    action: 'addtest', categoryName: data.cat,
+    testName: data.name, priceRegular: data.prR,
+    priceSenior: data.prS, notes: data.notes || '',
+  }),
+});
+  }
+
+  // ── Toast ──────────────────────────────────────────────
+  let _atToastTimer = null;
+  function atToast(msg, type) {
+    const el   = document.getElementById('at-toast');
+    const msgEl = document.getElementById('at-toast-msg');
+    const icon  = document.getElementById('at-toast-icon');
+    msgEl.textContent = msg;
+    el.className = 'show ' + (type || '');
+    icon.innerHTML = type === 'ok'
+      ? '<polyline points="20 6 9 17 4 12"/>'
+      : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    if (_atToastTimer) clearTimeout(_atToastTimer);
+    _atToastTimer = setTimeout(() => { el.className = ''; }, 3500);
+  }
+
+  function escH(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  </script></body>
 </html>
