@@ -6517,7 +6517,7 @@
             <div class="cancel-slide-label">Slide right to cancel and clear this registration.</div>
             <div class="cancel-slide" id="cancel-slide-mobile">
               <div class="cancel-slide-fill" id="cancel-slide-fill-mobile"></div>
-              <div class="cancel-slide-text" id="cancel-slide-text-mobile">Slide to cancel and clear form</div>
+              <div class="cancel-slide-text" id="cancel-slide-text-mobile">Clear Form</div>
               <button type="button" class="cancel-slide-handle" id="cancel-slide-handle-mobile" aria-label="Slide to cancel registration">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -8601,7 +8601,7 @@
         fill.style.transition = animate ? 'width 0.18s ease' : 'none';
         handle.style.left = '3px';
         fill.style.width = '0%';
-        txt.textContent = 'Slide to cancel and clear form';
+        txt.textContent = 'Clear Form';
         setTimeout(() => { handle.style.transition = ''; fill.style.transition = ''; }, 200);
       };
 
@@ -8619,7 +8619,7 @@
         handle.style.left = (x + 3) + 'px';
         const pct = maxX > 0 ? (x / maxX) : 0;
         fill.style.width = Math.round(pct * 100) + '%';
-        txt.textContent = pct >= 0.8 ? 'Release to cancel registration' : 'Slide to cancel and clear form';
+        txt.textContent = pct >= 0.8 ? 'Release to cancel registration' : 'Clear Form';
         return pct;
       };
 
