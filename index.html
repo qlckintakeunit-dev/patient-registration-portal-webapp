@@ -269,7 +269,7 @@
        DELETE CONFIRMATION MODAL
     ══════════════════════════════════════════ */
     #delete-confirm-modal {
-      display: none;
+      display: flex;
       position: fixed;
       inset: 0;
       background: rgba(15, 5, 30, 0.55);
@@ -279,11 +279,15 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, visibility 0.18s ease;
     }
-    #delete-confirm-modal.show { display: flex; animation: delFadeIn 0.2s ease; }
-    @keyframes delFadeIn {
-      from { opacity: 0; transform: scale(0.97); }
-      to   { opacity: 1; transform: scale(1); }
+    #delete-confirm-modal.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
     .del-modal-card {
       background: #ffffff;
@@ -293,6 +297,13 @@
       width: 100%;
       box-shadow: 0 24px 80px rgba(0,0,0,0.22), 0 4px 16px rgba(183,28,28,0.1);
       overflow: hidden;
+      transform: translateY(10px);
+      opacity: 0;
+      transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), opacity 0.18s ease;
+    }
+    #delete-confirm-modal.show .del-modal-card {
+      transform: translateY(0);
+      opacity: 1;
     }
     .del-modal-top {
       background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
@@ -418,7 +429,7 @@
        EDIT PATIENT MODAL
     ══════════════════════════════════════════ */
     #edit-patient-modal {
-      display: none;
+      display: flex;
       position: fixed;
       inset: 0;
       background: rgba(15, 5, 30, 0.6);
@@ -429,8 +440,16 @@
       justify-content: center;
       padding: 16px;
       overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
     }
-    #edit-patient-modal.show { display: flex; animation: delFadeIn 0.2s ease; }
+    #edit-patient-modal.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
 
     .edit-modal-card {
       background: #ffffff;
@@ -443,6 +462,13 @@
       flex-direction: column;
       max-height: calc(100vh - 32px);
       margin: auto;
+      transform: translateY(12px);
+      opacity: 0;
+      transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), opacity 0.2s ease;
+    }
+    #edit-patient-modal.show .edit-modal-card {
+      transform: translateY(0);
+      opacity: 1;
     }
 
     .edit-modal-header {
@@ -642,7 +668,7 @@
 
     /* Edit confirm overlay */
     #edit-confirm-modal {
-      display: none;
+      display: flex;
       position: fixed;
       inset: 0;
       background: rgba(15,5,30,0.6);
@@ -652,8 +678,16 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, visibility 0.18s ease;
     }
-    #edit-confirm-modal.show { display: flex; animation: delFadeIn 0.18s ease; }
+    #edit-confirm-modal.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
     .edit-confirm-card {
       background: #fff;
       border-radius: 18px;
@@ -661,6 +695,13 @@
       width: 100%;
       overflow: hidden;
       box-shadow: 0 20px 70px rgba(0,0,0,0.22);
+      transform: translateY(10px);
+      opacity: 0;
+      transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), opacity 0.18s ease;
+    }
+    #edit-confirm-modal.show .edit-confirm-card {
+      transform: translateY(0);
+      opacity: 1;
     }
     .edit-confirm-top {
       background: linear-gradient(135deg, #283593 0%, #3949AB 100%);
@@ -932,6 +973,28 @@
       color: #6F2DBD;
       background: #faf7ff;
     }
+
+    .pt-reload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      height: 30px;
+      border: 1.5px solid #e0d6f7;
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: #6F2DBD;
+      background: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .pt-reload-btn:hover { background: #faf7ff; border-color: #6F2DBD; }
+    .pt-reload-btn:active { transform: scale(0.99); }
+    .pt-reload-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
     /* ══════════════════════════════════════════
        INDIVIDUAL DISCOUNT MODAL — REDESIGNED
@@ -2562,6 +2625,52 @@
       white-space: nowrap;
     }
 
+    .order-qty {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      padding: 2px 4px;
+      border-radius: 999px;
+      background: #faf7ff;
+      border: 1px solid #ede6fa;
+    }
+
+    .qty-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 1px solid #e2d6f7;
+      background: #fff;
+      color: #6F2DBD;
+      font-weight: 900;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.05s, background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .qty-btn:hover {
+      background: #f5f0ff;
+      border-color: #d2c0f4;
+    }
+
+    .qty-btn:active {
+      transform: scale(0.98);
+    }
+
+    .qty-val {
+      min-width: 16px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: #333;
+    }
+
     .order-del {
       background: none;
       border: none;
@@ -2860,6 +2969,67 @@
       cursor: not-allowed;
       transform: none;
     }
+
+    .cancel-slide-wrap {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed #e6dcf7;
+    }
+    .cancel-slide-label {
+      font-size: 11px;
+      color: #8a7bb1;
+      margin-bottom: 7px;
+      letter-spacing: 0.2px;
+    }
+    .cancel-slide {
+      position: relative;
+      height: 44px;
+      border-radius: 999px;
+      border: 1.5px solid #e5d8f8;
+      background: #fff;
+      overflow: hidden;
+      user-select: none;
+      touch-action: pan-y;
+    }
+    .cancel-slide-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: linear-gradient(90deg, #ffeff0, #ffe2e5);
+      transition: width 0.12s linear;
+    }
+    .cancel-slide-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #9d5f6a;
+      pointer-events: none;
+      padding: 0 56px;
+      text-align: center;
+    }
+    .cancel-slide-handle {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid #f1b7bf;
+      background: #fff7f8;
+      color: #c62828;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(198, 40, 40, 0.18);
+      cursor: grab;
+      touch-action: none;
+      transition: transform 0.12s ease;
+    }
+    .cancel-slide-handle:active { transform: scale(0.98); cursor: grabbing; }
 
     /* ════════════════════════════════════════════════
      RECENT REGISTRANTS PAGE
@@ -3803,6 +3973,8 @@
         padding: 14px;
         font-size: 15px;
       }
+      .cancel-slide-label { font-size: 10px; }
+      .cancel-slide-text { font-size: 11px; }
 
       /* Acct block */
       .acct-block {
@@ -3989,7 +4161,8 @@
         box-sizing: border-box;
         font-size: 14px;
         padding: 11px 68px 11px 12px;
-        -webkit-appearance: none;
+      -webkit-appearance: none;
+      appearance: none;
         appearance: none;
         min-height: 44px;
       }
@@ -4322,6 +4495,17 @@
     }
     .pos-item-row:last-child { border-bottom: none; }
     .pos-item-name { flex: 1; padding-right: 12px; }
+
+    .pos-item-qty {
+      font-size: 11px;
+      font-weight: 800;
+      color: #6F2DBD;
+      background: #EDE8FF;
+      padding: 1px 6px;
+      border-radius: 999px;
+      white-space: nowrap;
+      margin-left: 6px;
+    }
     .pos-item-cat {
       font-size: 11px;
       color: #aaa;
@@ -4578,6 +4762,7 @@
       outline: none;
       transition: border-color 0.15s, background 0.15s;
       -moz-appearance: textfield;
+      appearance: textfield;
       letter-spacing: -1px;
       box-sizing: border-box;
     }
@@ -5678,7 +5863,7 @@
               <div class="autocomplete-wrap" id="ref-wrap">
                 <input type="text" id="f-referred" placeholder="Physician / Clinic" autocomplete="off"
                   oninput="enforceUpperCase(this); onReferredInput();"
-                  onblur="closeDropdown('ref-wrap',300); applyReferralDiscount(this.value);"
+                  onblur="closeDropdown('ref-wrap',300); applyReferralDiscount(this.value); onReferralPricingContextChange();"
                   onfocus="closeAllDropdownsExcept('ref-dropdown'); onReferredInput();"
                   onkeydown="acKeyNav(event,'ref-dropdown','ref-wrap')" />
                 <div class="ac-dropdown" id="ref-dropdown"></div>
@@ -5932,6 +6117,18 @@
             </svg>
             Submit Registration
           </button>
+          <div class="cancel-slide-wrap">
+            <div class="cancel-slide-label">Need to reset this entry? Slide right to cancel registration.</div>
+            <div class="cancel-slide" id="cancel-slide-desktop">
+              <div class="cancel-slide-fill" id="cancel-slide-fill-desktop"></div>
+              <div class="cancel-slide-text" id="cancel-slide-text-desktop">Slide to cancel and clear form</div>
+              <button type="button" class="cancel-slide-handle" id="cancel-slide-handle-desktop" aria-label="Slide to cancel registration">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div><!-- /.reg-right -->
 
@@ -6027,10 +6224,18 @@
       </div>
 
       <!-- Count + loading badge -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;">Records</span>
-        <span id="pt-count-badge" style="background:#ede8ff;color:#6F2DBD;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">0</span>
-        <span id="pt-loading-badge" style="display:none;background:#e8eaf6;color:#3949ab;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">↻ Loading…</span>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;">Records</span>
+          <span id="pt-count-badge" style="background:#ede8ff;color:#6F2DBD;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">0</span>
+          <span id="pt-loading-badge" style="display:none;background:#e8eaf6;color:#3949ab;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;">↻ Loading…</span>
+        </div>
+        <button class="pt-reload-btn" onclick="_ptFetch(_ptPage, { soft: true })" title="Reload list">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Reload
+        </button>
       </div>
 
       <!-- Loading skeleton -->
@@ -6308,6 +6513,18 @@
             </svg>
             Submit Registration
           </button>
+          <div class="cancel-slide-wrap">
+            <div class="cancel-slide-label">Slide right to cancel and clear this registration.</div>
+            <div class="cancel-slide" id="cancel-slide-mobile">
+              <div class="cancel-slide-fill" id="cancel-slide-fill-mobile"></div>
+              <div class="cancel-slide-text" id="cancel-slide-text-mobile">Slide to cancel and clear form</div>
+              <button type="button" class="cancel-slide-handle" id="cancel-slide-handle-mobile" aria-label="Slide to cancel registration">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -6551,6 +6768,14 @@
       return KEY_ALIAS[up] || up;
     }
 
+    function getReferralPriceTier() {
+      const v = (document.getElementById('f-referred')?.value || '').toUpperCase();
+      if (/(^|[\s,;])\/?BSA($|[\s,;])/.test(v)) return 'bsa';
+      if (/(^|[\s,;])\/?OM($|[\s,;])/.test(v)) return 'om';
+      if (/(^|[\s,;])\/?YAKAP($|[\s,;])/.test(v)) return 'yakap';
+      return '';
+    }
+
     function getPrice(testName) {
       const key = normalizeKey(testName);
       let p = PRICES[key];
@@ -6560,6 +6785,10 @@
         if (stripped !== key) p = PRICES[stripped];
       }
       if (!p) return null;
+      const tier = getReferralPriceTier();
+      if (tier === 'bsa' && typeof p.bsa === 'number') return p.bsa;
+      if (tier === 'om' && typeof p.om === 'number') return p.om;
+      if (tier === 'yakap' && typeof p.yakap === 'number') return p.yakap;
       if (priceMode === 's') {
         return (p.s !== null && p.s !== undefined && typeof p.s === 'number') ? p.s : p.r;
       }
@@ -6619,6 +6848,9 @@
        STATE
     ════════════════════════════════════════════════ */
     const sel = {};
+    // Quantity per selected test (per category).
+    // Shape: qty[catId][testName] = number (>= 1)
+    const qty = {};
 
     let PRICES = {};
 
@@ -6874,8 +7106,8 @@
         console.warn('Delete network error (non-fatal):', err.message);
       }
 
-      // Quietly refresh list after a short delay to sync with server state
-      setTimeout(() => _ptFetch(_ptPage), 1500);
+      // Quietly refresh list shortly after to sync with server state
+      setTimeout(() => _ptFetch(_ptPage, { soft: true }), 250);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -7079,8 +7311,8 @@
         banner.classList.add('show');
         setTimeout(() => banner.classList.remove('show'), 6000);
 
-        // Refresh list
-        setTimeout(() => _ptFetch(_ptPage), 800);
+        // Refresh list quickly (soft refresh keeps UI feeling instant)
+        setTimeout(() => _ptFetch(_ptPage, { soft: true }), 150);
 
       } catch(err) {
         btn.disabled = false;
@@ -7112,7 +7344,21 @@
         .then(r => r.json())
         .then(d => {
           if (d.success && d.prices) {
-            PRICES = d.prices;
+            // Normalize server fields so frontend can use r/s + bsa/om/yakap safely.
+            PRICES = Object.fromEntries(
+              Object.entries(d.prices).map(([k, v]) => {
+                const o = (v && typeof v === 'object') ? v : {};
+                const _num = (x) => (typeof x === 'number' && isFinite(x)) ? x : null;
+                const norm = {
+                  r: _num(o.r ?? o.regular ?? o.reg),
+                  s: _num(o.s ?? o.senior),
+                  bsa: _num(o.bsa ?? o.f ?? o.bsaPrice ?? o.bsa_price),
+                  om: _num(o.om ?? o.g ?? o.qsdom ?? o.qsdOmPrice ?? o.qsd_om_price),
+                  yakap: _num(o.yakap ?? o.h ?? o.yakapPrice ?? o.yakap_price),
+                };
+                return [k, norm];
+              })
+            );
             pricesLoaded = true;
             if (d.categories && Object.keys(d.categories).length > 0) {
               _buildCategoriesFromSheet(d.categories);
@@ -7143,6 +7389,7 @@
       // Reset
       CATEGORIES.length = 0;
       Object.keys(sel).forEach(k => delete sel[k]);
+      Object.keys(qty).forEach(k => delete qty[k]);
 
       Object.entries(sheetCats).forEach(([catName, tests]) => {
         const id   = _catNameToId(catName);
@@ -7150,6 +7397,7 @@
         const cat  = { id, name: catName, tests: tests.filter(t => t && t.trim()), type };
         CATEGORIES.push(cat);
         sel[id] = new Set();
+        qty[id] = {};
       });
 
       console.log('[LIS] Categories built:', CATEGORIES.map(c => c.name + '(' + c.type + ')').join(', '));
@@ -7244,7 +7492,10 @@
       const wrap = document.getElementById('categories');
       wrap.innerHTML = '';
       // Ensure sel is in sync with current CATEGORIES
-      CATEGORIES.forEach(c => { if (!sel[c.id]) sel[c.id] = new Set(); });
+      CATEGORIES.forEach(c => {
+        if (!sel[c.id]) sel[c.id] = new Set();
+        if (!qty[c.id]) qty[c.id] = {};
+      });
       CATEGORIES.forEach(cat => {
         const cols = cat.tests.length <= 9 ? 3 : 4;
         const block = document.createElement('div');
@@ -7283,17 +7534,67 @@
 
     function toggleCat(id) { document.getElementById('cat-' + id).classList.toggle('open'); }
 
+    function _getQty(catId, testName) {
+      const n = qty?.[catId]?.[testName];
+      return (typeof n === 'number' && isFinite(n) && n > 0) ? Math.floor(n) : 0;
+    }
+
+    function _setQty(catId, testName, n) {
+      if (!qty[catId]) qty[catId] = {};
+      const nn = Math.max(0, Math.floor(Number(n) || 0));
+      if (nn <= 0) delete qty[catId][testName];
+      else qty[catId][testName] = nn;
+    }
+
+    function adjustQty(catId, testName, delta) {
+      const set = sel[catId];
+      if (!set) return;
+      if (!set.has(testName)) {
+        // If something tries to adjust a non-selected item, treat as select.
+        set.add(testName);
+        _setQty(catId, testName, 1);
+        document.getElementById('ti-' + catId + '-' + slug(testName))?.classList.add('sel');
+        document.getElementById('eti-' + catId + '-' + slug(testName))?.classList.add('sel');
+        updateBadge(catId);
+        syncEBadge?.(catId);
+        renderOrders();
+        return;
+      }
+
+      const cur = _getQty(catId, testName) || 1;
+      const next = cur + (Number(delta) || 0);
+      if (next <= 0) {
+        set.delete(testName);
+        _setQty(catId, testName, 0);
+        document.getElementById('ti-' + catId + '-' + slug(testName))?.classList.remove('sel');
+        document.getElementById('eti-' + catId + '-' + slug(testName))?.classList.remove('sel');
+      } else {
+        _setQty(catId, testName, next);
+      }
+      updateBadge(catId);
+      syncEBadge?.(catId);
+      renderOrders();
+    }
+
     function toggleTest(catId, testName) {
       const set = sel[catId];
       const el = document.getElementById('ti-' + catId + '-' + slug(testName));
-      if (set.has(testName)) { set.delete(testName); el?.classList.remove('sel'); }
-      else { set.add(testName); el?.classList.add('sel'); }
+      if (set.has(testName)) {
+        set.delete(testName);
+        _setQty(catId, testName, 0);
+        el?.classList.remove('sel');
+      } else {
+        set.add(testName);
+        _setQty(catId, testName, 1);
+        el?.classList.add('sel');
+      }
       updateBadge(catId);
       renderOrders();
     }
 
     function updateBadge(catId) {
-      const n = sel[catId].size;
+      let n = 0;
+      sel[catId].forEach(t => { n += (_getQty(catId, t) || 1); });
       const b = document.getElementById('badge-' + catId);
       b.textContent = n;
       b.classList.toggle('show', n > 0);
@@ -7310,15 +7611,22 @@
       CATEGORIES.forEach(cat => {
         const tests = [...sel[cat.id]];
         if (!tests.length) return;
-        total += tests.length;
+        tests.forEach(t => { total += (_getQty(cat.id, t) || 1); });
         html += `<div class="order-group">
       <div class="order-group-lbl">${cat.name}</div>
       ${tests.map(t => {
           const p = getPrice(t);
+          const q = _getQty(cat.id, t) || 1;
+          const line = (p !== null) ? (p * q) : null;
           return `<div class="order-row">
           <div class="order-dot"></div>
           <span class="order-test">${t}</span>
-          <span class="order-price-tag">${p !== null ? fmtPeso(p) : '—'}</span>
+          <div class="order-qty">
+            <button class="qty-btn" onclick="adjustQty('${cat.id}','${escQ(t)}',-1)" title="Decrease">−</button>
+            <span class="qty-val">${q}</span>
+            <button class="qty-btn" onclick="adjustQty('${cat.id}','${escQ(t)}',1)" title="Increase">+</button>
+          </div>
+          <span class="order-price-tag">${line !== null ? fmtPeso(line) : '—'}</span>
           <button class="order-del" onclick="toggleTest('${cat.id}','${escQ(t)}')" title="Remove">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -7344,14 +7652,15 @@
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
         if (p !== null) {
+          const q = _getQty(cat.id, t) || 1;
           const resolvedType = _isMedcert(t) ? 'checkup' : cat.type;
-          if      (resolvedType === 'utz')        utzSubtotal     += p;
-          else if (resolvedType === 'xray')       xraySubtotal    += p;
-          else if (resolvedType === 'drug')       drugSubtotal    += p;
-          else if (resolvedType === 'checkup')    checkupSubtotal += p;
-          else if (resolvedType === 'cardiology') cadSubtotal     += p;
-          else if (resolvedType === 'kits')       kitsSubtotal    += p;
-          else                                    labSubtotal     += p;
+          if      (resolvedType === 'utz')        utzSubtotal     += (p * q);
+          else if (resolvedType === 'xray')       xraySubtotal    += (p * q);
+          else if (resolvedType === 'drug')       drugSubtotal    += (p * q);
+          else if (resolvedType === 'checkup')    checkupSubtotal += (p * q);
+          else if (resolvedType === 'cardiology') cadSubtotal     += (p * q);
+          else if (resolvedType === 'kits')       kitsSubtotal    += (p * q);
+          else                                    labSubtotal     += (p * q);
         }
       }));
       const subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal
@@ -7415,11 +7724,12 @@
       if (isSenior) {
         CATEGORIES.forEach(cat => {
           (sel[cat.id] || []).forEach(t => {
+            const q = _getQty(cat.id, t) || 1;
             const key = normalizeKey(t);
             const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
             const priceObj = PRICES[key] || PRICES[stripped];
             if (priceObj && priceObj.s != null && priceObj.r != null && priceObj.s !== priceObj.r) {
-              seniorSavings += (priceObj.r - priceObj.s);
+              seniorSavings += (priceObj.r - priceObj.s) * q;
             }
           });
         });
@@ -7473,17 +7783,21 @@
       const checkupTests  = [];
       const cardiologyTests = [];
       const kitsTests     = [];
+      const _nameForSheet = (catId, t) => {
+        const q = _getQty(catId, t) || 1;
+        return q > 1 ? `${t} (${q})` : t;
+      };
       CATEGORIES.forEach(cat => {
-        if      (cat.type === 'utz')       sel[cat.id].forEach(t => utzTests.push(t));
-        else if (cat.type === 'xray')      sel[cat.id].forEach(t => xrayTests.push(t));
-        else if (cat.type === 'drug')      sel[cat.id].forEach(t => drugTests.push(t));
-        else if (cat.type === 'checkup')   sel[cat.id].forEach(t => checkupTests.push(t));
-        else if (cat.type === 'cardiology') sel[cat.id].forEach(t => cardiologyTests.push(t));
-        else if (cat.type === 'kits')      sel[cat.id].forEach(t => kitsTests.push(t));
+        if      (cat.type === 'utz')       sel[cat.id].forEach(t => utzTests.push(_nameForSheet(cat.id, t)));
+        else if (cat.type === 'xray')      sel[cat.id].forEach(t => xrayTests.push(_nameForSheet(cat.id, t)));
+        else if (cat.type === 'drug')      sel[cat.id].forEach(t => drugTests.push(_nameForSheet(cat.id, t)));
+        else if (cat.type === 'checkup')   sel[cat.id].forEach(t => checkupTests.push(_nameForSheet(cat.id, t)));
+        else if (cat.type === 'cardiology') sel[cat.id].forEach(t => cardiologyTests.push(_nameForSheet(cat.id, t)));
+        else if (cat.type === 'kits')      sel[cat.id].forEach(t => kitsTests.push(_nameForSheet(cat.id, t)));
         else sel[cat.id].forEach(t => {
           // MEDCERT items always go to checkup even if in a lab category
-          if (_isMedcert(t)) checkupTests.push(t);
-          else labTests.push(t);
+          if (_isMedcert(t)) checkupTests.push(_nameForSheet(cat.id, t));
+          else labTests.push(_nameForSheet(cat.id, t));
         });
       });
       const allTests = [...labTests, ...xrayTests, ...drugTests, ...utzTests,
@@ -7495,15 +7809,16 @@
       CATEGORIES.forEach(cat => sel[cat.id].forEach(t => {
         const p = getPrice(t);
         if (p !== null) {
+          const q = _getQty(cat.id, t) || 1;
           // MEDCERT items in lab categories still count toward checkup subtotal
           const resolvedType = _isMedcert(t) ? 'checkup' : cat.type;
-          if      (resolvedType === 'utz')       utzSubtotal      += p;
-          else if (resolvedType === 'xray')      xraySubtotal     += p;
-          else if (resolvedType === 'drug')      drugSubtotal     += p;
-          else if (resolvedType === 'checkup')   checkupSubtotal  += p;
-          else if (resolvedType === 'cardiology') cadSubtotal     += p;
-          else if (resolvedType === 'kits')      kitsSubtotal     += p;
-          else                                   labSubtotal      += p;
+          if      (resolvedType === 'utz')       utzSubtotal      += (p * q);
+          else if (resolvedType === 'xray')      xraySubtotal     += (p * q);
+          else if (resolvedType === 'drug')      drugSubtotal     += (p * q);
+          else if (resolvedType === 'checkup')   checkupSubtotal  += (p * q);
+          else if (resolvedType === 'cardiology') cadSubtotal     += (p * q);
+          else if (resolvedType === 'kits')      kitsSubtotal     += (p * q);
+          else                                   labSubtotal      += (p * q);
         }
       }));
       let subtotal = labSubtotal + xraySubtotal + drugSubtotal + utzSubtotal
@@ -7576,6 +7891,7 @@
         sel[cat.id].forEach(t => {
           const p = getPrice(t);
           if (p !== null) {
+            const q = _getQty(cat.id, t) || 1;
             const key = normalizeKey(t);
             const stripped = key.replace(/\s*[\u2014\-]+.*$/, '').trim();
             const priceObj = PRICES[key] || PRICES[stripped];
@@ -7583,7 +7899,7 @@
             const isSeniorPrice = priceMode === 's' && priceObj && priceObj.s !== null && priceObj.s !== undefined && priceObj.s !== priceObj.r;
             // MEDCERT items always belong to checkup, regardless of which category they appear in
             const resolvedType = _isMedcert(t) ? 'checkup' : cat.type;
-            itemsDetail.push({ name: t, cat: cat.name, catType: resolvedType, price: p, regularPrice, isSeniorPrice });
+            itemsDetail.push({ name: t, qty: q, cat: cat.name, catType: resolvedType, price: p, linePrice: p * q, regularPrice, isSeniorPrice });
           }
         });
       });
@@ -7627,7 +7943,7 @@
 
     function _ptDebounce() {
       clearTimeout(_ptDebTimer);
-      _ptDebTimer = setTimeout(() => _ptFetch(1), 400);
+      _ptDebTimer = setTimeout(() => _ptFetch(1), 250);
     }
 
     function _ptClearFilters() {
@@ -7639,9 +7955,12 @@
       _ptFetch(1);
     }
 
-    async function _ptFetch(page) {
-      if (_ptFetching) return;
-      _ptFetching = true;
+    let _ptAbort = null;
+    let _ptReqSeq = 0;
+
+    async function _ptFetch(page, opts = {}) {
+      const { soft = false } = (opts || {});
+      const mySeq = ++_ptReqSeq;
       page = Math.max(1, page || 1);
 
       const search   = (document.getElementById('pt-search')?.value         || '').trim();
@@ -7650,11 +7969,19 @@
       const dateFrom = (document.getElementById('pt-date-from')?.value       || '').trim();
       const dateTo   = (document.getElementById('pt-date-to')?.value         || '').trim();
 
+      // Abort any in-flight request so the UI always reflects the latest filters quickly.
+      try { _ptAbort?.abort(); } catch(e) {}
+      _ptAbort = new AbortController();
+      const signal = _ptAbort.signal;
+
+      _ptFetching = true;
       document.getElementById('pt-loading-badge').style.display = 'inline-block';
-      document.getElementById('pt-skeleton').style.display = 'flex';
-      document.getElementById('pt-list').innerHTML = '';
-      document.getElementById('pt-empty').style.display = 'none';
-      document.getElementById('pt-pagination').style.display = 'none';
+      if (!soft) {
+        document.getElementById('pt-skeleton').style.display = 'flex';
+        document.getElementById('pt-list').innerHTML = '';
+        document.getElementById('pt-empty').style.display = 'none';
+        document.getElementById('pt-pagination').style.display = 'none';
+      }
 
       try {
         let url = `${APPS_SCRIPT_URL}?action=getpatients&page=${page}`;
@@ -7664,9 +7991,11 @@
         if (dateFrom) url += `&dateFrom=${encodeURIComponent(dateFrom)}`;
         if (dateTo)   url += `&dateTo=${encodeURIComponent(dateTo)}`;
 
-        const res  = await fetch(url);
+        const res  = await fetch(url, { signal });
         const data = await res.json();
 
+        // If a newer request already started, ignore this response.
+        if (mySeq !== _ptReqSeq) return;
         if (!data.success) throw new Error(data.message || 'Failed');
 
         _ptPage  = data.page  || 1;
@@ -7676,6 +8005,7 @@
         document.getElementById('pt-count-badge').textContent = _ptTotal;
 
         const list = document.getElementById('pt-list');
+        if (soft) list.innerHTML = '';
         if (!data.records || data.records.length === 0) {
           document.getElementById('pt-empty').style.display = 'block';
         } else {
@@ -7791,11 +8121,15 @@
         }
 
       } catch(err) {
+        if (err?.name === 'AbortError') return;
         showToast('Failed to load patients: ' + err.message, 'err');
       } finally {
-        _ptFetching = false;
-        document.getElementById('pt-loading-badge').style.display = 'none';
-        document.getElementById('pt-skeleton').style.display = 'none';
+        // Only the latest request should control the loading UI.
+        if (mySeq === _ptReqSeq) {
+          _ptFetching = false;
+          document.getElementById('pt-loading-badge').style.display = 'none';
+          document.getElementById('pt-skeleton').style.display = 'none';
+        }
       }
     }
 
@@ -8222,6 +8556,7 @@
       ['f-sex'].forEach(id => { const e = document.getElementById(id); if (e) e.selectedIndex = 0; });
       CATEGORIES.forEach(cat => {
         sel[cat.id].clear();
+        if (qty[cat.id]) qty[cat.id] = {};
         updateBadge(cat.id);
         cat.tests.forEach(t => document.getElementById('ti-' + cat.id + '-' + slug(t))?.classList.remove('sel'));
       });
@@ -8246,6 +8581,87 @@
       }
       onPriceModeChange();
       renderOrders();
+    }
+
+    function cancelCurrentRegistration() {
+      clearForm();
+      if (typeof goToStep1 === 'function') goToStep1();
+      showToast('Registration cancelled. Form has been cleared and is ready for a new entry.', 'ok');
+    }
+
+    function initCancelSlider(sliderId, handleId, fillId, textId) {
+      const slider = document.getElementById(sliderId);
+      const handle = document.getElementById(handleId);
+      const fill = document.getElementById(fillId);
+      const txt = document.getElementById(textId);
+      if (!slider || !handle || !fill || !txt) return;
+
+      const reset = (animate) => {
+        handle.style.transition = animate ? 'left 0.18s ease' : 'none';
+        fill.style.transition = animate ? 'width 0.18s ease' : 'none';
+        handle.style.left = '3px';
+        fill.style.width = '0%';
+        txt.textContent = 'Slide to cancel and clear form';
+        setTimeout(() => { handle.style.transition = ''; fill.style.transition = ''; }, 200);
+      };
+
+      let dragging = false;
+      let pointerId = null;
+      let maxX = 0;
+
+      const updateX = (clientX) => {
+        const sliderRect = slider.getBoundingClientRect();
+        const handleRect = handle.getBoundingClientRect();
+        const w = handleRect.width || 38;
+        maxX = Math.max(0, sliderRect.width - w - 6);
+        let x = clientX - sliderRect.left - (w / 2) - 3;
+        x = Math.max(0, Math.min(maxX, x));
+        handle.style.left = (x + 3) + 'px';
+        const pct = maxX > 0 ? (x / maxX) : 0;
+        fill.style.width = Math.round(pct * 100) + '%';
+        txt.textContent = pct >= 0.8 ? 'Release to cancel registration' : 'Slide to cancel and clear form';
+        return pct;
+      };
+
+      const onDown = (ev) => {
+        dragging = true;
+        pointerId = ev.pointerId;
+        handle.setPointerCapture(pointerId);
+        updateX(ev.clientX);
+        ev.preventDefault();
+      };
+      const onMove = (ev) => {
+        if (!dragging || ev.pointerId !== pointerId) return;
+        updateX(ev.clientX);
+      };
+      const onUp = (ev) => {
+        if (!dragging || ev.pointerId !== pointerId) return;
+        dragging = false;
+        const pct = updateX(ev.clientX);
+        try { handle.releasePointerCapture(pointerId); } catch(e) {}
+        pointerId = null;
+        if (pct >= 0.92) {
+          txt.textContent = 'Cancelling...';
+          fill.style.width = '100%';
+          setTimeout(() => {
+            cancelCurrentRegistration();
+            reset(true);
+          }, 120);
+        } else {
+          reset(true);
+        }
+      };
+
+      handle.addEventListener('pointerdown', onDown);
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onUp);
+      handle.addEventListener('pointercancel', () => { dragging = false; reset(true); });
+      reset(false);
+    }
+
+    function initCancelSlides() {
+      initCancelSlider('cancel-slide-desktop', 'cancel-slide-handle-desktop', 'cancel-slide-fill-desktop', 'cancel-slide-text-desktop');
+      initCancelSlider('cancel-slide-mobile', 'cancel-slide-handle-mobile', 'cancel-slide-fill-mobile', 'cancel-slide-text-mobile');
     }
 
     /* ════════════════════════════════════════════════
@@ -8372,6 +8788,7 @@
           // Add with exact casing from sheet tests list if available, else use map name
           const sheetName = cat.tests.find(t => t.toUpperCase() === name.toUpperCase()) || name;
           sel[cat.id].add(sheetName);
+          _setQty(cat.id, sheetName, 1);
           updateBadge(cat.id);
           document.getElementById('ti-' + cat.id + '-' + slug(sheetName))?.classList.add('sel');
         }
@@ -8461,7 +8878,8 @@
     }
 
     function syncEBadge(catId) {
-      const n = sel[catId].size;
+      let n = 0;
+      sel[catId].forEach(t => { n += (_getQty(catId, t) || 1); });
       const b = document.getElementById('ebadge-' + catId);
       if (b) { b.textContent = n; b.classList.toggle('show', n > 0); }
       const block = document.getElementById('ecat-' + catId);
@@ -8477,6 +8895,7 @@
     function clearAllSelections() {
       CATEGORIES.forEach(cat => {
         sel[cat.id].clear();
+        if (qty[cat.id]) qty[cat.id] = {};
         updateBadge(cat.id);
         cat.tests.forEach(t => {
           document.getElementById('ti-' + cat.id + '-' + slug(t))?.classList.remove('sel');
@@ -8505,6 +8924,7 @@
        AGE/SEX listeners for accredited package re-apply
     ════════════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', () => {
+      initCancelSlides();
       document.getElementById('f-birthday').addEventListener('change', () => {
         onBirthdayChange();
         if (acctMode && acctCompany) {
@@ -8752,6 +9172,7 @@
     function onReferredInput() {
       closeAllDropdownsExcept('ref-dropdown');
       const inp = document.getElementById('f-referred');
+      onReferralPricingContextChange();
       const q = inp.value.trim().toLowerCase();
       const dd = document.getElementById('ref-dropdown');
       if (!q) { dd.classList.remove('open'); dd.innerHTML = ''; return; }
@@ -8780,6 +9201,7 @@
       document.getElementById('f-referred').value = name;
       document.getElementById('ref-dropdown').classList.remove('open');
       applyReferralDiscount(name);
+      onReferralPricingContextChange();
     }
 
     let _referralAutoActive = false;
@@ -8869,6 +9291,7 @@
       document.getElementById('f-referred').value = name;
       closeAddOtherReferralModal();
       showToast('Other referral saved!', 'ok');
+      onReferralPricingContextChange();
       if (APPS_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&details=${encodeURIComponent(details)}`)
           .then(r => r.json())
@@ -8886,6 +9309,7 @@
       document.getElementById('f-referred').value = name;
       closeAddDoctorModal();
       showToast('Doctor added! Saving to records…', 'ok');
+      onReferralPricingContextChange();
 
       if (APPS_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&details=${encodeURIComponent(details)}`)
@@ -9023,17 +9447,25 @@
       document.getElementById('test-search-results-acct').innerHTML = '';
     }
 
-    function onPriceModeChange() {
-      const _pmVal = document.getElementById('price-mode').value;
-      if (_pmVal) priceMode = _pmVal; // only update if select has a valid value
+    function refreshTestPriceLabels() {
       CATEGORIES.forEach(cat => {
         cat.tests.forEach(t => {
           const el = document.getElementById('tp-' + cat.id + '-' + slug(t));
           if (el) { const p = getPrice(t); el.textContent = p !== null ? fmtPeso(p) : ''; }
         });
       });
+    }
+
+    function onReferralPricingContextChange() {
+      refreshTestPriceLabels();
       renderOrders();
       if (document.getElementById('test-search-inp').value.trim()) _runTestSearch();
+    }
+
+    function onPriceModeChange() {
+      const _pmVal = document.getElementById('price-mode').value;
+      if (_pmVal) priceMode = _pmVal; // only update if select has a valid value
+      onReferralPricingContextChange();
     }
 
     function showRegPage(status) {
@@ -9198,7 +9630,7 @@
       _origRenderOrders();
       // Update mobile badges
       let total = 0;
-      CATEGORIES.forEach(cat => total += sel[cat.id].size);
+      CATEGORIES.forEach(cat => sel[cat.id].forEach(t => { total += (_getQty(cat.id, t) || 1); }));
       const badge1 = document.getElementById('bnav-tests-badge');
       const badge2 = document.getElementById('bnav-order-badge');
       if (badge1) { badge1.textContent = total; badge1.classList.toggle('show', total > 0); }
@@ -9322,6 +9754,7 @@
       list.innerHTML = '';
       const allItems = data.itemsDetail || [];
       allItems.forEach((item, idx) => {
+        const q = (typeof item.qty === 'number' && isFinite(item.qty) && item.qty > 0) ? Math.floor(item.qty) : 1;
         const row = document.createElement('div');
         row.className = 'pos-item-row';
         row.style.cursor = 'pointer';
@@ -9330,11 +9763,11 @@
         row.innerHTML = `
           <div class="pos-item-name">
             <span class="pos-item-cat">${item.cat}</span>
-            ${item.name}
+            ${item.name}${q > 1 ? ` <span class="pos-item-qty">×${q}</span>` : ''}
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="item-disc-badge" id="idb-${idx}" style="display:none;background:#EDE8FF;color:#6F2DBD;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;"></span>
-            <div class="pos-item-price" id="idp-${idx}">${fmtPeso(item.price)}</div>
+            <div class="pos-item-price" id="idp-${idx}">${fmtPeso((item.price || 0) * q)}</div>
           </div>`;
         row.addEventListener('click', () => openItemDiscModal(idx));
         list.appendChild(row);
@@ -9355,7 +9788,8 @@
       document.getElementById('pos-senior-row').style.display = data.isSenior ? 'flex' : 'none';
       if (data.isSenior) {
         const savings = (data.itemsDetail || []).reduce((sum, it) => {
-          return sum + (it.isSeniorPrice && it.regularPrice != null ? it.regularPrice - it.price : 0);
+          const q = (typeof it.qty === 'number' && isFinite(it.qty) && it.qty > 0) ? Math.floor(it.qty) : 1;
+          return sum + (it.isSeniorPrice && it.regularPrice != null ? (it.regularPrice - it.price) * q : 0);
         }, 0);
         const savEl = document.getElementById('pos-senior-savings');
         if (savEl) savEl.textContent = savings > 0 ? '− ' + fmtPeso(savings) : 'Applied';
@@ -9439,15 +9873,17 @@
       let labEff = 0, xrayEff = 0, drugEff = 0, utzEff = 0;
       let checkupEff = 0, cadEff = 0, kitsEff = 0;
       items.forEach((item, idx) => {
+        const q = (typeof item.qty === 'number' && isFinite(item.qty) && item.qty > 0) ? Math.floor(item.qty) : 1;
         const id        = _itemDiscounts[idx];
-        const effective = id ? Math.max(0, item.price - id.discAmt) : item.price;
-        if      (item.catType === 'utz')        utzEff      += effective;
-        else if (item.catType === 'xray')       xrayEff     += effective;
-        else if (item.catType === 'drug')       drugEff     += effective;
-        else if (item.catType === 'checkup')    checkupEff  += effective;
-        else if (item.catType === 'cardiology') cadEff      += effective;
-        else if (item.catType === 'kits')       kitsEff     += effective;
-        else                                    labEff      += effective;
+        const effectiveUnit = id ? Math.max(0, item.price - id.discAmt) : item.price;
+        const effectiveLine = effectiveUnit * q;
+        if      (item.catType === 'utz')        utzEff      += effectiveLine;
+        else if (item.catType === 'xray')       xrayEff     += effectiveLine;
+        else if (item.catType === 'drug')       drugEff     += effectiveLine;
+        else if (item.catType === 'checkup')    checkupEff  += effectiveLine;
+        else if (item.catType === 'cardiology') cadEff      += effectiveLine;
+        else if (item.catType === 'kits')       kitsEff     += effectiveLine;
+        else                                    labEff      += effectiveLine;
       });
 
       const rawSubtotal = labEff + xrayEff + drugEff + utzEff + checkupEff + cadEff + kitsEff;
@@ -9457,8 +9893,13 @@
       const globalDiscAmt = discRate > 0 ? rawSubtotal * discRate : 0;
 
       // Sum of item-level discount amounts
-      const itemDiscTotal = Object.values(_itemDiscounts)
-        .reduce((s, d) => s + (d.discAmt || 0), 0);
+      const itemDiscTotal = Object.entries(_itemDiscounts)
+        .reduce((s, [idxStr, d]) => {
+          const idx = parseInt(idxStr);
+          const item = (_posData.itemsDetail || [])[idx];
+          const q = item && typeof item.qty === 'number' && isFinite(item.qty) && item.qty > 0 ? Math.floor(item.qty) : 1;
+          return s + ((d?.discAmt || 0) * q);
+        }, 0);
 
       const totalDiscAmt = globalDiscAmt + itemDiscTotal;
       const origSubtotal = (_posData.subtotal||0) + (_posData.xraySubtotal||0) + (_posData.drugSubtotal||0) + (_posData.utzSubtotal||0)
@@ -9516,16 +9957,19 @@
 
       // Update item price displays
       (items).forEach((item, idx) => {
+        const q = (typeof item.qty === 'number' && isFinite(item.qty) && item.qty > 0) ? Math.floor(item.qty) : 1;
         const id      = _itemDiscounts[idx];
         const priceEl = document.getElementById('idp-' + idx);
         const badgeEl = document.getElementById('idb-' + idx);
         if (!priceEl) return;
         if (id) {
-          const eff = Math.max(0, item.price - id.discAmt);
-          priceEl.innerHTML = `<span style="text-decoration:line-through;color:#ccc;font-size:11px;margin-right:3px;">${fmtPeso(item.price)}</span>${fmtPeso(eff)}`;
+          const effUnit  = Math.max(0, item.price - id.discAmt);
+          const origLine = (item.price || 0) * q;
+          const effLine  = effUnit * q;
+          priceEl.innerHTML = `<span style="text-decoration:line-through;color:#ccc;font-size:11px;margin-right:3px;">${fmtPeso(origLine)}</span>${fmtPeso(effLine)}`;
           if (badgeEl) { badgeEl.style.display='inline-block'; badgeEl.textContent='-'+Math.round(id.discRate*100)+'%'; }
         } else {
-          priceEl.textContent = fmtPeso(item.price);
+          priceEl.textContent = fmtPeso((item.price || 0) * q);
           if (badgeEl) badgeEl.style.display='none';
         }
       });
@@ -10011,6 +10455,7 @@
       // Build itemized receipt items (with per-item effective prices after item discounts)
       const _rcptItemsFinal = (_posData.itemsDetail || []).map((it, i) => {
         const id = _itemDiscounts[i];
+        const q = (typeof it.qty === 'number' && isFinite(it.qty) && it.qty > 0) ? Math.floor(it.qty) : 1;
         const type = it.catType === 'xray'       ? 'xray'
                    : it.catType === 'drug'       ? 'drug'
                    : it.catType === 'utz'        ? 'utz'
@@ -10021,14 +10466,14 @@
         if (id) {
           const effPrice = Math.max(0, it.price - id.discAmt);
           return {
-            name: it.name, price: effPrice, discNote: id.discName, type,
+            name: it.name, qty: q, unitPrice: effPrice, linePrice: effPrice * q, price: effPrice, discNote: id.discName, type,
             origPrice: id.origPrice,
             specialPrice: id.isSpecial ? id.specialPrice : null,
             isSpecial: id.isSpecial || false,
           };
         }
         return {
-          name: it.name, price: it.price, discNote: '', type,
+          name: it.name, qty: q, unitPrice: it.price, linePrice: (it.price || 0) * q, price: it.price, discNote: '', type,
           isSeniorPrice: it.isSeniorPrice || false,
           regularPrice:  it.isSeniorPrice ? it.regularPrice : null,
         };
@@ -10180,6 +10625,8 @@
     const CMD = {
       INIT:         [ESC, 0x40],
       DARKNESS:     [GS,  0x7C, 0x08],   // GS | n  — print density 8 (max=8, default=4)
+      // Code page selection (ESC t n). 0 = CP437 on most ESC/POS printers.
+      CODEPAGE_437: [ESC, 0x74, 0x00],
       ALIGN_LEFT:   [ESC, 0x61, 0x00],
       ALIGN_CENTER: [ESC, 0x61, 0x01],
       BOLD_ON:      [ESC, 0x45, 0x01],
@@ -10224,8 +10671,22 @@
       }
     }
 
+    // ESC/POS printers typically expect a single-byte code page (not UTF-8).
+    // We encode to CP437 with a small fallback sanitizer to avoid garbled output
+    // (notably for Ñ/ñ on many POS58 thermal printers).
     function txtBytes(str) {
-      return new TextEncoder().encode(str);
+      str = String(str ?? '');
+      const directMap = { 'ñ': 0xA4, 'Ñ': 0xA5 };
+      const out = [];
+      for (const ch of str) {
+        const code = ch.codePointAt(0);
+        if (code <= 0x7F) { out.push(code); continue; }
+        if (directMap[ch] != null) { out.push(directMap[ch]); continue; }
+        const stripped = ch.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+        if (stripped && stripped.codePointAt(0) <= 0x7F) out.push(stripped.codePointAt(0));
+        else out.push(0x3F); // '?'
+      }
+      return new Uint8Array(out);
     }
 
     function padLine(left, right, w) {
@@ -10422,6 +10883,16 @@
       const row  = (l, r, cls) => `<div class="rp-row${cls?' '+cls:''}"><span class="rp-lbl">${l}</span><span class="rp-val">${r}</span></div>`;
 
       const recNo = 'REC-' + String(d.num || 0).padStart(5, '0');
+      const _isCharged100 = (() => {
+        const pt = String(d.paymentType || '').toUpperCase();
+        if (pt === 'CHARGED') return true;
+        const disc = String(d.discountLabel || '').toUpperCase();
+        const hint = (pt + ' ' + disc);
+        const looksCharged = /YAKAP|BSA|CHARGED|CHARGE|OM/.test(hint);
+        const paidZero = (parseFloat(d.paymentAmt) || 0) <= 0 && (parseFloat(d.balance) || 0) <= 0;
+        const totalZero = (parseFloat(d.grand) || 0) <= 0;
+        return looksCharged && (paidZero || totalZero);
+      })();
       const hasXray     = (d.xraySubtotal     || 0) > 0;
       const hasDrug     = (d.drugSubtotal     || 0) > 0;
       const hasUtz      = (d.utzSubtotal      || 0) > 0;
@@ -10438,6 +10909,8 @@
         <div class="rp-gap"></div>
         <div class="rp-center rp-bold" style="font-size:12px;letter-spacing:0.5px;">NOT OFFICIAL RECEIPT</div>
         <div class="rp-center rp-small" style="color:#1a1a1a;">** NOT A VALID MEDICAL RECORD **</div>
+        ${_isCharged100 ? `<div class="rp-center rp-small rp-bold" style="color:#1a1a1a;margin-top:4px;">CHARGE SLIP &amp;</div>
+                           <div class="rp-center rp-small rp-bold" style="color:#1a1a1a;">ACKNOWLEDGEMENT RECEIPT</div>` : ''}
         ${div('-')}
         ${row('Receipt No:', recNo)}
         ${row('Date/Time:', d.date || '')}
@@ -10598,7 +11071,15 @@
         <div class="rp-center rp-bold rp-small">Qualicheck Diagnostic Clinic</div>
         <div class="rp-center rp-small" style="color:#1a1a1a;">Results are strictly confidential.</div>
         <div class="rp-center rp-small" style="color:#1a1a1a;">For inquiries call 8367-4160</div>
-        <div class="rp-gap"></div>`;
+        ${_isCharged100 ? `
+          <div class="rp-gap"></div>
+          <div class="rp-center rp-small" style="color:#1a1a1a;">Patient Acknowledgement</div>
+          <div style="margin-top:18px;border-top:1px dashed #bbb;padding-top:6px;" class="rp-center rp-small">
+            ${(d.name || '').toUpperCase()}
+          </div>
+          <div class="rp-center rp-small" style="color:#666;margin-top:2px;">Signature over printed name</div>
+        ` : `<div class="rp-gap"></div>`}
+      `;
 
       document.getElementById('rp-paper-content').innerHTML = html;
     }
@@ -10609,8 +11090,20 @@
       const txt  = str => chunks.push(txtBytes(str));
 
       cmd(CMD.INIT);
+      cmd(CMD.CODEPAGE_437);
       cmd(CMD.DARKNESS);   // max print density — ensures solid black on thermal paper
       cmd(CMD.ALIGN_CENTER);
+
+      const _isCharged100 = (() => {
+        const pt = String(d.paymentType || '').toUpperCase();
+        if (pt === 'CHARGED') return true;
+        const disc = String(d.discountLabel || '').toUpperCase();
+        const hint = (pt + ' ' + disc);
+        const looksCharged = /YAKAP|BSA|CHARGED|CHARGE|OM/.test(hint);
+        const paidZero = (parseFloat(d.paymentAmt) || 0) <= 0 && (parseFloat(d.balance) || 0) <= 0;
+        const totalZero = (parseFloat(d.grand) || 0) <= 0;
+        return looksCharged && (paidZero || totalZero);
+      })();
 
       // ── LOGO ─────────────────────────────────────
       await _loadLogo();   // fetch from GitHub if not yet cached this session
@@ -10642,6 +11135,12 @@
       cmd(CMD.BOLD_OFF);
       cmd(CMD.SMALL_ON);
       txt(ctr('** NOT A VALID MEDICAL RECORD **') + '\n');
+      if (_isCharged100) {
+        cmd(CMD.BOLD_ON);
+        txt(ctr('CHARGE SLIP &') + '\n');
+        txt(ctr('ACKNOWLEDGEMENT RECEIPT') + '\n');
+        cmd(CMD.BOLD_OFF);
+      }
       cmd(CMD.SMALL_OFF);
 
       txt(div('-'));
@@ -10855,6 +11354,17 @@
       cmd(CMD.BOLD_OFF);
       txt('Results are strictly confidential.\n');
       txt('For inquiries call 8367-4160\n');
+      if (_isCharged100) {
+        cmd(CMD.FEED_1);
+        txt('Patient Acknowledgement\n');
+        cmd(CMD.SMALL_OFF);
+        txt('\n');
+        txt(ctr('______________________________') + '\n');
+        cmd(CMD.SMALL_ON);
+        const pn = (d.name || '').toUpperCase().slice(0, LW);
+        txt(ctr(pn) + '\n');
+        txt(ctr('Signature over printed name') + '\n');
+      }
       cmd(CMD.SMALL_OFF);
       cmd(CMD.FEED_4);
       cmd(CMD.CUT);
@@ -11856,7 +12366,7 @@
       .et-modal-cur-val { font-size:15px; font-weight:800; color:#4A0E8F; font-family:'DM Mono',monospace; }
       .et-modal-cur-val.name { font-family:'DM Sans',sans-serif; color:#1a1a1a; font-size:14px; }
       .et-modal-inputs { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px; }
-      .et-modal-field { }
+      .et-modal-field { display: block; }
       .et-modal-field label {
         display:block; font-size:10px; font-weight:800;
         text-transform:uppercase; letter-spacing:0.9px; margin-bottom:5px;
