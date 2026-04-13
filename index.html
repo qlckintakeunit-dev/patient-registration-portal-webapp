@@ -6854,10 +6854,16 @@
 
     let PRICES = {};
 
+    let _encodedBy = '';   // tracks who is logged in this session
+
     function fmtPeso(n) {
       if (n === null || n === undefined || isNaN(n)) return '—';
       return '₱ ' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
+
+    function _toTitleCase(str) {
+              return (str || '').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+            }
 
     function doLogin() {
       const u = document.getElementById('inp-user').value.trim();
@@ -6879,7 +6885,8 @@
         const DEMO = [{ u: 'admin', p: 'admin2026' }, { u: 'labtech', p: 'lab@lis2026' }];
         setTimeout(() => {
           const ok = DEMO.find(x => x.u === u && x.p === p);
-          if (ok) { loginSuccess(true); }
+          if (ok) { _encodedBy = _toTitleCase(u); loginSuccess(true); }
+
           else { loginFail(btn, btnTxt, errEl, errTxt, 'Invalid username or password.'); }
         }, 400);
         return;
@@ -6888,7 +6895,7 @@
       fetch(`${APPS_SCRIPT_URL}?action=login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)
         .then(r => r.json())
         .then(d => {
-          if (d.success) { loginSuccess(false); }
+          if (d.success) { _encodedBy = d.displayName || _toTitleCase(u); loginSuccess(false); }
           else { loginFail(btn, btnTxt, errEl, errTxt, d.message || 'Invalid credentials.'); }
         })
         .catch(() => loginFail(btn, btnTxt, errEl, errTxt, 'Connection error. Check your network.'));
@@ -6958,6 +6965,8 @@
     }
 
     function doLogout() {
+
+      _encodedBy = '';
       document.getElementById('page-reg').classList.remove('active');
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-add-tests').classList.remove('active');
@@ -7883,6 +7892,7 @@
         xraySubtotal,
         drugSubtotal,
         utzSubtotal,
+        encodedBy: _encodedBy,
       };
 
       // Build itemsDetail for POS display
@@ -7924,6 +7934,7 @@
         isSenior: parseInt(age) >= 60,
         itemsDetail,
         rawPayload: payload,
+        encodedBy:  _encodedBy,
       });
     }
 
@@ -10575,7 +10586,8 @@
               paymentType:   finalPayload.paymentType,
               paymentAmt:    finalPayload.paymentAmount,
               balance:       finalPayload.balance,
-              changeAmt:     _posChangeAmt,
+              changeAmt:       _posChangeAmt,
+              encodedBy:       _posData.encodedBy || _encodedBy || '',
             };
             // Show print button
             document.getElementById('pos-print-btn').style.display = 'flex';
@@ -10904,7 +10916,7 @@
       let html = `
         <div class="rp-center rp-bold" style="font-size:13px;letter-spacing:1px;">QUALICHECK</div>
         <div class="rp-center" style="font-size:10px;margin-top:2px;">Qualicheck Diagnostic Clinic</div>
-        <div class="rp-center rp-small" style="color:#666;">127 A Mabini St., Brgy. San Antonio, San Pedro City, Laguna 4023</div>
+        <div class="rp-center rp-small" style="color:#666;">127 A Mabini St., Brgy. San Antonio, San Pedro City, 4023</div>
         <div class="rp-center rp-small" style="color:#666;">Tel: 8772-4759</div>
         <div class="rp-gap"></div>
         <div class="rp-center rp-bold" style="font-size:12px;letter-spacing:0.5px;">NOT OFFICIAL RECEIPT</div>
@@ -10914,7 +10926,7 @@
         ${div('-')}
         ${row('Receipt No:', recNo)}
         ${row('Date/Time:', d.date || '')}
-        ${row('Cashier:', 'Front Desk')}
+        ${row('Cashier:', d.encodedBy || 'Front Desk')}
         ${div('-')}
         <div class="rp-small" style="color:#1a1a1a;">Patient</div>
         <div class="rp-bold" style="font-size:12px;word-break:break-word;">${(d.name || '').toUpperCase()}</div>
@@ -11149,7 +11161,7 @@
       const recNo = 'REC-' + String(d.num || 0).padStart(5, '0');
       txt(padLine('Receipt No:', recNo) + '\n');
       txt(padLine('Date/Time:', d.date || '') + '\n');
-      txt(padLine('Cashier:', 'Front Desk') + '\n');
+      txt(padLine('Cashier:', d.encodedBy || 'Front Desk') + '\n');
 
       txt(div('-'));
 
