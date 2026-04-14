@@ -8197,6 +8197,7 @@
         paymentAmt:       r.paymentAmt       || 0,
         balance:          r.balance          || 0,
         changeAmt:        Math.max(0, (r.paymentAmt || 0) - (r.grand || 0)),
+        encodedBy:        r.encodedBy        || '',
       };
       _rpOpen(receiptData, null);
     }
