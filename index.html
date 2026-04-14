@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#6F2DBD">
   <title>Qualicheck — Patient Registration</title>
+  <link rel="icon" type="image/png" href="qc-logo-purple.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -10495,6 +10496,7 @@
         paymentStatus: sheetStatus,
         paymentAmount: _posIsCharged ? 0 : paid,
         balance:       _posIsCharged ? 0 : balance,
+        remarks:       '',
         itemsJson:     JSON.stringify(_rcptItemsFinal),  // ← itemized for RECEIPT LOGS
       });
 
