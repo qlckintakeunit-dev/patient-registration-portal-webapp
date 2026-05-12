@@ -10796,6 +10796,7 @@
        Returns Uint8Array or null if no logo loaded.
     ─────────────────────────────────────────────────── */
     async function buildLogoBytes() {
+      return null;  // ← add this line to disable logo temporarily
       if (!_logoDataUrl) return null;
       return new Promise((resolve) => {
         const img = new Image();
