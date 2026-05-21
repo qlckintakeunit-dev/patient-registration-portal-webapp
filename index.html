@@ -8168,6 +8168,7 @@
       if (/(^|[\s,;])\/?BSA($|[\s,;])/.test(v)) return 'bsa';
       if (/(^|[\s,;])\/?OM($|[\s,;])/.test(v)) return 'om';
       if (/(^|[\s,;])\/?YAKAP($|[\s,;])/.test(v)) return 'yakap';
+      if (/(^|[\s,;])\/?AMANTE($|[\s,;])/.test(v)) return 'amante';
       return '';
     }
 
@@ -8184,6 +8185,7 @@
       if (tier === 'bsa' && typeof p.bsa === 'number') return p.bsa;
       if (tier === 'om' && typeof p.om === 'number') return p.om;
       if (tier === 'yakap' && typeof p.yakap === 'number') return p.yakap;
+      if (tier === 'amante' && typeof p.amante === 'number') return p.amante;
       if (priceMode === 's') {
         return (p.s !== null && p.s !== undefined && typeof p.s === 'number') ? p.s : p.r;
       }
@@ -8759,6 +8761,7 @@
                   bsa: _num(o.bsa ?? o.f ?? o.bsaPrice ?? o.bsa_price),
                   om: _num(o.om ?? o.g ?? o.qsdom ?? o.qsdOmPrice ?? o.qsd_om_price),
                   yakap: _num(o.yakap ?? o.h ?? o.yakapPrice ?? o.yakap_price),
+                  amante: _num(o.amante ?? o.amarPrice ?? o.amante_price),
                 };
                 return [k, norm];
               })
