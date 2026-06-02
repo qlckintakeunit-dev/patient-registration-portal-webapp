@@ -12729,6 +12729,11 @@
 
       html += div('-');
       html += `
+        <div class="rp-center rp-small">--------------------------------</div>
+        <div class="rp-center rp-bold rp-small">IMPORTANT:</div>
+        <div class="rp-center rp-small">KEEP THIS AS YOUR CLAIMING STUB.</div>
+        <div class="rp-center rp-small">NO STUB, NO RELEASE OF RESULTS.</div>
+        <div class="rp-center rp-small">--------------------------------</div>
         <div class="rp-gap"></div>
         <div class="rp-center rp-small">Thank you for trusting</div>
         <div class="rp-center rp-bold rp-small">Qualicheck Diagnostic Clinic</div>
@@ -13025,6 +13030,11 @@
       }
 
       txt(div('-'));
+      txt('--------------------------------\n');
+      cmd(CMD.BOLD_ON); txt('IMPORTANT:\n'); cmd(CMD.BOLD_OFF);
+      txt('KEEP THIS AS YOUR CLAIMING STUB.\n');
+      txt('NO STUB, NO RELEASE OF RESULTS.\n');
+      txt('--------------------------------\n');
 
       // ── FOOTER ────────────────────────────────────
       cmd(CMD.ALIGN_CENTER);
