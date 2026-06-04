@@ -8166,7 +8166,7 @@
     function getReferralPriceTier() {
       const v = (document.getElementById('f-referred')?.value || '').toUpperCase();
       if (/(^|[\s,;])\/?BSA($|[\s,;])/.test(v)) return 'bsa';
-      if (/(^|[\s,;])\/?OM($|[\s,;])/.test(v)) return 'om';
+      if (/\/OM($|[\s,;/])/.test(v)) return 'om';
       if (/(^|[\s,;])\/?YAKAP($|[\s,;])/.test(v)) return 'yakap';
       if (/(^|[\s,;])\/?AMANTE($|[\s,;])/.test(v)) return 'amante';
       return '';
