@@ -8802,8 +8802,8 @@
         console.warn('Delete network error (non-fatal):', err.message);
       }
 
-      // Reload list to show updated records from server
-      setTimeout(() => _ptFetch(_ptPage), 500);
+      // Reload list immediately to show updated records from server
+      setTimeout(() => _ptFetch(_ptPage), 50);
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -8897,8 +8897,8 @@
         console.warn('Refund network error:', err.message);
       }
 
-      // Reload list to show updated records from server
-      setTimeout(() => _ptFetch(_ptPage), 500);
+      // Reload list immediately to show updated records from server
+      setTimeout(() => _ptFetch(_ptPage), 50);
     }
 
     // ═══════════════════════════════════════════════════════════════
