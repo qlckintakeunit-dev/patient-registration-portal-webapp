@@ -778,7 +778,7 @@ function handleEditPatient(data) {
           data.encodedBy
         ];
 
-        daily.getRange(sheetRow, 1, 1, 31).setValues([rowData]);
+        daily.getRange(sheetRow, 1, 1, rowData.length).setValues([rowData]);
         _formatDailyRow(daily, sheetRow, payStatus, payType, disAmt,
                         xraySub, drugSub, utzSub);
         _setupDailyDropdowns(daily, sheetRow);

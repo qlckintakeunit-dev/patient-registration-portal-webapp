@@ -4433,6 +4433,45 @@
       animation: notifCardIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    .action-loading-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.18);
+      animation: notifCardIn 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .action-loading-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #ede8ff;
+    }
+
+    .action-loading-icon .spin-icon {
+      animation: spin 0.9s linear infinite;
+    }
+
+    .action-loading-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #1a1a1a;
+    }
+
+    .action-loading-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
     .modal-title {
       font-size: 18px;
       font-weight: 700;
@@ -7282,7 +7321,7 @@
         </div>
         <div class="refund-modal-field">
           <label>Refund Remarks</label>
-          <textarea id="refund-remarks-input" placeholder="Enter reason for refund (e.g., Client request, Duplicate test, etc.)"></textarea>
+          <textarea id="refund-remarks-input" placeholder="Enter reason for refund"></textarea>
         </div>
       </div>
       <div class="refund-modal-btns">
@@ -7296,6 +7335,19 @@
           Confirm Refund
         </button>
       </div>
+    </div>
+  </div>
+
+  <div id="action-loading-overlay" class="modal-overlay">
+    <div class="action-loading-card">
+      <div class="action-loading-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6F2DBD" stroke-width="2.5" class="spin-icon">
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.2" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="action-loading-title" id="action-loading-title">Working…</div>
+      <div class="action-loading-desc" id="action-loading-desc">Deleting the patient order.</div>
     </div>
   </div>
 
@@ -8747,6 +8799,20 @@
       _deleteTarget = null;
     }
 
+    function showActionLoadingOverlay(title, description) {
+      const overlay = document.getElementById('action-loading-overlay');
+      if (!overlay) return;
+      document.getElementById('action-loading-title').textContent = title;
+      document.getElementById('action-loading-desc').textContent = description;
+      overlay.classList.add('show');
+    }
+
+    function hideActionLoadingOverlay() {
+      const overlay = document.getElementById('action-loading-overlay');
+      if (!overlay) return;
+      overlay.classList.remove('show');
+    }
+
     async function confirmDeletePatient() {
       if (!_deleteTarget) return;
       const btn = document.getElementById('del-modal-confirm-btn');
@@ -8754,8 +8820,9 @@
       btn.disabled = true;
       btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><polyline points="12 2 12 6"/><polyline points="12 18 12 22"/><polyline points="4.93 4.93 7.76 7.76"/><polyline points="16.24 16.24 19.07 19.07"/><polyline points="2 12 6 12"/><polyline points="18 12 22 12"/><polyline points="4.93 19.07 7.76 16.24"/><polyline points="16.24 7.76 19.07 4.93"/></svg> Deleting…`;
 
-      // Close modal immediately — optimistic UX
+      // Close modal and show a unified loading overlay
       closeDeleteModal();
+      showActionLoadingOverlay('Deleting patient order', 'Please wait while we delete the patient order.');
 
       // Remove the card from the DOM immediately — don't wait for server
       const cards = document.querySelectorAll('#pt-list > div');
@@ -8776,8 +8843,6 @@
       // Auto-hide banner after 6 seconds
       setTimeout(() => banner.classList.remove('show'), 6000);
 
-      // Fire the server delete in the background — errors are silent
-      // (the record is already removed from the UI)
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
@@ -8787,23 +8852,20 @@
             name: target.name,
           }),
         });
-        // Try to parse response — if it fails (CORS/redirect), still fine
         try {
           const d = await res.json();
           if (!d.success) {
             console.warn('Delete server warning:', d.message);
           }
         } catch (e) {
-          // CORS or non-JSON response — delete likely still went through
           console.warn('Delete response parse issue (usually harmless):', e.message);
         }
       } catch (err) {
-        // Network error — log only, don't bother the user
         console.warn('Delete network error (non-fatal):', err.message);
       }
 
-      // Reload list immediately to show updated records from server
-      setTimeout(() => _ptFetch(_ptPage), 50);
+      await _ptFetch(_ptPage, { soft: true });
+      hideActionLoadingOverlay();
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -8862,12 +8924,8 @@
         }, 500);
       }
 
-      // Show the success banner
-      const banner = document.getElementById('pt-deleted-banner');
-      document.getElementById('pt-deleted-msg').innerHTML =
-        `Record #${target.numPadded} — ${target.name} has been <strong>refunded</strong>. Amounts zeroed, status marked as REFUNDED.`;
-      banner.classList.add('show');
-      setTimeout(() => banner.classList.remove('show'), 6000);
+      // Show a unified loading overlay while the refund is processed
+      showActionLoadingOverlay('Processing refund', 'Please wait while we refund the patient order.');
 
       // Send refund to server
       try {
@@ -8878,10 +8936,8 @@
             numPadded: target.numPadded,
             name: target.name,
             remarks: remarks,
-            // Zero out payment amounts (COL AA, AD)
             paymentAmount: 0,
             balance: 0,
-            // Set status to REFUNDED (COL AB)
             paymentStatus: 'REFUNDED',
           }),
         });
@@ -8897,8 +8953,8 @@
         console.warn('Refund network error:', err.message);
       }
 
-      // Reload list immediately to show updated records from server
-      setTimeout(() => _ptFetch(_ptPage), 50);
+      await _ptFetch(_ptPage, { soft: true });
+      hideActionLoadingOverlay();
     }
 
     // ═══════════════════════════════════════════════════════════════
