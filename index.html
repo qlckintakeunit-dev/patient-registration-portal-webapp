@@ -1166,6 +1166,21 @@
       color: #424242;
     }
 
+    .pt-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1024px) {
+      .pt-action-row {
+        justify-content: flex-start;
+      }
+    }
+
     /* Refund remarks modal */
     #refund-remarks-modal {
       display: flex;
@@ -1194,11 +1209,11 @@
       background: #ffffff;
       border-radius: 20px;
       padding: 0;
-      max-width: 440px;
+      max-width: 460px;
       width: 100%;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22), 0 4px 16px rgba(117, 117, 117, 0.1);
+      box-shadow: 0 28px 100px rgba(0, 0, 0, 0.18), 0 6px 22px rgba(15, 23, 42, 0.08);
       overflow: hidden;
-      transform: translateY(10px);
+      transform: translateY(12px);
       opacity: 0;
       transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
     }
@@ -1209,7 +1224,7 @@
     }
 
     .refund-modal-top {
-      background: linear-gradient(135deg, #757575 0%, #9e9e9e 100%);
+      background: linear-gradient(135deg, #111111 0%, #2e2e2e 100%);
       padding: 28px 28px 22px;
       display: flex;
       align-items: flex-start;
@@ -1252,21 +1267,21 @@
     }
 
     .refund-modal-patient {
-      background: #fafafa;
-      border: 1.5px solid #f0ebff;
-      border-radius: 12px;
-      padding: 12px 16px;
+      background: #f4f7ff;
+      border: 1px solid rgba(57, 73, 171, 0.16);
+      border-radius: 14px;
+      padding: 14px 18px;
       margin-bottom: 14px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .refund-modal-patient-num {
       font-family: 'DM Mono', monospace;
       font-size: 18px;
       font-weight: 800;
-      color: #e65100;
+      color: #1a237e;
       flex-shrink: 0;
     }
 
@@ -1333,33 +1348,33 @@
     .refund-modal-btns {
       display: flex;
       gap: 0;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid rgba(57, 73, 171, 0.12);
     }
 
     .refund-modal-cancel {
       flex: 1;
-      padding: 15px 12px;
-      background: #fff;
+      padding: 16px 14px;
+      background: #ffffff;
       border: none;
-      border-right: 1px solid #f0f0f0;
+      border-right: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 0 0 0 20px;
-      color: #555;
+      color: #222222;
       font-family: 'DM Sans', sans-serif;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.13s;
+      transition: background 0.13s, color 0.13s;
     }
 
     .refund-modal-cancel:hover {
-      background: #f8f8f8;
-      color: #1a1a1a;
+      background: #f3f3f3;
+      color: #0d0d0d;
     }
 
     .refund-modal-confirm {
       flex: 1;
-      padding: 15px 12px;
-      background: #757575;
+      padding: 16px 14px;
+      background: #111111;
       border: none;
       border-radius: 0 0 20px 0;
       color: #ffffff;
@@ -1367,7 +1382,7 @@
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
-      transition: background 0.13s;
+      transition: background 0.13s, transform 0.13s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1375,7 +1390,8 @@
     }
 
     .refund-modal-confirm:hover {
-      background: #9e9e9e;
+      background: #2b2b2b;
+      transform: translateY(-1px);
     }
 
     .refund-modal-confirm:disabled {
@@ -5326,6 +5342,7 @@
       /* Patient card buttons */
       .pt-reprint-btn,
       .pt-edit-btn,
+      .pt-refund-btn,
       .pt-delete-btn {
         height: 36px;
         min-height: 36px;
@@ -6872,7 +6889,7 @@
   <div id="side-drawer">
     <div class="sd-header">
       <div>
-        <div class="sd-header-title">QualiCheck LIS</div>
+        <div class="sd-header-title">QDC Front</div>
         <div class="sd-header-sub">Navigation Menu</div>
       </div>
       <button class="sd-close" onclick="closeSideDrawer()">
@@ -7915,7 +7932,7 @@
             <option value="FULLY PAID">Fully Paid</option>
             <option value="PARTLY PAID">Partly Paid</option>
             <option value="UNPAID">Unpaid</option>
-            <option value="PENDING">Pending</option>
+            <option value="REFUNDED">Refunded</option>
           </select>
         </div>
         <!-- Row 2: date range + referred + clear -->
@@ -9138,6 +9155,12 @@
       };
 
       try {
+        // Close modals before making the request so the overlay is visible.
+        closeEditConfirm();
+        closeEditModal();
+
+        showActionLoadingOverlay('Saving patient record', 'Please wait while we update the patient information.');
+
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -9148,23 +9171,19 @@
         if (d.success === false) throw new Error(d.message || 'Server error.');
 
         // ── Success ──────────────────────────────────────────────
-        closeEditConfirm();
-        closeEditModal();
-
-        // Show success banner (reuse delete banner)
         const banner = document.getElementById('pt-deleted-banner');
         document.getElementById('pt-deleted-msg').textContent =
           `Record #${numPadded} — ${payload.name} has been updated.`;
         banner.classList.add('show');
         setTimeout(() => banner.classList.remove('show'), 6000);
 
-        // Refresh list quickly (soft refresh keeps UI feeling instant)
-        setTimeout(() => _ptFetch(_ptPage, { soft: true }), 150);
-
+        await _ptFetch(_ptPage, { soft: true });
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Yes, Save Changes`;
         alert('Save failed: ' + err.message + '\n\nPlease try again.');
+      } finally {
+        hideActionLoadingOverlay();
       }
     }
 
@@ -9929,7 +9948,7 @@
                     </span>
                   </div>
                   <!-- Row 5: action buttons — right aligned -->
-                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:8px;flex-wrap:nowrap;">
+                  <div class="pt-action-row" style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">
                     <button class="pt-reprint-btn" onclick="_ptReprint(${i})" data-idx="${i}">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polyline points="6 9 6 2 18 2 18 9"/>
