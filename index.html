@@ -7455,7 +7455,7 @@
       <div class="login-logo">
         <div class="login-logo-icon"><img src="qc-logo-purple.png"
             style="width:100px;height:100px;object-fit:contain;display:block;" alt="QC Logo" /></div>
-        <h1>QDC Front</h1>
+        <h1>Qualicheck Front</h1>
         <p>Patient Registration Portal</p>
       </div>
       <div class="form-group">
@@ -8886,6 +8886,78 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
+       UPDATE RECEIPT DATA AFTER REFUND/EDIT
+       Refreshes the cached receipt data so reprints show updated values
+    ═══════════════════════════════════════════════════════════════ */
+    function _updateReceiptDataAfterChange(numPadded) {
+      // Find the updated card in the patient list
+      const cards = document.querySelectorAll('#pt-list > div');
+      let updatedCard = null;
+      for (let card of cards) {
+        if (card._ptRecord && card._ptRecord.numPadded === numPadded) {
+          updatedCard = card;
+          break;
+        }
+      }
+      
+      if (!updatedCard || !updatedCard._ptRecord) return;
+      
+      const r = updatedCard._ptRecord;
+      
+      // Find the matching entry in _recentList
+      const recentIdx = _recentList.findIndex(rl => 
+        rl.num === r.num && rl.name === r.name
+      );
+      
+      if (recentIdx >= 0) {
+        // Update the receipt data with the new values
+        _recentList[recentIdx].receiptData = {
+          num: r.num || _recentList[recentIdx].receiptData.num,
+          date: r.date || _recentList[recentIdx].receiptData.date,
+          name: r.name || _recentList[recentIdx].receiptData.name,
+          ageSex: r.ageSex || _recentList[recentIdx].receiptData.ageSex,
+          contact: r.contact || _recentList[recentIdx].receiptData.contact,
+          address: r.address || _recentList[recentIdx].receiptData.address,
+          referred: r.referred || _recentList[recentIdx].receiptData.referred,
+          items: r.items || _recentList[recentIdx].receiptData.items || [],
+          procedures: r.procedures || _recentList[recentIdx].receiptData.procedures || '',
+          checkupTests: r.checkupTests || _recentList[recentIdx].receiptData.checkupTests || '',
+          cardiologyTests: r.cardiologyTests || _recentList[recentIdx].receiptData.cardiologyTests || '',
+          kitsTests: r.kitsTests || _recentList[recentIdx].receiptData.kitsTests || '',
+          xrayTests: r.xrayTests || _recentList[recentIdx].receiptData.xrayTests || '',
+          drugTests: r.drugTests || _recentList[recentIdx].receiptData.drugTests || '',
+          utzTests: r.utzTests || _recentList[recentIdx].receiptData.utzTests || '',
+          labSubtotal: r.labSubtotal || _recentList[recentIdx].receiptData.labSubtotal || 0,
+          checkupSubtotal: r.checkupSubtotal || _recentList[recentIdx].receiptData.checkupSubtotal || 0,
+          cadSubtotal: r.cadSubtotal || _recentList[recentIdx].receiptData.cadSubtotal || 0,
+          kitsSubtotal: r.kitsSubtotal || _recentList[recentIdx].receiptData.kitsSubtotal || 0,
+          xraySubtotal: r.xraySubtotal || _recentList[recentIdx].receiptData.xraySubtotal || 0,
+          drugSubtotal: r.drugSubtotal || _recentList[recentIdx].receiptData.drugSubtotal || 0,
+          utzSubtotal: r.utzSubtotal || _recentList[recentIdx].receiptData.utzSubtotal || 0,
+          discAmt: r.discAmt || _recentList[recentIdx].receiptData.discAmt || 0,
+          discountLabel: r.discountLabel || _recentList[recentIdx].receiptData.discountLabel || '',
+          grand: r.grand || _recentList[recentIdx].receiptData.grand || 0,
+          paymentStatus: r.paymentStatus || _recentList[recentIdx].receiptData.paymentStatus || 'PENDING',
+          paymentType: r.paymentType || _recentList[recentIdx].receiptData.paymentType || '',
+          paymentAmt: r.paymentAmt || _recentList[recentIdx].receiptData.paymentAmt || 0,
+          balance: r.balance || _recentList[recentIdx].receiptData.balance || 0,
+        };
+        
+        // Also update the _lastReceiptData if it matches this patient
+        if (_lastReceiptData && _lastReceiptData.num === r.num && _lastReceiptData.name === r.name) {
+          _lastReceiptData = _recentList[recentIdx].receiptData;
+        }
+        
+        // Update the card's cached recent match
+        updatedCard._ptRecentMatch = {
+          num: r.num,
+          name: r.name,
+          receiptData: _recentList[recentIdx].receiptData
+        };
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
        REFUND PATIENT — JS functions
     ═══════════════════════════════════════════════════════════════ */
     let _refundTarget = null; // holds the record being refunded
@@ -8972,6 +9044,9 @@
 
       await _ptFetch(_ptPage, { soft: true });
       hideActionLoadingOverlay();
+      
+      // Update the cached receipt data so reprint shows the refunded status
+      _updateReceiptDataAfterChange(target.numPadded);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -9178,6 +9253,9 @@
         setTimeout(() => banner.classList.remove('show'), 6000);
 
         await _ptFetch(_ptPage, { soft: true });
+        
+        // Update the cached receipt data so reprint shows the edited values
+        _updateReceiptDataAfterChange(numPadded);
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Yes, Save Changes`;
