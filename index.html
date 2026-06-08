@@ -5840,12 +5840,12 @@
     .pos-ld-name-input:focus {
       outline: none;
       border-color: #6F2DBD;
-      box-shadow: 0 0 0 3px rgba(111,45,189,0.08);
+      box-shadow: 0 0 0 3px rgba(111, 45, 189, 0.08);
     }
 
     .pos-ld-name-input.error {
       border-color: #e53935;
-      box-shadow: 0 0 0 3px rgba(229,57,53,0.08);
+      box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.08);
     }
 
     .pos-ld-amt-field {
@@ -5887,7 +5887,7 @@
     .pos-ld-amt-input:focus {
       outline: none;
       border-color: #6F2DBD;
-      box-shadow: 0 0 0 3px rgba(111,45,189,0.08);
+      box-shadow: 0 0 0 3px rgba(111, 45, 189, 0.08);
     }
 
     .pos-ld-amt-input:disabled {
@@ -5898,7 +5898,7 @@
 
     .pos-ld-amt-input.error {
       border-color: #e53935;
-      box-shadow: 0 0 0 3px rgba(229,57,53,0.08);
+      box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.08);
     }
 
     .pos-ld-remove-btn {
@@ -5914,7 +5914,8 @@
       cursor: pointer;
       transition: background 0.13s, border-color 0.13s, color 0.13s;
       flex-shrink: 0;
-      margin-top: 18px; /* align with inputs (below label) */
+      margin-top: 18px;
+      /* align with inputs (below label) */
     }
 
     .pos-ld-remove-btn:hover {
@@ -7317,10 +7318,10 @@
       <div class="refund-modal-top">
         <div class="refund-modal-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-            <path d="M21 3v5h-5"/>
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-            <path d="M3 21v-5h5"/>
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+            <path d="M21 3v5h-5" />
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+            <path d="M3 21v-5h5" />
           </svg>
         </div>
         <div class="refund-modal-top-text">
@@ -7358,7 +7359,8 @@
   <div id="action-loading-overlay" class="modal-overlay">
     <div class="action-loading-card">
       <div class="action-loading-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6F2DBD" stroke-width="2.5" class="spin-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6F2DBD" stroke-width="2.5"
+          class="spin-icon">
           <circle cx="12" cy="12" r="10" stroke-opacity="0.2" />
           <path d="M22 12a10 10 0 0 1-10 10" stroke-linecap="round" />
         </svg>
@@ -8899,16 +8901,16 @@
           break;
         }
       }
-      
+
       if (!updatedCard || !updatedCard._ptRecord) return;
-      
+
       const r = updatedCard._ptRecord;
-      
+
       // Find the matching entry in _recentList
-      const recentIdx = _recentList.findIndex(rl => 
+      const recentIdx = _recentList.findIndex(rl =>
         rl.num === r.num && rl.name === r.name
       );
-      
+
       if (recentIdx >= 0) {
         // Update the receipt data with the new values
         _recentList[recentIdx].receiptData = {
@@ -8942,12 +8944,12 @@
           paymentAmt: r.paymentAmt || _recentList[recentIdx].receiptData.paymentAmt || 0,
           balance: r.balance || _recentList[recentIdx].receiptData.balance || 0,
         };
-        
+
         // Also update the _lastReceiptData if it matches this patient
         if (_lastReceiptData && _lastReceiptData.num === r.num && _lastReceiptData.name === r.name) {
           _lastReceiptData = _recentList[recentIdx].receiptData;
         }
-        
+
         // Update the card's cached recent match
         updatedCard._ptRecentMatch = {
           num: r.num,
@@ -9044,7 +9046,7 @@
 
       await _ptFetch(_ptPage, { soft: true });
       hideActionLoadingOverlay();
-      
+
       // Update the cached receipt data so reprint shows the refunded status
       _updateReceiptDataAfterChange(target.numPadded);
     }
@@ -9253,7 +9255,7 @@
         setTimeout(() => banner.classList.remove('show'), 6000);
 
         await _ptFetch(_ptPage, { soft: true });
-        
+
         // Update the cached receipt data so reprint shows the edited values
         _updateReceiptDataAfterChange(numPadded);
       } catch (err) {
@@ -9724,11 +9726,11 @@
       const address = document.getElementById('f-address').value.trim();
       const referred = document.getElementById('f-referred').value.trim();
 
-      if (!name || !bday || !age || !sex || !contact || !address|| !referred) {
+      if (!name || !bday || !age || !sex || !contact || !address || !referred) {
         showToast('Please complete all required patient fields.', 'err'); return;
       }
 
-      const labTests  = [];
+      const labTests = [];
       const xrayTests = [];
       const drugTests = [];
       const utzTests = [];
@@ -10961,14 +10963,184 @@
       }
     });
     const PH_PLACES = [
-      'Caloocan', 'Las Piñas', 'Makati', 'Malabon', 'Mandaluyong', 'Manila', 'Marikina',
-      'Muntinlupa', 'Navotas', 'Parañaque', 'Pasay', 'Pasig', 'Pateros', 'Quezon City',
-      'San Juan', 'Taguig', 'Valenzuela',
-      'Alaminos', 'Bay', 'Biñan', 'Cabuyao', 'Calamba', 'Calauan', 'Cavinti', 'Famy',
-      'Kalayaan', 'Laguna', 'Liliw', 'Los Baños', 'Luisiana', 'Lumban', 'Mabitac',
-      'Magdalena', 'Majayjay', 'Nagcarlan', 'Paete', 'Pagsanjan', 'Pakil', 'Pangil',
-      'Pila', 'Rizal', 'San Pablo', 'Santa Cruz', 'Santa Maria', 'Santa Rosa',
-      'Siniloan', 'Victoria',
+      // NCR
+      'Caloocan City',
+      'Las Piñas City',
+      'Makati City',
+      'Malabon City',
+      'Mandaluyong City',
+      'Manila City',
+      'Marikina City',
+      'Muntinlupa City',
+      'Navotas City',
+      'Parañaque City',
+      'Pasay City',
+      'Pasig City',
+      'Quezon City',
+      'San Juan City',
+      'Taguig City',
+      'Valenzuela City',
+      'Pateros',
+
+      // Laguna
+      'Alaminos City',
+      'Bay',
+      'Biñan City',
+      'Cabuyao City',
+      'Calamba City',
+      'Calauan',
+      'Cavinti',
+      'Famy',
+      'Kalayaan',
+      'Liliw',
+      'Los Baños',
+      'Luisiana',
+      'Lumban',
+      'Mabitac',
+      'Magdalena',
+      'Majayjay',
+      'Nagcarlan',
+      'Paete',
+      'Pagsanjan',
+      'Pakil',
+      'Pangil',
+      'Pila',
+      'Rizal',
+      'San Pablo City',
+      'San Pedro City',
+      'Santa Cruz',
+      'Santa Maria',
+      'Santa Rosa City',
+      'Siniloan',
+      'Victoria',
+
+      // Nearby Cavite Cities/Municipalities
+      'Bacoor City',
+      'Carmona City',
+      'Dasmariñas City',
+      'General Mariano Alvarez',
+      'General Trias City',
+      'Imus City',
+      'Silang',
+
+      // Nearby Rizal Cities
+      'Antipolo City',
+      'Taytay',
+      'Cainta',
+
+      // Nearby Batangas Cities/Municipalities
+      'Santo Tomas City',
+      'Tanauan City',
+
+      // ── Muntinlupa City, Metro Manila — all barangays ──
+      'Brgy. Alabang, Muntinlupa',
+      'Brgy. Ayala Alabang, Muntinlupa',
+      'Brgy. Buli, Muntinlupa',
+      'Brgy. Cupang, Muntinlupa',
+      'Brgy. Poblacion, Muntinlupa',
+      'Brgy. Putatan, Muntinlupa',
+      'Brgy. Sucat, Muntinlupa',
+      'Brgy. Talon, Muntinlupa',
+      'Brgy. Tunasan, Muntinlupa',
+      // ── Santa Rosa City, Laguna — all barangays ──
+      'Brgy. Aplaya, Santa Rosa City',
+      'Brgy. Balibago, Santa Rosa City',
+      'Brgy. Caingin, Santa Rosa City',
+      'Brgy. Dila, Santa Rosa City',
+      'Brgy. Dita, Santa Rosa City',
+      'Brgy. Don Jose, Santa Rosa City',
+      'Brgy. Ibaba, Santa Rosa City',
+      'Brgy. Kanluran, Santa Rosa City',
+      'Brgy. Labas, Santa Rosa City',
+      'Brgy. Macabling, Santa Rosa City',
+      'Brgy. Malitlit, Santa Rosa City',
+      'Brgy. Malusak, Santa Rosa City',
+      'Brgy. Market Area, Santa Rosa City',
+      'Brgy. Pooc, Santa Rosa City',
+      'Brgy. Pulong Santa Cruz, Santa Rosa City',
+      'Brgy. Santo Domingo, Santa Rosa City',
+      'Brgy. Sinalhan, Santa Rosa City',
+      'Brgy. Tagapo, Santa Rosa City',
+      // ── Biñan City, Laguna — all barangays ──
+      'Brgy. Biñan, Biñan',
+      'Brgy. Bungahan, Biñan',
+      'Brgy. Santo Tomas (Calabuso), Biñan',
+      'Brgy. Canlalay, Biñan',
+      'Brgy. Casile, Biñan',
+      'Brgy. De La Paz, Biñan',
+      'Brgy. Ganado, Biñan',
+      'Brgy. San Francisco (Halang), Biñan',
+      'Brgy. Langkiwa, Biñan',
+      'Brgy. Loma, Biñan',
+      'Brgy. Malaban, Biñan',
+      'Brgy. Malamig, Biñan',
+      'Brgy. Mampalasan, Biñan',
+      'Brgy. Platero, Biñan',
+      'Brgy. Poblacion, Biñan',
+      'Brgy. Santo Niño, Biñan',
+      'Brgy. San Antonio, Biñan',
+      'Brgy. San Jose, Biñan',
+      'Brgy. San Vicente, Biñan',
+      'Brgy. Soro-Soro, Biñan',
+      'Brgy. Santo Domingo, Biñan',
+      'Brgy. Timbao, Biñan',
+      'Brgy. Tubigan, Biñan',
+      'Brgy. Zapote, Biñan',
+      // ── Calamba City, Laguna — all barangays ──
+      'Brgy. Bagong Kalsada, Calamba',
+      'Brgy. Bañadero, Calamba',
+      'Brgy. Banlic, Calamba',
+      'Brgy. Barandal, Calamba',
+      'Brgy. Barangay 1, Calamba',
+      'Brgy. Barangay 2, Calamba',
+      'Brgy. Barangay 3, Calamba',
+      'Brgy. Barangay 4, Calamba',
+      'Brgy. Barangay 5, Calamba',
+      'Brgy. Barangay 6, Calamba',
+      'Brgy. Barangay 7, Calamba',
+      'Brgy. Batino, Calamba',
+      'Brgy. Bubuyan, Calamba',
+      'Brgy. Bucal, Calamba',
+      'Brgy. Bunggo, Calamba',
+      'Brgy. Burol, Calamba',
+      'Brgy. Camaligan, Calamba',
+      'Brgy. Canlubang, Calamba',
+      'Brgy. Halang, Calamba',
+      'Brgy. Hornalan, Calamba',
+      'Brgy. Kay-Anlog, Calamba',
+      'Brgy. La Mesa, Calamba',
+      'Brgy. Laguerta, Calamba',
+      'Brgy. Lawa, Calamba',
+      'Brgy. Lecheria, Calamba',
+      'Brgy. Lingga, Calamba',
+      'Brgy. Looc, Calamba',
+      'Brgy. Mabato, Calamba',
+      'Brgy. Majada Labas, Calamba',
+      'Brgy. Makiling, Calamba',
+      'Brgy. Mapagong, Calamba',
+      'Brgy. Masili, Calamba',
+      'Brgy. Maunong, Calamba',
+      'Brgy. Mayapa, Calamba',
+      'Brgy. Milagrosa, Calamba',
+      'Brgy. Paciano Rizal, Calamba',
+      'Brgy. Palingon, Calamba',
+      'Brgy. Palo-Alto, Calamba',
+      'Brgy. Pansol, Calamba',
+      'Brgy. Parian, Calamba',
+      'Brgy. Prinza, Calamba',
+      'Brgy. Punta, Calamba',
+      'Brgy. Puting Lupa, Calamba',
+      'Brgy. Real, Calamba',
+      'Brgy. Saimsim, Calamba',
+      'Brgy. Sampiruhan, Calamba',
+      'Brgy. San Cristobal, Calamba',
+      'Brgy. San Jose, Calamba',
+      'Brgy. San Juan, Calamba',
+      'Brgy. Sirang Lupa, Calamba',
+      'Brgy. Sucol, Calamba',
+      'Brgy. Turbina, Calamba',
+      'Brgy. Ulango, Calamba',
+      'Brgy. Uwisan, Calamba',
       // ── San Pedro City, Laguna — all barangays ──
       'Brgy. San Antonio, San Pedro City',
       'Brgy. Bagong Silang, San Pedro City',
@@ -11003,32 +11175,10 @@
       'Brgy. United Bayanihan, San Pedro City',
       'Brgy. United Better Living, San Pedro City',
       'San Pedro City',
-      // ── Other nearby ──
-      'Alfonso', 'Amadeo', 'Bacoor', 'Carmona', 'Cavite City', 'Dasmariñas', 'General Mariano Alvarez',
-      'General Trias', 'Imus', 'Indang', 'Kawit', 'Magallanes', 'Maragondon', 'Mendez',
-      'Naic', 'Noveleta', 'Rosario', 'Silang', 'Tanza', 'Tagaytay', 'Ternate', 'Trece Martires',
-      'Angono', 'Antipolo', 'Baras', 'Binangonan', 'Cainta', 'Cardona', 'Jala-jala',
-      'Morong', 'Pililla', 'Rodriguez', 'San Mateo', 'Tanay', 'Taytay', 'Teresa',
-      'Lucena', 'Tayabas', 'Candelaria', 'Atimonan', 'Gumaca', 'Infanta', 'Real',
-      'Batangas City', 'Lipa', 'Tanauan', 'Sto. Tomas', 'Bauan', 'Nasugbu', 'Lemery',
-      'Meycauayan', 'Marilao', 'Bocaue', 'Balagtas', 'Malolos', 'San Jose del Monte',
-      'Baguio', 'Cebu City', 'Davao City', 'Iloilo City', 'Zamboanga City',
-    ];
-
-    // Addresses that trigger 100% free discount automatically
-    const ADDRESS_FREE_TRIGGER = [
-      'BRGY. SAN ANTONIO, SAN PEDRO',
-      'SAN ANTONIO, SAN PEDRO',
     ];
 
     function _checkAddressDiscount(val) {
-      const v = val.trim().toUpperCase();
-      const isFree = ADDRESS_FREE_TRIGGER.some(t => v.includes(t));
-      if (isFree) {
-        _applyAutoDiscount(1.00, 'Brgy. San Antonio – 100% FREE', 'Address discount: Brgy. San Antonio 100% FREE applied!');
-      } else if (_addressAutoActive) {
-        _removeAddressAutoDiscount();
-      }
+      // No address is automatically free by barangay.
     }
 
     let _addressAutoActive = false;
@@ -12037,9 +12187,9 @@
       if (!ld) return;
 
       const nameInp = entry.querySelector('.pos-ld-name-input');
-      const amtInp  = entry.querySelector('.pos-ld-amt-input');
+      const amtInp = entry.querySelector('.pos-ld-amt-input');
       const nameErr = entry.querySelector('.pos-ld-name-err');
-      const amtErr  = entry.querySelector('.pos-ld-amt-err');
+      const amtErr = entry.querySelector('.pos-ld-amt-err');
 
       ld.discName = (nameInp ? nameInp.value : '').trim().toUpperCase();
 
@@ -12047,7 +12197,7 @@
       const nameOk = ld.discName.length > 0;
       if (amtInp) amtInp.disabled = !nameOk;
       if (nameInp) nameInp.classList.toggle('error', false);
-      if (nameErr)  nameErr.classList.toggle('show', false);
+      if (nameErr) nameErr.classList.toggle('show', false);
 
       // If name was cleared, also clear amount
       if (!nameOk && amtInp) {
@@ -12085,12 +12235,12 @@
         const entry = document.querySelector(`.pos-ld-entry[data-ld-id="${ld.id}"]`);
         if (!entry) return;
         const nameInp = entry.querySelector('.pos-ld-name-input');
-        const amtInp  = entry.querySelector('.pos-ld-amt-input');
+        const amtInp = entry.querySelector('.pos-ld-amt-input');
         const nameErr = entry.querySelector('.pos-ld-name-err');
-        const amtErr  = entry.querySelector('.pos-ld-amt-err');
+        const amtErr = entry.querySelector('.pos-ld-amt-err');
 
         const nameOk = ld.discName && ld.discName.trim().length > 0;
-        const amtOk  = parseFloat(ld.amount) > 0;
+        const amtOk = parseFloat(ld.amount) > 0;
 
         if (!nameOk) {
           if (nameInp) nameInp.classList.add('error');
@@ -13233,7 +13383,7 @@
       }
       if ((d.discAmt || 0) > 0) {
         // If there are line discounts, show each separately for clarity
-        const lineDiscs = (() => { try { return JSON.parse(d.lineDiscountsJson || '[]'); } catch(e) { return []; } })();
+        const lineDiscs = (() => { try { return JSON.parse(d.lineDiscountsJson || '[]'); } catch (e) { return []; } })();
         if (lineDiscs.length > 0) {
           // Show the combined discount label for global+item discounts (minus the line-item portion)
           const lineTotal = lineDiscs.reduce((s, ld) => s + (parseFloat(ld.amount) || 0), 0);
@@ -13511,7 +13661,7 @@
       }
 
       if (d.discAmt > 0) {
-        const lineDiscs2 = (() => { try { return JSON.parse(d.lineDiscountsJson || '[]'); } catch(e) { return []; } })();
+        const lineDiscs2 = (() => { try { return JSON.parse(d.lineDiscountsJson || '[]'); } catch (e) { return []; } })();
         if (lineDiscs2.length > 0) {
           const lineTotal2 = lineDiscs2.reduce((s, ld) => s + (parseFloat(ld.amount) || 0), 0);
           const otherAmt2 = (d.discAmt || 0) - lineTotal2;
@@ -14170,7 +14320,10 @@
           <div class="pos-lineDisc-header">
             <span class="pos-lineDisc-title">Line-Item Discounts</span>
             <button class="pos-lineDisc-add-btn" onclick="posLdAddLine()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               Add Line
             </button>
           </div>
