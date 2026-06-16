@@ -80,6 +80,14 @@
       text-transform: uppercase;
     }
 
+    .header-logo-name-desktop {
+      display: block;
+    }
+
+    .header-logo-name-mobile {
+      display: none;
+    }
+
     .logout-btn {
       background: rgba(255, 255, 255, 0.12);
       border: 1.5px solid rgba(255, 255, 255, 0.28);
@@ -4864,6 +4872,14 @@
         font-size: 15px;
       }
 
+      .header-logo-name-desktop {
+        display: none;
+      }
+
+      .header-logo-name-mobile {
+        display: block;
+      }
+
       .header-logo-sub {
         display: none;
       }
@@ -6862,7 +6878,8 @@
           style="width:46px;height:46px;object-fit:contain;display:block;filter:brightness(0) invert(1);" alt="QC" />
       </div>
       <div>
-        <div class="header-logo-name">Qualicheck Diagnostic Clinic</div>
+        <div class="header-logo-name header-logo-name-desktop">Qualicheck Diagnostic Clinic</div>
+        <div class="header-logo-name header-logo-name-mobile">QDC Front</div>
         <div class="header-logo-sub">Patient Registration Portal</div>
       </div>
     </div>
