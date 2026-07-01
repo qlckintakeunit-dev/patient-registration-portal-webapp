@@ -15401,7 +15401,7 @@
 
       /* ── EDIT PRICE POPUP ──────────────────────── */
       #et-edit-modal {
-        display: none;
+        display: flex;
         position: fixed;
         inset: 0;
         background: rgba(15, 5, 30, 0.65);
@@ -15411,11 +15411,16 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.18s ease, visibility 0.18s ease;
       }
 
       #et-edit-modal.show {
-        display: flex;
-        animation: etFadeIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
       }
 
       .et-modal-card {
@@ -15425,6 +15430,14 @@
         width: 100%;
         box-shadow: 0 28px 80px rgba(0, 0, 0, 0.25);
         overflow: hidden;
+        transform: scale(0.95) translateY(6px);
+        opacity: 0;
+        transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+      }
+
+      #et-edit-modal.show .et-modal-card {
+        transform: scale(1) translateY(0);
+        opacity: 1;
       }
 
       .et-modal-head {
@@ -15614,7 +15627,7 @@
 
       /* ── CONFIRM MODAL ─────────────────────────── */
       #et-confirm-modal {
-        display: none;
+        display: flex;
         position: fixed;
         inset: 0;
         background: rgba(15, 5, 30, 0.7);
@@ -15624,11 +15637,16 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.18s ease, visibility 0.18s ease;
       }
 
       #et-confirm-modal.show {
-        display: flex;
-        animation: etFadeIn 0.2s ease;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
       }
 
       .et-conf-card {
@@ -15638,6 +15656,14 @@
         width: 100%;
         box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
         overflow: hidden;
+        transform: scale(0.95) translateY(6px);
+        opacity: 0;
+        transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+      }
+
+      #et-confirm-modal.show .et-conf-card {
+        transform: scale(1) translateY(0);
+        opacity: 1;
       }
 
       .et-conf-head {
@@ -15841,7 +15867,7 @@
 
       /* ── ADD TESTS CONFIRM MODAL (reuse) ─────────── */
       #at-confirm-modal {
-        display: none;
+        display: flex;
         position: fixed;
         inset: 0;
         background: rgba(15, 5, 30, 0.6);
@@ -15851,11 +15877,16 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.18s ease, visibility 0.18s ease;
       }
 
       #at-confirm-modal.show {
-        display: flex;
-        animation: etFadeIn 0.2s ease;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
       }
 
       .at-conf-card {
@@ -15865,6 +15896,14 @@
         width: 100%;
         overflow: hidden;
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+        transform: scale(0.95) translateY(6px);
+        opacity: 0;
+        transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+      }
+
+      #at-confirm-modal.show .at-conf-card {
+        transform: scale(1) translateY(0);
+        opacity: 1;
       }
 
       .at-conf-top {
@@ -16078,18 +16117,6 @@
       @keyframes etCheckDraw {
         to {
           stroke-dashoffset: 0;
-        }
-      }
-
-      @keyframes etFadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.94) translateY(8px)
-        }
-
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0)
         }
       }
 
