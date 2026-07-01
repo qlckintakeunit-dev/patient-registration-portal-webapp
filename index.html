@@ -7663,14 +7663,7 @@
         <!-- ────────── STEP 2: Laboratory Procedures ────────── -->
         <div class="step-panel" id="step2-panel">
 
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-            <button class="btn-back" onclick="goToStep1()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="19" y1="12" x2="5" y2="12" />
-                <polyline points="12 19 5 12 12 5" />
-              </svg>
-              Back to Patient Info
-            </button>
+          <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:18px;">
             <div class="price-mode-bar">
               <label>Rate:</label>
               <div class="price-mode-badge" id="price-mode-badge">Regular</div>
@@ -14742,6 +14735,154 @@
 
       .et-panel.active {
         display: block;
+        animation: etPanelIn 0.28s cubic-bezier(.22, .9, .32, 1);
+      }
+
+      @keyframes etPanelIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ══ LANDING SCREEN ═══════════════════════════════════ */
+      .et-landing {
+        display: none;
+      }
+
+      .et-landing.active {
+        display: block;
+        animation: etPanelIn 0.32s cubic-bezier(.22, .9, .32, 1);
+      }
+
+      .et-landing-head {
+        text-align: center;
+        margin: 18px 0 30px;
+      }
+
+      .et-landing-title {
+        font-size: 22px;
+        font-weight: 900;
+        color: #1a1a1a;
+        letter-spacing: -0.4px;
+      }
+
+      .et-landing-sub {
+        font-size: 13px;
+        color: #999;
+        margin-top: 6px;
+      }
+
+      .et-landing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      @media(max-width:760px) {
+        .et-landing-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .et-land-card {
+        background: #fff;
+        border: 1.5px solid #ede8ff;
+        border-radius: 18px;
+        padding: 28px 22px;
+        box-shadow: 0 3px 14px rgba(111, 45, 189, 0.08);
+        cursor: pointer;
+        text-align: left;
+        font-family: 'DM Sans', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        transition: transform 0.2s cubic-bezier(.22, .9, .32, 1), box-shadow 0.2s, border-color 0.2s;
+        position: relative;
+      }
+
+      .et-land-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(111, 45, 189, 0.16);
+        border-color: #d9c8fb;
+      }
+
+      .et-land-card:active {
+        transform: translateY(-1px);
+      }
+
+      .et-land-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+        flex-shrink: 0;
+      }
+
+      .et-land-card-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: #1a1a1a;
+      }
+
+      .et-land-card-sub {
+        font-size: 12.5px;
+        color: #999;
+        line-height: 1.45;
+        margin-top: 2px;
+      }
+
+      .et-land-arrow {
+        position: absolute;
+        top: 26px;
+        right: 22px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #f4f1fa;
+        color: #6F2DBD;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: transform 0.2s, background 0.2s;
+      }
+
+      .et-land-card:hover .et-land-arrow {
+        background: #6F2DBD;
+        color: #fff;
+        transform: translateX(2px);
+      }
+
+      /* Back-to-menu link, shown atop each section panel */
+      .et-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: none;
+        color: #6F2DBD;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 8px 2px;
+        margin-bottom: 14px;
+        transition: opacity 0.15s, transform 0.15s;
+      }
+
+      .et-back-btn:hover {
+        opacity: 0.7;
+        transform: translateX(-2px);
       }
 
       /* Card */
@@ -15882,22 +16023,24 @@
         position: fixed;
         bottom: 28px;
         left: 50%;
-        transform: translateX(-50%) translateY(20px);
+        transform: translateX(-50%) translateY(14px) scale(0.92);
         background: #1a1a1a;
         color: #fff;
-        border-radius: 10px;
-        padding: 12px 22px;
+        border-radius: 12px;
+        padding: 13px 24px;
         font-size: 13px;
         font-weight: 600;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 10px 34px rgba(0, 0, 0, 0.22);
         opacity: 0;
-        transition: opacity 0.25s, transform 0.25s;
+        transition: opacity 0.32s cubic-bezier(.22, .9, .32, 1),
+                    transform 0.32s cubic-bezier(.22, .9, .32, 1);
         z-index: 7000;
         pointer-events: none;
         white-space: nowrap;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
+        will-change: transform, opacity;
       }
 
       #at-toast.ok {
@@ -15910,7 +16053,32 @@
 
       #at-toast.show {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+
+      #at-toast.hide {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.96);
+        transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+      }
+
+      #at-toast .at-toast-check {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #at-toast.show .at-toast-check svg circle,
+      #at-toast.show .at-toast-check svg polyline {
+        stroke-dasharray: 40;
+        stroke-dashoffset: 40;
+        animation: etCheckDraw 0.4s 0.08s cubic-bezier(.65, 0, .35, 1) forwards;
+      }
+
+      @keyframes etCheckDraw {
+        to {
+          stroke-dashoffset: 0;
+        }
       }
 
       @keyframes etFadeIn {
@@ -15973,76 +16141,114 @@
             </svg>
             Refresh
           </button>
-          <button class="et-btn et-btn-ghost" onclick="sdGoRegister()" style="color:#888;border-color:#ddd;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            Back
+        </div>
+      </div>
+
+      <!-- ══ LANDING SCREEN — shown first, no forms/catalog visible ══ -->
+      <div class="et-landing active" id="et-landing">
+        <div class="et-landing-head">
+          <div class="et-landing-title">What would you like to do?</div>
+          <div class="et-landing-sub">Pick an action to manage the procedure catalog</div>
+        </div>
+        <div class="et-landing-grid">
+          <button class="et-land-card" onclick="etShowSection('catalog')">
+            <div class="et-land-icon" style="background:linear-gradient(135deg,#6F2DBD,#4A0E8F);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+            </div>
+            <div class="et-land-card-title">Browse &amp; Edit Catalog</div>
+            <div class="et-land-card-sub">View category summaries, search tests, and update pricing</div>
+            <div class="et-land-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </button>
+          <button class="et-land-card" onclick="etShowSection('add-cat')">
+            <div class="et-land-icon" style="background:linear-gradient(135deg,#E65100,#FF6F00);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                <line x1="12" y1="11" x2="12" y2="17" />
+                <line x1="9" y1="14" x2="15" y2="14" />
+              </svg>
+            </div>
+            <div class="et-land-card-title">New Category</div>
+            <div class="et-land-card-sub">Create a new category group in the catalog</div>
+            <div class="et-land-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </button>
+          <button class="et-land-card" onclick="etShowSection('add-test')">
+            <div class="et-land-icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+            </div>
+            <div class="et-land-card-title">Add New Test</div>
+            <div class="et-land-card-sub">Append a new test or procedure with pricing</div>
+            <div class="et-land-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
           </button>
         </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="et-stats" id="et-stats">
-        <div class="et-stat">
-          <div class="et-stat-icon" style="background:linear-gradient(135deg,#6F2DBD,#4A0E8F);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-            </svg>
-          </div>
-          <div>
-            <div class="et-stat-val" id="et-stat-cats">—</div>
-            <div class="et-stat-lbl">Categories</div>
-          </div>
-        </div>
-        <div class="et-stat">
-          <div class="et-stat-icon" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-          </div>
-          <div>
-            <div class="et-stat-val" id="et-stat-tests">—</div>
-            <div class="et-stat-lbl">Total Tests</div>
-          </div>
-        </div>
-        <div class="et-stat">
-          <div class="et-stat-icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </div>
-          <div>
-            <div class="et-stat-val" id="et-stat-avg">—</div>
-            <div class="et-stat-lbl">Avg. Reg. Price</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- View selector dropdown (replaces tabs) -->
-      <div style="margin-bottom:20px;">
-        <div style="position:relative;">
-          <select id="et-view-select" onchange="etSwitchTabFromSelect(this.value)" style="width:100%;padding:13px 44px 13px 16px;border:1.5px solid #e0d6f7;border-radius:12px;
-            font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#1a1a1a;
-            background:#fff;outline:none;cursor:pointer;box-shadow:0 2px 8px rgba(111,45,189,0.07);
-            appearance:none;-webkit-appearance:none;transition:border-color 0.15s,box-shadow 0.15s;">
-            <option value="catalog">Browse &amp; Edit Catalog</option>
-            <option value="add-cat">New Category</option>
-            <option value="add-test">Add New Test</option>
-          </select>
-          <div
-            style="pointer-events:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#6F2DBD;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </div>
-        </div>
-      </div>
+      </div><!-- /#et-landing -->
 
       <!-- ══ TAB: BROWSE & EDIT ══ -->
-      <div class="et-panel active" id="et-panel-catalog">
+      <div class="et-panel" id="et-panel-catalog">
+
+        <button class="et-back-btn" onclick="etShowSection('landing')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to menu
+        </button>
+
+        <!-- Stats -->
+        <div class="et-stats" id="et-stats">
+          <div class="et-stat">
+            <div class="et-stat-icon" style="background:linear-gradient(135deg,#6F2DBD,#4A0E8F);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <div>
+              <div class="et-stat-val" id="et-stat-cats">—</div>
+              <div class="et-stat-lbl">Categories</div>
+            </div>
+          </div>
+          <div class="et-stat">
+            <div class="et-stat-icon" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+            </div>
+            <div>
+              <div class="et-stat-val" id="et-stat-tests">—</div>
+              <div class="et-stat-lbl">Total Tests</div>
+            </div>
+          </div>
+          <div class="et-stat">
+            <div class="et-stat-icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </div>
+            <div>
+              <div class="et-stat-val" id="et-stat-avg">—</div>
+              <div class="et-stat-lbl">Avg. Reg. Price</div>
+            </div>
+          </div>
+        </div>
 
         <!-- Search -->
         <div class="et-card">
@@ -16117,6 +16323,12 @@
 
       <!-- ══ TAB: NEW CATEGORY ══ -->
       <div class="et-panel" id="et-panel-add-cat">
+        <button class="et-back-btn" onclick="etShowSection('landing')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to menu
+        </button>
         <div class="et-card">
           <div class="et-card-head">
             <div class="et-card-icon" style="background:linear-gradient(135deg,#E65100,#FF6F00);">
@@ -16166,6 +16378,12 @@
 
       <!-- ══ TAB: ADD NEW TEST ══ -->
       <div class="et-panel" id="et-panel-add-test">
+        <button class="et-back-btn" onclick="etShowSection('landing')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to menu
+        </button>
         <div class="et-card">
           <div class="et-card-head">
             <div class="et-card-icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
@@ -16967,7 +17185,7 @@
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <span id="et-conf-note">After saving, the page will reload to sync with the sheet.</span>
+          <span id="et-conf-note">The catalog refreshes instantly — you’ll stay right here.</span>
         </div>
       </div>
       <div class="et-conf-footer">
@@ -17008,7 +17226,7 @@
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <span id="at-conf-note-text">After saving, the page will reload to reflect the updated catalog.</span>
+          <span id="at-conf-note-text">The catalog refreshes instantly — you’ll stay right here.</span>
         </div>
       </div>
       <div class="at-conf-btns">
@@ -17025,10 +17243,12 @@
 
   <!-- Toast -->
   <div id="at-toast">
-    <svg id="at-toast-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2.5">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
+    <span class="at-toast-check">
+      <svg id="at-toast-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </span>
     <span id="at-toast-msg">Saved!</span>
   </div>
 
@@ -17046,22 +17266,26 @@
 
     // ── Init (called when page becomes active) ─────────────
     function atInit() {
-      etRefresh();
+      etShowSection('landing');   // always land on the clean menu screen
+      etRefresh();                // load catalog data quietly in the background
     }
 
-    // ── Tab switching ──────────────────────────────────────
-    function etSwitchTab(tab) {
+    // ── Section switching (landing + the 3 panels) ─────────
+    // Only one of these is ever visible at a time.
+    function etShowSection(section) {
+      const isLanding = section === 'landing';
+      document.getElementById('et-landing').classList.toggle('active', isLanding);
       ['catalog', 'add-cat', 'add-test'].forEach(t => {
-        document.getElementById('et-panel-' + t).classList.toggle('active', t === tab);
+        document.getElementById('et-panel-' + t).classList.toggle('active', t === section);
       });
-      // Sync the dropdown
-      const sel = document.getElementById('et-view-select');
-      if (sel) sel.value = tab;
+      // Scroll the panel into view smoothly on section change
+      const wrap = document.querySelector('#page-add-tests .et-wrap');
+      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function etSwitchTabFromSelect(tab) {
-      etSwitchTab(tab);
-    }
+    // Kept for backward compatibility with any old inline handlers.
+    function etSwitchTab(tab) { etShowSection(tab); }
+    function etSwitchTabFromSelect(tab) { etShowSection(tab); }
 
     // ── Refresh catalog from sheet ─────────────────────────
     async function etRefresh() {
@@ -17307,7 +17531,7 @@
 
       document.getElementById('et-conf-title').textContent = 'Confirm Price Update';
       document.getElementById('et-conf-sub').textContent = _etConfData.name + ' — updating both price tiers';
-      document.getElementById('et-conf-note').textContent = 'After saving, the page will reload so the registration form picks up the new price.';
+      document.getElementById('et-conf-note').textContent = 'The catalog and registration form will refresh instantly — you\'ll stay right here.';
 
       const proc = document.getElementById('et-conf-proceed');
       proc.className = 'et-conf-proceed edit';
@@ -17353,8 +17577,8 @@
         });
 
         // GAS does not support CORS preflight — use no-cors + text/plain
-        // to avoid the OPTIONS request. Response is opaque but that's OK
-        // since we reload the page on success anyway.
+        // to avoid the OPTIONS request. Response is opaque, so we simply
+        // re-fetch the catalog afterwards to confirm the change landed.
         await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
@@ -17362,10 +17586,15 @@
         });
         // no-cors gives opaque response — we can't read it, so just proceed
 
-        etShowSavingOverlay('Reloading catalog…');
-        atToast('Price updated! Reloading…', 'ok');
+        etShowSavingOverlay('Updating catalog…');
+        // Refresh only the catalog data (existing data-loading function) —
+        // no full page reload, so the session/navigation state is preserved.
+        await etRefresh();
 
-        setTimeout(() => location.reload(), 1400);
+        document.getElementById('et-saving-overlay').classList.remove('show');
+        proc.disabled = false;
+        document.getElementById('et-conf-proceed-lbl').textContent = 'Yes, Update Price';
+        atToast('Price updated for "' + _etConfData.name + '"', 'ok');
 
       } catch (err) {
         document.getElementById('et-saving-overlay').classList.remove('show');
@@ -17411,7 +17640,7 @@
 
       const prev = document.getElementById('at-conf-preview');
       prev.innerHTML = _atConfRow('Category Name', name) + (notes ? _atConfRow('Notes', notes) : '');
-      document.getElementById('at-conf-note-text').textContent = 'After saving, the page will reload to sync the updated catalog.';
+      document.getElementById('at-conf-note-text').textContent = 'The catalog refreshes instantly and you’ll be taken to Browse & Edit Catalog to see it.';
 
       const btn = document.getElementById('at-conf-proceed-btn');
       btn.disabled = false;
@@ -17452,7 +17681,7 @@
         _atConfRow('Regular', prR ? '₱' + prR.toLocaleString('en-PH', { minimumFractionDigits: 2 }) : '—') +
         _atConfRow('Senior', (prS || prR) ? '₱' + (prS || prR).toLocaleString('en-PH', { minimumFractionDigits: 2 }) : '—') +
         (notes ? _atConfRow('Notes', notes) : '');
-      document.getElementById('at-conf-note-text').textContent = 'After saving, the page will reload so the new test appears in the registration form.';
+      document.getElementById('at-conf-note-text').textContent = 'The catalog refreshes instantly and you’ll be taken to Browse & Edit Catalog to see it.';
 
       const btn = document.getElementById('at-conf-proceed-btn');
       btn.disabled = false;
@@ -17474,13 +17703,28 @@
       etShowSavingOverlay(_atConfMode === 'cat' ? 'Adding category…' : 'Adding test…');
 
       try {
-        if (_atConfMode === 'cat') {
+        const wasCat = _atConfMode === 'cat';
+        const savedName = _atConfData.name;
+
+        if (wasCat) {
           await _atSaveCategory(_atConfData);
         } else {
           await _atSaveTest(_atConfData);
         }
-        atToast((_atConfMode === 'cat' ? 'Category "' + _atConfData.name : 'Test "' + _atConfData.name) + '" saved! Reloading…', 'ok');
-        setTimeout(() => location.reload(), 1400);
+
+        etShowSavingOverlay('Updating catalog…');
+        // Refresh only the catalog data (existing data-loading function) —
+        // no full page reload, so the user stays logged in and on this page.
+        await etRefresh();
+
+        document.getElementById('et-saving-overlay').classList.remove('show');
+        atConfClose();
+        if (wasCat) { _atResetCatForm(); } else { _atResetTestForm(); }
+
+        atToast((wasCat ? 'Category "' : 'Test "') + savedName + '" added!', 'ok');
+
+        // Jump to the catalog view so the new entry is immediately visible.
+        etShowSection('catalog');
       } catch (err) {
         document.getElementById('et-saving-overlay').classList.remove('show');
         btn.disabled = false;
@@ -17488,6 +17732,20 @@
         document.getElementById('at-confirm-modal').classList.add('show');
         atToast('Error: ' + err.message, 'err');
       }
+    }
+
+    // ── Reset forms after a successful save, ready for the next entry ──
+    function _atResetCatForm() {
+      document.getElementById('at-cat-name').value = '';
+      document.getElementById('at-cat-notes').value = '';
+    }
+
+    function _atResetTestForm() {
+      document.getElementById('at-test-cat').value = '';
+      document.getElementById('at-test-name').value = '';
+      document.getElementById('at-test-price-r').value = '';
+      document.getElementById('at-test-price-s').value = '';
+      document.getElementById('at-test-notes').value = '';
     }
 
     function atConfClose() {
@@ -17518,17 +17776,31 @@
 
     // ── Toast ──────────────────────────────────────────────
     let _atToastTimer = null;
+    let _atToastHideTimer = null;
     function atToast(msg, type) {
       const el = document.getElementById('at-toast');
       const msgEl = document.getElementById('at-toast-msg');
       const icon = document.getElementById('at-toast-icon');
       msgEl.textContent = msg;
-      el.className = 'show ' + (type || '');
       icon.innerHTML = type === 'ok'
         ? '<polyline points="20 6 9 17 4 12"/>'
         : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+
       if (_atToastTimer) clearTimeout(_atToastTimer);
-      _atToastTimer = setTimeout(() => { el.className = ''; }, 3500);
+      if (_atToastHideTimer) clearTimeout(_atToastHideTimer);
+
+      // Reset to a clean, invisible state first (in case a previous toast
+      // is mid-exit) so the entrance animation always plays fresh.
+      el.classList.remove('show', 'hide');
+      void el.offsetWidth; // force reflow to restart the CSS transition
+      el.className = (type || '');
+      requestAnimationFrame(() => el.classList.add('show'));
+
+      _atToastTimer = setTimeout(() => {
+        el.classList.remove('show');
+        el.classList.add('hide');
+        _atToastHideTimer = setTimeout(() => { el.className = ''; }, 220);
+      }, 3200);
     }
 
     function escH(s) {
