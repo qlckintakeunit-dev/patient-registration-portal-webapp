@@ -2736,12 +2736,34 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s, border-color 0.15s;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(111, 45, 189, 0.08);
     }
 
     .btn-back:hover {
       background: #ede6fa;
+      border-color: #cbbdef;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(111, 45, 189, 0.12);
+    }
+
+    .btn-back:active {
+      transform: none;
+    }
+
+    .btn-back:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(111, 45, 189, 0.14);
+    }
+
+    .step2-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
     }
 
     /* ══════════════════════════════════════════
@@ -7663,7 +7685,14 @@
         <!-- ────────── STEP 2: Laboratory Procedures ────────── -->
         <div class="step-panel" id="step2-panel">
 
-          <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:18px;">
+          <div class="step2-topbar">
+            <button class="btn-back" type="button" onclick="goToStep1()" aria-label="Back to patient information">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Back to Patient Info</span>
+            </button>
             <div class="price-mode-bar">
               <label>Rate:</label>
               <div class="price-mode-badge" id="price-mode-badge">Regular</div>
