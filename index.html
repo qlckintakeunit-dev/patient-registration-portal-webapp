@@ -8633,6 +8633,40 @@
     ════════════════════════════════════════════════ */
     let CATEGORIES = [];
 
+    function _captureCatalogSelectionSnapshot() {
+      const snapshot = {};
+      Object.entries(sel || {}).forEach(([catId, set]) => {
+        if (!set || typeof set.values !== 'function') return;
+        const items = [...set];
+        if (!items.length) return;
+        snapshot[catId] = items.map(testName => ({
+          testName,
+          qty: _getQty(catId, testName) || 1,
+        }));
+      });
+      return snapshot;
+    }
+
+    function _restoreCatalogSelectionSnapshot(snapshot) {
+      if (!snapshot || typeof snapshot !== 'object') return;
+      const knownCatIds = new Set(CATEGORIES.map(c => c.id));
+      Object.keys(sel).forEach(catId => {
+        sel[catId] = new Set();
+        qty[catId] = {};
+      });
+      Object.entries(snapshot).forEach(([catId, items]) => {
+        if (!knownCatIds.has(catId) || !Array.isArray(items)) return;
+        const cat = CATEGORIES.find(c => c.id === catId);
+        if (!cat) return;
+        items.filter(item => item && item.testName).forEach(item => {
+          const testName = item.testName;
+          if (!cat.tests.includes(testName)) return;
+          sel[catId].add(testName);
+          _setQty(catId, testName, Number(item.qty) || 1);
+        });
+      });
+    }
+
     /* Infer category type from its name */
     function _inferCatType(name) {
       const n = name.toLowerCase();
@@ -9419,6 +9453,7 @@
        Order is preserved as returned by the GS (sheet row order).
     */
     function _buildCategoriesFromSheet(sheetCats) {
+      const snapshot = _captureCatalogSelectionSnapshot();
       // Reset
       CATEGORIES.length = 0;
       Object.keys(sel).forEach(k => delete sel[k]);
@@ -9433,6 +9468,7 @@
         qty[id] = {};
       });
 
+      _restoreCatalogSelectionSnapshot(snapshot);
       console.log('[LIS] Categories built:', CATEGORIES.map(c => c.name + '(' + c.type + ')').join(', '));
     }
 
@@ -17386,6 +17422,19 @@
       etUpdateStats();
       etPopulateSelects();
       etRenderCatalog();
+
+      if (typeof buildCategories === 'function') {
+        buildCategories();
+        renderOrders();
+        recalcTotal();
+      }
+      if (typeof ctPopulateCatFilter === 'function') {
+        ctPopulateCatFilter();
+      }
+      if (typeof ctRenderTiles === 'function') {
+        ctRenderTiles();
+        ctRenderSummary();
+      }
 
       if (btn) {
         btn.disabled = false;
