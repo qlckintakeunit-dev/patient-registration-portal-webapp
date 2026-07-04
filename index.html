@@ -9933,6 +9933,13 @@
 
       const payload = {
         action: 'register',
+        // Unique per-registration-attempt ID. Generated ONCE here (not inside
+        // posConfirm), so if the user retries Confirm & Save after a slow/dropped
+        // connection, the SAME id is resent — letting the backend recognize the
+        // retry and avoid creating a duplicate patient record.
+        clientTxnId: (window.crypto && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : ('txn_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
         date: dateStr,
         name,
         birthday: document.getElementById('f-birthday-fmt').value || '',
@@ -12014,6 +12021,7 @@
        POS STATE
     ════════════════════════════════════════════════ */
     let _posData = null;  // holds the full payload + computed values
+    let _posSaveInFlight = false;  // true while a Confirm & Save request is in transit (guards against double-submit)
     let _itemDiscounts = {};    // { itemIdx: { discName, discRate, discAmt, origPrice } }
     let _idcEditIdx = null;  // index of item being edited in modal
     let _idcSelectedIdx = null;  // index inside DISCOUNTS array selected in modal (null = none)
@@ -12843,6 +12851,10 @@
        POS CONFIRM — submit to sheet with payment info
     ════════════════════════════════════════════════ */
     function posConfirm() {
+      // Guard: ignore re-entrant calls (rapid double-click/double-tap, Enter key
+      // firing alongside a click, etc.) while a save is already in transit.
+      if (_posSaveInFlight) return;
+
       const btn = document.getElementById('pos-confirm-btn');
       const payType = document.getElementById('pos-payment-type').value;
       const paid = parseFloat(_posRawAmount) || 0;
@@ -12949,10 +12961,12 @@
         itemsJson: JSON.stringify(_rcptItemsFinal),  // ← itemized for RECEIPT LOGS
       });
 
+      _posSaveInFlight = true;
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Saving…';
 
       const resetBtn = () => {
+        _posSaveInFlight = false;
         btn.disabled = false;
         btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirm & Save';
       };
@@ -12996,12 +13010,21 @@
         return;
       }
 
+      // Abort the request if it hangs too long on a bad connection, instead of
+      // leaving the button stuck on "Saving…" indefinitely. finalPayload carries
+      // clientTxnId, so retrying after this (or after any network error below)
+      // is safe — the backend recognizes the same clientTxnId and will NOT
+      // create a second record; it just returns the original result again.
+      const _posAbortCtrl = new AbortController();
+      const _posTimeoutId = setTimeout(() => _posAbortCtrl.abort(), 45000);
+
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(finalPayload),
+        signal: _posAbortCtrl.signal,
       })
-        .then(r => r.json())
+        .then(r => { clearTimeout(_posTimeoutId); return r.json(); })
         .then(d => {
           resetBtn();
           if (d.success) {
@@ -13049,7 +13072,14 @@
             showToast('Error: ' + (d.message || 'Save failed.'), 'err');
           }
         })
-        .catch(() => { resetBtn(); showToast('Network error.', 'err'); });
+        .catch((err) => {
+          clearTimeout(_posTimeoutId);
+          resetBtn();
+          const msg = (err && err.name === 'AbortError')
+            ? 'Request timed out — connection may be slow. Safe to press Confirm & Save again; it will not create a duplicate record.'
+            : 'Network error. Safe to press Confirm & Save again; it will not create a duplicate record.';
+          showToast(msg, 'err');
+        });
     }
 
     function showSuccessAndReset(name, num) {
