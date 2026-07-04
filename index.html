@@ -6450,29 +6450,6 @@
       opacity: 1;
     }
 
-    /* Print receipt button — shown after save */
-    .pos-print-btn {
-      width: 100%;
-      padding: 12px;
-      background: #f0faf4;
-      color: #1b7a3e;
-      border: 1.5px solid #a8d5ba;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      font-family: 'DM Sans', sans-serif;
-      cursor: pointer;
-      transition: background 0.12s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .pos-print-btn:hover {
-      background: #dcf0e4;
-    }
-
     /* Secondary row — back + cancel side by side */
     .pos-footer-secondary {
       display: grid;
@@ -13004,7 +12981,6 @@
             changeAmt: _posChangeAmt,
             lineDiscountsJson: finalPayload.lineDiscountsJson || '[]',
           };
-          document.getElementById('pos-print-btn').style.display = 'flex';
           showSuccessAndReset(finalPayload.name, '0000');
         }, 1000);
         return;
@@ -13065,8 +13041,6 @@
               encodedBy: _posData.encodedBy || _encodedBy || '',
               lineDiscountsJson: finalPayload.lineDiscountsJson || '[]',
             };
-            // Show print button
-            document.getElementById('pos-print-btn').style.display = 'flex';
             showSuccessAndReset(finalPayload.name, d.number);
           } else {
             showToast('Error: ' + (d.message || 'Save failed.'), 'err');
@@ -14357,34 +14331,6 @@
       }
     }
 
-    async function printReceipt() {
-      const btn = document.getElementById('pos-print-btn');
-      if (!_lastReceiptData) { showToast('No receipt data.', 'err'); return; }
-      btn.disabled = true;
-      const printIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`;
-      btn.innerHTML = printIcon + ' Printing…';
-      try {
-        const bytes = await buildReceiptBytes(_lastReceiptData);
-        await sendToUsbPrinter(bytes);
-        showToast('Receipt sent to ' + (_activePrinter || 'printer') + '!', 'ok');
-        _qzUpdateBadge();
-      } catch (err) {
-        console.error('Print error:', err);
-        _qzConnected = false;
-        const msg = err.message || '';
-        if (msg.includes('Unable to establish') || msg.includes('connect') || msg.includes('refused')) {
-          showToast('QZ Tray not running. Start it from the system tray first.', 'err');
-        } else if (msg === 'No printer selected.') {
-          showToast('Print cancelled — no printer selected.', 'err');
-        } else {
-          showToast('Print failed: ' + msg, 'err');
-        }
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = printIcon + ' Print Receipt';
-      }
-    }
-
     let _lastReceiptData = null;
     function updatePrinterBadge() { _qzUpdateBadge(); }
 
@@ -14595,16 +14541,6 @@
             </svg>
             Confirm &amp; Save
           </button>
-          <button class="pos-print-btn" id="pos-print-btn" onclick="printReceipt()" style="display:none;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="6 9 6 2 18 2 18 9" />
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-              <rect x="6" y="14" width="12" height="8" />
-            </svg>
-            Print Receipt
-          </button>
-          <div id="qz-active-badge"></div>
-          <div id="qz-change-printer" onclick="_activePrinter=null;printReceipt()">⚙ Change Printer</div>
           <div class="pos-footer-secondary">
             <button class="pos-back-btn" onclick="posBack()">← Back to Registration</button>
             <button class="pos-cancel-btn" onclick="posCancelRegistration()">
