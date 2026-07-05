@@ -23,6 +23,10 @@
       padding: 0;
     }
 
+    html {
+      background: #f4f1fa;
+    }
+
     body {
       font-family: 'DM Sans', Helvetica, Arial, sans-serif;
       background: #f4f1fa;
@@ -1962,7 +1966,8 @@
      LOGIN
   ══════════════════════════════════════════ */
     #page-login {
-      min-height: calc(100vh - 62px);
+      height: calc(100vh - 62px);
+      height: calc(100dvh - 62px);
       align-items: center;
       justify-content: center;
       background: linear-gradient(135deg, #1a0d2e 0%, #2d1a52 50%, #1a0d2e 100%);
@@ -1985,6 +1990,8 @@
       padding: 50px 46px 46px;
       width: 100%;
       max-width: 420px;
+      max-height: 100%;
+      overflow-y: auto;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
       position: relative;
       z-index: 1;
@@ -4518,6 +4525,12 @@
       line-height: 1.5;
     }
 
+    #action-loading-overlay {
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
     .modal-title {
       font-size: 18px;
       font-weight: 700;
@@ -4927,7 +4940,8 @@
         padding: 20px 16px;
         align-items: center;
         justify-content: center;
-        min-height: calc(100vh - 54px);
+        height: calc(100vh - 54px);
+        height: calc(100dvh - 54px);
       }
 
       .login-card {
@@ -5511,20 +5525,23 @@
     /* ── Delete / cancel confirm modals ── */
     @media (max-width: 600px) {
 
-      .del-modal-card,
-      .cancel-modal-card,
-      .edit-confirm-card {
+      .cancel-modal-card {
         border-radius: 18px 18px 0 0;
         margin: 0;
         width: 100%;
         max-width: 100%;
       }
 
-      #del-modal,
-      #cancel-reg-modal,
-      #edit-confirm-modal {
+      #cancel-reg-modal {
         align-items: flex-end;
         padding: 0;
+      }
+
+      /* Delete & edit confirm now match the refund-remarks-modal
+         reference: centered floating card, fully rounded corners */
+      .del-modal-card,
+      .edit-confirm-card {
+        border-radius: 20px;
       }
     }
 
@@ -5567,15 +5584,9 @@
     /* ── Success / notification cards ── */
     @media (max-width: 600px) {
       .notif-card {
-        border-radius: 18px 18px 0 0;
-        max-width: 100%;
-        margin: 0;
-      }
-
-      #page-success,
-      .notif-overlay {
-        align-items: flex-end;
-        padding: 0;
+        border-radius: 20px;
+        max-width: 92%;
+        margin: 0 auto;
       }
     }
 
@@ -16570,6 +16581,10 @@
 
         .ct-body.ct-show-summary .ct-right {
           display: flex;
+        }
+
+        .ct-body.ct-show-tests .ct-right {
+          display: none;
         }
 
         .ct-body.ct-show-summary .ct-totals {
