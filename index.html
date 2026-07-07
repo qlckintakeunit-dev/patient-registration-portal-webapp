@@ -8804,6 +8804,7 @@
     function doLogout() {
 
       _encodedBy = '';
+      _ptStopPolling();
       document.getElementById('page-reg').classList.remove('active');
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-add-tests').classList.remove('active');
@@ -8833,6 +8834,7 @@
     }
     function sdGoRegister() {
       closeSideDrawer();
+      _ptStopPolling();
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-add-tests').classList.remove('active');
       document.getElementById('page-compute-tests').classList.remove('active');
@@ -8857,6 +8859,7 @@
       document.getElementById('page-compute-tests').classList.remove('active');
       document.getElementById('page-recent').classList.add('active');
       _ptFetch(1);
+      _ptStartPolling();
     }
     function sdGoAddTests() {
       closeSideDrawer();
@@ -8868,6 +8871,7 @@
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-compute-tests').classList.remove('active');
       document.getElementById('page-add-tests').classList.add('active');
+      _ptStopPolling();
       atInit();
     }
     function sdGoComputeTests() {
@@ -8880,6 +8884,7 @@
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-add-tests').classList.remove('active');
       document.getElementById('page-compute-tests').classList.add('active');
+      _ptStopPolling();
       ctInit();
       ctSwitchMobileTab('tests'); // always open on the Tests pane
     }
@@ -10031,6 +10036,200 @@
     let _ptAbort = null;
     let _ptReqSeq = 0;
 
+    // ── Efficient rendering: build / diff / reconcile patient cards ──
+    // Identity key for matching a rendered card to a server record across
+    // refreshes.
+    function _ptCardKey(r) { return String(r.numPadded || r.num); }
+
+    // Lightweight fingerprint of everything a card actually displays.
+    // If this is unchanged between refreshes, the existing DOM node for
+    // that record is reused untouched instead of being rebuilt.
+    function _ptCardSignature(r) {
+      return JSON.stringify([
+        r.name, r.ageSex, r.referred, r.paymentStatus, r.grand,
+        r.procedures, r.checkupTests, r.cardiologyTests, r.kitsTests,
+        r.xrayTests, r.drugTests, r.utzTests, r.date, r.ts,
+      ]);
+    }
+
+    // Builds one patient card element. Markup/styling is unchanged from
+    // the original implementation — only extracted into a function so it
+    // can be reused by both full renders and incremental patch renders.
+    // The action-button indices are placeholders (0) and get corrected in
+    // one pass by _ptReindexCards() right after the card lands in the DOM.
+    function _ptBuildCard(r) {
+      const recentMatch = _recentList.find(rl =>
+        rl.num === r.num && rl.name === r.name
+      );
+      const hasReceipt = !!recentMatch;
+
+      const statusColors = {
+        'FULLY PAID': { bg: '#1B5E20', fg: '#fff' },
+        'PARTLY PAID': { bg: '#FFF9C4', fg: '#000' },
+        'UNPAID': { bg: '#B71C1C', fg: '#fff' },
+        'PENDING': { bg: '#EDE8FF', fg: '#3D0099' },
+        'REFUNDED': { bg: '#212121', fg: '#fff' },
+      };
+      const sc = statusColors[r.paymentStatus] || statusColors['PENDING'];
+
+      const services = [
+        r.procedures ? `Lab: ${r.procedures}` : '',
+        r.checkupTests ? `Checkup: ${r.checkupTests}` : '',
+        r.cardiologyTests ? `Cardio: ${r.cardiologyTests}` : '',
+        r.kitsTests ? `Kits: ${r.kitsTests}` : '',
+        r.xrayTests ? `X-Ray: ${r.xrayTests}` : '',
+        r.drugTests ? `Drug: ${r.drugTests}` : '',
+        r.utzTests ? `UTZ: ${r.utzTests}` : '',
+      ].filter(Boolean).join(' · ');
+
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background:#fff;border-radius:12px;padding:14px 16px;
+        box-shadow:0 1px 6px rgba(111,45,189,0.07);border:1.5px solid #ede8ff;
+        box-sizing:border-box;width:100%;overflow:hidden;`;
+
+      const dateStr = (() => { const s = String(r.date || ''); const m = s.match(/(\d{1,2}\/\d{1,2}\/\d{4})/); return m ? m[1] : ''; })();
+      const timeStr = r.ts ? (() => { const m = String(r.ts).match(/(\d{1,2}:\d{2}:\d{2})/); return m ? m[1] : String(r.ts).replace(/GMT.*/, '').replace(/\(.*\)/, '').trim(); })() : '';
+      const metaLine = [dateStr, timeStr, r.referred].filter(Boolean).join(' · ');
+
+      card.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%;min-width:0;">
+
+          <!-- LEFT: all text info -->
+          <div style="flex:1;min-width:0;overflow:hidden;">
+            <!-- Row 1: record# + name + age/sex -->
+            <div style="display:flex;align-items:baseline;gap:6px;min-width:0;margin-bottom:3px;overflow:hidden;">
+              <span style="font-size:13px;color:#6F2DBD;font-weight:800;white-space:nowrap;flex-shrink:0;">#${String(r.num).padStart(4, '0')}</span>
+              <span style="font-size:13px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">${r.name}</span>
+              <span style="font-size:11px;color:#888;white-space:nowrap;flex-shrink:0;">${r.ageSex || ''}</span>
+            </div>
+            <!-- Row 2: date · time · referred -->
+            <div style="font-size:11px;color:#aaa;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${metaLine}
+            </div>
+            <!-- Row 3: services (ellipsis) -->
+            ${services ? `<div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${services}</div>` : ''}
+            <!-- Row 4: status badge + amount on same row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px;flex-wrap:nowrap;min-width:0;">
+              <span style="background:${sc.bg};color:${sc.fg};border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;">
+                ${r.paymentStatus}
+              </span>
+              <span style="font-size:14px;font-weight:800;color:#1a1a1a;white-space:nowrap;flex-shrink:0;">
+                ₱${(r.grand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <!-- Row 5: action buttons — right aligned -->
+            <div class="pt-action-row" style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">
+              <button class="pt-reprint-btn" onclick="_ptReprint(0)" data-idx="0">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="6 9 6 2 18 2 18 9"/>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                  <rect x="6" y="14" width="12" height="8"/>
+                </svg>
+                <span class="pt-btn-label">Reprint</span>
+              </button>
+              <button class="pt-edit-btn" onclick="_ptEdit(0)" data-idx="0">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <span class="pt-btn-label">Edit</span>
+              </button>
+              <button class="pt-refund-btn" onclick="_ptRefund(0)" data-idx="0">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
+                <span class="pt-btn-label">Refund</span>
+              </button>
+              <button class="pt-delete-btn" onclick="_ptDelete(0)" data-idx="0">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6"/><path d="M14 11v6"/>
+                  <path d="M9 6V4h6v2"/>
+                </svg>
+                <span class="pt-btn-label">Delete</span>
+              </button>
+            </div>
+          </div>
+
+        </div>`;
+
+      card._ptRecord = r;
+      card._ptHasReceipt = hasReceipt;
+      card._ptRecentMatch = recentMatch;
+      card._ptKey = _ptCardKey(r);
+      card._ptSig = _ptCardSignature(r);
+      return card;
+    }
+
+    // Action buttons resolve their target card via `#pt-list > div`
+    // position at click time, so after any reordering we correct every
+    // button's baked-in index to match the card's actual DOM position.
+    function _ptReindexCards(list) {
+      Array.from(list.children).forEach((card, idx) => {
+        card.querySelectorAll('[data-idx]').forEach(btn => {
+          btn.setAttribute('data-idx', idx);
+          if (btn.classList.contains('pt-reprint-btn')) btn.setAttribute('onclick', `_ptReprint(${idx})`);
+          else if (btn.classList.contains('pt-edit-btn')) btn.setAttribute('onclick', `_ptEdit(${idx})`);
+          else if (btn.classList.contains('pt-refund-btn')) btn.setAttribute('onclick', `_ptRefund(${idx})`);
+          else if (btn.classList.contains('pt-delete-btn')) btn.setAttribute('onclick', `_ptDelete(${idx})`);
+        });
+      });
+    }
+
+    // Renders the patient list. `soft` refreshes (polling / reload button)
+    // reconcile against the existing DOM instead of tearing it down:
+    // unchanged rows are reused as-is, changed rows are rebuilt in place,
+    // new records are inserted, and records no longer returned by the
+    // server are dropped. Non-soft refreshes (initial load / filter
+    // change) do a plain full rebuild, which is simplest and safest since
+    // the whole result set is new anyway.
+    function _ptRenderRecords(list, records, soft) {
+      if (!soft) {
+        const frag = document.createDocumentFragment();
+        records.forEach(r => frag.appendChild(_ptBuildCard(r)));
+        list.innerHTML = '';
+        list.appendChild(frag);
+        _ptReindexCards(list);
+        return;
+      }
+
+      const existing = new Map();
+      Array.from(list.children).forEach(card => {
+        if (card._ptKey) existing.set(card._ptKey, card);
+      });
+
+      const frag = document.createDocumentFragment();
+      records.forEach(r => {
+        const key = _ptCardKey(r);
+        const sig = _ptCardSignature(r);
+        const old = existing.get(key);
+        if (old && old._ptSig === sig) {
+          // Unchanged — reuse the DOM node untouched. Refresh the record
+          // reference and in-memory receipt match, which can change
+          // independently of the server data.
+          const recentMatch = _recentList.find(rl => rl.num === r.num && rl.name === r.name);
+          old._ptRecord = r;
+          old._ptHasReceipt = !!recentMatch;
+          old._ptRecentMatch = recentMatch;
+          frag.appendChild(old);
+        } else {
+          frag.appendChild(_ptBuildCard(r));
+        }
+        existing.delete(key);
+      });
+      // Anything left in `existing` is a record removed/deleted server-side
+      // and is simply not re-appended (dropped).
+
+      list.innerHTML = '';
+      list.appendChild(frag);
+      _ptReindexCards(list);
+    }
+
     async function _ptFetch(page, opts = {}) {
       const { soft = false } = (opts || {});
       const mySeq = ++_ptReqSeq;
@@ -10078,118 +10277,14 @@
         document.getElementById('pt-count-badge').textContent = _ptTotal;
 
         const list = document.getElementById('pt-list');
-        if (soft) list.innerHTML = '';
         if (!data.records || data.records.length === 0) {
+          list.innerHTML = '';
           document.getElementById('pt-empty').style.display = 'block';
         } else {
-          data.records.forEach((r, i) => {
-            // Check if this patient is in _recentList (has receipt data)
-            const recentMatch = _recentList.find(rl =>
-              rl.num === r.num && rl.name === r.name
-            );
-            const hasReceipt = !!recentMatch;
-
-            const statusColors = {
-              'FULLY PAID': { bg: '#1B5E20', fg: '#fff' },
-              'PARTLY PAID': { bg: '#FFF9C4', fg: '#000' },
-              'UNPAID': { bg: '#B71C1C', fg: '#fff' },
-              'PENDING': { bg: '#EDE8FF', fg: '#3D0099' },
-              'REFUNDED': { bg: '#212121', fg: '#fff' },
-            };
-            const sc = statusColors[r.paymentStatus] || statusColors['PENDING'];
-
-            const services = [
-              r.procedures ? `Lab: ${r.procedures}` : '',
-              r.checkupTests ? `Checkup: ${r.checkupTests}` : '',
-              r.cardiologyTests ? `Cardio: ${r.cardiologyTests}` : '',
-              r.kitsTests ? `Kits: ${r.kitsTests}` : '',
-              r.xrayTests ? `X-Ray: ${r.xrayTests}` : '',
-              r.drugTests ? `Drug: ${r.drugTests}` : '',
-              r.utzTests ? `UTZ: ${r.utzTests}` : '',
-            ].filter(Boolean).join(' · ');
-
-            const card = document.createElement('div');
-            card.style.cssText = `
-              background:#fff;border-radius:12px;padding:14px 16px;
-              box-shadow:0 1px 6px rgba(111,45,189,0.07);border:1.5px solid #ede8ff;
-              box-sizing:border-box;width:100%;overflow:hidden;`;
-
-            const dateStr = (() => { const s = String(r.date || ''); const m = s.match(/(\d{1,2}\/\d{1,2}\/\d{4})/); return m ? m[1] : ''; })();
-            const timeStr = r.ts ? (() => { const m = String(r.ts).match(/(\d{1,2}:\d{2}:\d{2})/); return m ? m[1] : String(r.ts).replace(/GMT.*/, '').replace(/\(.*\)/, '').trim(); })() : '';
-            const metaLine = [dateStr, timeStr, r.referred].filter(Boolean).join(' · ');
-
-            card.innerHTML = `
-              <div style="display:flex;align-items:flex-start;gap:10px;width:100%;min-width:0;">
-
-                <!-- LEFT: all text info -->
-                <div style="flex:1;min-width:0;overflow:hidden;">
-                  <!-- Row 1: record# + name + age/sex -->
-                  <div style="display:flex;align-items:baseline;gap:6px;min-width:0;margin-bottom:3px;overflow:hidden;">
-                    <span style="font-size:13px;color:#6F2DBD;font-weight:800;white-space:nowrap;flex-shrink:0;">#${String(r.num).padStart(4, '0')}</span>
-                    <span style="font-size:13px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">${r.name}</span>
-                    <span style="font-size:11px;color:#888;white-space:nowrap;flex-shrink:0;">${r.ageSex || ''}</span>
-                  </div>
-                  <!-- Row 2: date · time · referred -->
-                  <div style="font-size:11px;color:#aaa;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                    ${metaLine}
-                  </div>
-                  <!-- Row 3: services (ellipsis) -->
-                  ${services ? `<div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${services}</div>` : ''}
-                  <!-- Row 4: status badge + amount on same row -->
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px;flex-wrap:nowrap;min-width:0;">
-                    <span style="background:${sc.bg};color:${sc.fg};border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;">
-                      ${r.paymentStatus}
-                    </span>
-                    <span style="font-size:14px;font-weight:800;color:#1a1a1a;white-space:nowrap;flex-shrink:0;">
-                      ₱${(r.grand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <!-- Row 5: action buttons — right aligned -->
-                  <div class="pt-action-row" style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">
-                    <button class="pt-reprint-btn" onclick="_ptReprint(${i})" data-idx="${i}">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="6 9 6 2 18 2 18 9"/>
-                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                        <rect x="6" y="14" width="12" height="8"/>
-                      </svg>
-                      <span class="pt-btn-label">Reprint</span>
-                    </button>
-                    <button class="pt-edit-btn" onclick="_ptEdit(${i})" data-idx="${i}">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                      <span class="pt-btn-label">Edit</span>
-                    </button>
-                    <button class="pt-refund-btn" onclick="_ptRefund(${i})" data-idx="${i}">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                        <path d="M21 3v5h-5"/>
-                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                        <path d="M3 21v-5h5"/>
-                      </svg>
-                      <span class="pt-btn-label">Refund</span>
-                    </button>
-                    <button class="pt-delete-btn" onclick="_ptDelete(${i})" data-idx="${i}">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                        <path d="M10 11v6"/><path d="M14 11v6"/>
-                        <path d="M9 6V4h6v2"/>
-                      </svg>
-                      <span class="pt-btn-label">Delete</span>
-                    </button>
-                  </div>
-                </div>
-
-              </div>`;
-
-            // Store record data on element for reprint
-            card._ptRecord = r;
-            card._ptHasReceipt = hasReceipt;
-            card._ptRecentMatch = recentMatch;
-            list.appendChild(card);
-          });
+          document.getElementById('pt-empty').style.display = 'none';
+          // Soft refreshes (polling / reload button) reconcile the DOM
+          // incrementally instead of rebuilding every card from scratch.
+          _ptRenderRecords(list, data.records, soft);
         }
 
         // Pagination
@@ -10214,6 +10309,60 @@
         }
       }
     }
+
+    // ── Near-real-time polling ───────────────────────────────────────
+    // Polls the cheap `getversion` endpoint (no sheet reads) while the
+    // Patient Records page is open. Only triggers a real soft refetch
+    // when the version actually changed, so other cashiers' registrations
+    // / edits / deletes / refunds show up automatically without anyone
+    // pressing reload, while idle polling costs almost nothing.
+    let _ptPollTimer = null;
+    let _ptLastVersion = null;
+    let _ptPollInFlight = false;
+    const PT_POLL_INTERVAL_MS = 6000;
+
+    function _ptStartPolling() {
+      if (_ptPollTimer) return; // already running
+      _ptPollTimer = setInterval(_ptPollCheck, PT_POLL_INTERVAL_MS);
+    }
+
+    function _ptStopPolling() {
+      if (_ptPollTimer) { clearInterval(_ptPollTimer); _ptPollTimer = null; }
+    }
+
+    async function _ptPollCheck() {
+      // Self-terminate once the Patient Records page is no longer visible.
+      if (!document.getElementById('page-recent')?.classList.contains('active')) {
+        _ptStopPolling();
+        return;
+      }
+      if (document.hidden) return; // don't poll background tabs
+      if (_ptPollInFlight || _ptFetching) return; // avoid overlapping requests
+
+      _ptPollInFlight = true;
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=getversion`);
+        const data = await res.json();
+        if (data.success && data.version !== _ptLastVersion) {
+          const isFirstCheck = _ptLastVersion === null;
+          _ptLastVersion = data.version;
+          // Skip the refetch the very first time we learn the version —
+          // the page was just freshly loaded by the explicit _ptFetch call.
+          if (!isFirstCheck) {
+            _ptFetch(_ptPage, { soft: true });
+          }
+        }
+      } catch (e) { /* transient network hiccup — try again next tick */ }
+      finally { _ptPollInFlight = false; }
+    }
+
+    // Resume promptly if the tab regains focus while already on this page,
+    // instead of waiting for the next interval tick.
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && document.getElementById('page-recent')?.classList.contains('active')) {
+        _ptPollCheck();
+      }
+    });
 
     // Reprint from patient list
     function _ptReprint(cardIdx) {
@@ -10310,6 +10459,7 @@
       document.getElementById('page-recent').classList.add('active');
       // Load full patient list
       _ptFetch(1);
+      _ptStartPolling();
     }
 
     function _renderRecentList() {
@@ -10465,6 +10615,7 @@
 
     /* Only called when staff explicitly clicks "Register Next Patient" */
     function goRegisterAnother() {
+      _ptStopPolling();
       document.getElementById('page-recent').classList.remove('active');
       document.getElementById('page-reg').classList.add('active');
       document.getElementById('logout-btn').classList.add('visible');
