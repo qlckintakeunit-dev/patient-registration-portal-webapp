@@ -6886,7 +6886,6 @@
        falls back to plain polling automatically. -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -8392,15 +8391,11 @@
     };
 
     let _fbDataVersionRef = null;
-    let _fbDb = null; // Firestore — Tier 1 migration: prices/discounts/doctors cache
     if (FIREBASE_CONFIG.databaseURL && typeof firebase !== 'undefined') {
       try {
         firebase.initializeApp(FIREBASE_CONFIG);
         _fbDataVersionRef = firebase.database().ref('dataVersion');
       } catch (e) { /* Firebase unavailable — polling fallback covers this */ }
-      try {
-        if (firebase.firestore) _fbDb = firebase.firestore();
-      } catch (e) { /* Firestore unavailable — GAS fallback covers this */ }
     }
 
     // Notifies other open tabs/devices that patient data changed, right after
@@ -8411,43 +8406,6 @@
     function _fbBumpVersion() {
       if (!_fbDataVersionRef) return;
       try { _fbDataVersionRef.set(Date.now()); } catch (e) { /* non-fatal */ }
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    //  FIRESTORE CONFIG CACHE — Tier 1 migration (prices/discounts/doctors)
-    //  Reference data lives in a single doc per collection ("config/prices",
-    //  "config/discounts", "config/doctors") since it's always read/written
-    //  as one whole blob anyway — this keeps reads at 1 per page load
-    //  instead of 1-per-item, well inside the Spark free tier.
-    //  GAS/Sheets stays the source of truth for editing; every admin save
-    //  (addcategory/addtest/edittest/adddoctor) re-pushes the fresh data
-    //  here right after — see etRefresh() and saveNewDoctor()/
-    //  saveOtherReferral(). Falls back to the normal GAS fetch automatically
-    //  if Firestore is unavailable or a doc hasn't been seeded yet.
-    // ═══════════════════════════════════════════════════════════════
-    async function _fbLoadConfig(docId) {
-      if (!_fbDb) return null;
-      try {
-        const snap = await _fbDb.collection('config').doc(docId).get();
-        return snap.exists ? snap.data() : null;
-      } catch (e) { return null; }
-    }
-
-    function _fbSaveConfig(docId, data) {
-      if (!_fbDb) return;
-      try { _fbDb.collection('config').doc(docId).set(data); } catch (e) { /* non-fatal */ }
-    }
-
-    // Live cross-tab updates: any device that saves a price/category/test/
-    // doctor change pushes to Firestore, and every other open tab picks it
-    // up here instantly — no polling, no manual refresh.
-    function _fbWatchConfig(docId, onData) {
-      if (!_fbDb) return;
-      try {
-        _fbDb.collection('config').doc(docId).onSnapshot(snap => {
-          if (snap.exists) onData(snap.data());
-        });
-      } catch (e) { /* non-fatal — GAS fetch on load still covers this tab */ }
     }
 
     /* ════════════════════════════════════════════════
@@ -9479,60 +9437,36 @@
    FETCH PRICES — 100% dynamic from TESTS & PRICES sheet
    No hardcoded prices, categories, or test names.
 ════════════════════════════════════════════════ */
-    // Shared by the Firestore path and the GAS path so both apply prices
-    // identically. `d` is { prices, categories } either way.
-    function _applyPricesPayload(d) {
-      if (d && d.prices) {
-        // Normalize server fields so frontend can use r/s + bsa/om/yakap safely.
-        PRICES = Object.fromEntries(
-          Object.entries(d.prices).map(([k, v]) => {
-            const o = (v && typeof v === 'object') ? v : {};
-            const _num = (x) => (typeof x === 'number' && isFinite(x)) ? x : null;
-            const norm = {
-              r: _num(o.r ?? o.regular ?? o.reg),
-              s: _num(o.s ?? o.senior),
-              bsa: _num(o.bsa ?? o.f ?? o.bsaPrice ?? o.bsa_price),
-              om: _num(o.om ?? o.g ?? o.qsdom ?? o.qsdOmPrice ?? o.qsd_om_price),
-              yakap: _num(o.yakap ?? o.h ?? o.yakapPrice ?? o.yakap_price),
-              amante: _num(o.amante ?? o.amarPrice ?? o.amante_price),
-            };
-            return [k, norm];
-          })
-        );
-        pricesLoaded = true;
-        if (d.categories && Object.keys(d.categories).length > 0) {
-          _buildCategoriesFromSheet(d.categories);
-          console.log('[LIS] Loaded', CATEGORIES.length, 'categories,',
-            Object.keys(PRICES).length, 'tests.');
-        } else {
-          console.warn('[LIS] No categories in payload.');
-          CATEGORIES = [];
-        }
-        return true;
-      }
-      return false;
-    }
-
-    async function fetchPrices() {
-      // Fast path: Firestore (instant, no GAS round-trip). Falls through to
-      // GAS automatically if the doc hasn't been seeded yet or Firestore is
-      // unavailable — see _fbLoadConfig.
-      const cached = await _fbLoadConfig('prices');
-      if (cached && _applyPricesPayload(cached)) {
-        // Live-update this tab if another device/admin edit pushes a change.
-        _fbWatchConfig('prices', _applyPricesPayload);
-        return;
-      }
-
+    function fetchPrices() {
       return fetch(`${APPS_SCRIPT_URL}?action=getprices`)
         .then(r => r.json())
         .then(d => {
           if (d.success && d.prices) {
-            _applyPricesPayload(d);
-            // Seed/refresh Firestore so the next load (this tab or any
-            // other) takes the fast path above.
-            _fbSaveConfig('prices', { prices: d.prices, categories: d.categories });
-            _fbWatchConfig('prices', _applyPricesPayload);
+            // Normalize server fields so frontend can use r/s + bsa/om/yakap safely.
+            PRICES = Object.fromEntries(
+              Object.entries(d.prices).map(([k, v]) => {
+                const o = (v && typeof v === 'object') ? v : {};
+                const _num = (x) => (typeof x === 'number' && isFinite(x)) ? x : null;
+                const norm = {
+                  r: _num(o.r ?? o.regular ?? o.reg),
+                  s: _num(o.s ?? o.senior),
+                  bsa: _num(o.bsa ?? o.f ?? o.bsaPrice ?? o.bsa_price),
+                  om: _num(o.om ?? o.g ?? o.qsdom ?? o.qsdOmPrice ?? o.qsd_om_price),
+                  yakap: _num(o.yakap ?? o.h ?? o.yakapPrice ?? o.yakap_price),
+                  amante: _num(o.amante ?? o.amarPrice ?? o.amante_price),
+                };
+                return [k, norm];
+              })
+            );
+            pricesLoaded = true;
+            if (d.categories && Object.keys(d.categories).length > 0) {
+              _buildCategoriesFromSheet(d.categories);
+              console.log('[LIS] Loaded', CATEGORIES.length, 'categories,',
+                Object.keys(PRICES).length, 'tests from sheet.');
+            } else {
+              console.warn('[LIS] Sheet returned no categories.');
+              CATEGORIES = [];
+            }
           } else {
             console.warn('[LIS] Price fetch failed:', d.message);
             PRICES = {};
@@ -9544,23 +9478,6 @@
           PRICES = {};
           CATEGORIES = [];
         });
-    }
-
-    // ── Manual full reseed — run once from the browser console to seed
-    // Firestore for the first time, and again any time you edit the
-    // DISCOUNTS sheet tab directly (no in-app editor for that one, so it
-    // can't self-heal the way prices/doctors do). Always reads straight
-    // from GAS/Sheets and overwrites Firestore, bypassing the cache.
-    async function resyncFirestoreConfig() {
-      const [p, disc, doc] = await Promise.all([
-        fetch(`${APPS_SCRIPT_URL}?action=getprices`).then(r => r.json()),
-        fetch(`${APPS_SCRIPT_URL}?action=getdiscounts`).then(r => r.json()),
-        fetch(`${APPS_SCRIPT_URL}?action=getdoctors`).then(r => r.json()),
-      ]);
-      if (p.success)    _fbSaveConfig('prices',    { prices: p.prices, categories: p.categories });
-      if (disc.success) _fbSaveConfig('discounts', { discounts: disc.discounts });
-      if (doc.success)  _fbSaveConfig('doctors',   { doctors: doc.doctors });
-      console.log('[LIS] Firestore config reseeded from Sheets.');
     }
 
     /* Build CATEGORIES array dynamically from sheet data.
@@ -9587,30 +9504,13 @@
       console.log('[LIS] Categories built:', CATEGORIES.map(c => c.name + '(' + c.type + ')').join(', '));
     }
 
-    async function fetchDiscounts() {
-      const cached = await _fbLoadConfig('discounts');
-      if (cached && cached.discounts) {
-        DISCOUNTS = cached.discounts;
-        populateDiscountSelect();
-        _fbWatchConfig('discounts', d => {
-          if (d && d.discounts) { DISCOUNTS = d.discounts; populateDiscountSelect(); }
-        });
-        return;
-      }
-
+    function fetchDiscounts() {
       return fetch(`${APPS_SCRIPT_URL}?action=getdiscounts`)
         .then(r => r.json())
         .then(d => {
           if (d.success && d.discounts) {
             DISCOUNTS = d.discounts;
             populateDiscountSelect();
-            // Seed Firestore. Note: there's no in-app "edit discounts" UI —
-            // if you edit the DISCOUNTS sheet tab directly, call
-            // resyncFirestoreConfig() once (console) to push the change.
-            _fbSaveConfig('discounts', { discounts: d.discounts });
-            _fbWatchConfig('discounts', dd => {
-              if (dd && dd.discounts) { DISCOUNTS = dd.discounts; populateDiscountSelect(); }
-            });
           }
         })
         .catch(() => {
@@ -11723,23 +11623,10 @@
     ════════════════════════════════════════════════ */
     let DOCTORS_LIST = [];
 
-    async function fetchDoctors() {
-      const cached = await _fbLoadConfig('doctors');
-      if (cached && cached.doctors) {
-        DOCTORS_LIST = cached.doctors;
-        _fbWatchConfig('doctors', d => { if (d && d.doctors) DOCTORS_LIST = d.doctors; });
-        return;
-      }
-
+    function fetchDoctors() {
       fetch(`${APPS_SCRIPT_URL}?action=getdoctors`)
         .then(r => r.json())
-        .then(d => {
-          if (d.success && d.doctors) {
-            DOCTORS_LIST = d.doctors;
-            _fbSaveConfig('doctors', { doctors: d.doctors });
-            _fbWatchConfig('doctors', dd => { if (dd && dd.doctors) DOCTORS_LIST = dd.doctors; });
-          }
-        })
+        .then(d => { if (d.success && d.doctors) DOCTORS_LIST = d.doctors; })
         .catch(() => { });
     }
 
@@ -11901,10 +11788,7 @@
       if (APPS_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&details=${encodeURIComponent(details)}`)
           .then(r => r.json())
-          .then(d => {
-            if (!d.success) showToast('Saved locally but remote save failed.', 'err');
-            else _fbSaveConfig('doctors', { doctors: DOCTORS_LIST });
-          })
+          .then(d => { if (!d.success) showToast('Saved locally but remote save failed.', 'err'); })
           .catch(() => showToast('Saved locally but could not reach server.', 'err'));
       }
     }
@@ -11923,10 +11807,7 @@
       if (APPS_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
         fetch(`${APPS_SCRIPT_URL}?action=adddoctor&name=${encodeURIComponent(name)}&details=${encodeURIComponent(details)}`)
           .then(r => r.json())
-          .then(d => {
-            if (!d.success) showToast('Saved locally but remote save failed.', 'err');
-            else _fbSaveConfig('doctors', { doctors: DOCTORS_LIST });
-          })
+          .then(d => { if (!d.success) showToast('Saved locally but remote save failed.', 'err'); })
           .catch(() => showToast('Saved locally but could not reach server.', 'err'));
       }
     }
@@ -17802,11 +17683,6 @@
           // Sync to global state so registration form stays fresh
           PRICES = d.prices || PRICES;
           if (d.categories) _buildCategoriesFromSheet(d.categories, d.prices);
-          // Re-push to Firestore so every other open tab/device gets this
-          // change live, and the fast Firestore path in fetchPrices() stays
-          // current. Covers addcategory/addtest/edittest — they all call
-          // etRefresh() right after saving.
-          _fbSaveConfig('prices', { prices: d.prices, categories: d.categories });
         }
       } catch (e) {
         // Fallback from global PRICES/CATEGORIES
