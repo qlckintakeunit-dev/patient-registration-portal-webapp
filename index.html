@@ -8398,6 +8398,16 @@
       } catch (e) { /* Firebase unavailable — polling fallback covers this */ }
     }
 
+    // Notifies other open tabs/devices that patient data changed, right after
+    // a register/refund/delete/edit call succeeds. Runs client-side because
+    // the Apps Script project doesn't have the external-request permission
+    // needed to push this from the server. Best-effort: if it fails, the
+    // existing polling fallback (_ptStartPolling) still covers it.
+    function _fbBumpVersion() {
+      if (!_fbDataVersionRef) return;
+      try { _fbDataVersionRef.set(Date.now()); } catch (e) { /* non-fatal */ }
+    }
+
     /* ════════════════════════════════════════════════
        STEP NAVIGATION
     ════════════════════════════════════════════════ */
@@ -8753,7 +8763,7 @@
         return;
       }
 
-      fetch(`${APPS_SCRIPT_URL}?action=login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)
+      fetch(`${APPS_SCRIPT_URL}?action=login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`, { cache: 'no-store' })
         .then(r => r.json())
         .then(d => {
           if (d.success) { _encodedBy = d.displayName || _toTitleCase(u); loginSuccess(false); }
@@ -9012,6 +9022,8 @@
           const d = await res.json();
           if (!d.success) {
             console.warn('Delete server warning:', d.message);
+          } else {
+            _fbBumpVersion();
           }
         } catch (e) {
           console.warn('Delete response parse issue (usually harmless):', e.message);
@@ -9173,6 +9185,8 @@
           const d = await res.json();
           if (!d.success) {
             console.warn('Refund server warning:', d.message);
+          } else {
+            _fbBumpVersion();
           }
         } catch (e) {
           console.warn('Refund response parse issue:', e.message);
@@ -9383,6 +9397,7 @@
         try { d = await res.json(); } catch (e) { d = { success: true }; }
 
         if (d.success === false) throw new Error(d.message || 'Server error.');
+        _fbBumpVersion();
 
         // ── Success ──────────────────────────────────────────────
         const banner = document.getElementById('pt-deleted-banner');
@@ -13208,6 +13223,7 @@
         .then(d => {
           resetBtn();
           if (d.success) {
+            _fbBumpVersion();
             // Build receipt data for printing
             // Use the already-built _rcptItemsFinal (built above finalPayload)
             _lastReceiptData = {
