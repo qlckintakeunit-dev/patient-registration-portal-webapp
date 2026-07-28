@@ -14,6 +14,219 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet">
+  <!-- Supabase client — used by the Lab Test Builder tab (Tests / Components / Reference Ranges) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .lc-test-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1.5px solid #eee;
+      border-radius: 9px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .lc-test-row:hover {
+      border-color: #c9b8ec;
+      background: #faf8ff;
+    }
+
+    .lc-test-row.sel {
+      border-color: #6F2DBD;
+      background: #f4f1fa;
+    }
+
+    /* ── Catalog Tree ─────────────────────────────────────── */
+    .tc-chevron {
+      transition: transform 0.15s;
+      flex-shrink: 0;
+    }
+
+    .tc-dept.expanded>.tc-dept-head .tc-chevron,
+    .tc-test.expanded>.tc-test-head .tc-chevron {
+      transform: rotate(90deg);
+    }
+
+    .tc-dept-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      background: #f4f1fa;
+      font-size: 13px;
+      font-weight: 800;
+      color: #4A0E8F;
+      margin-bottom: 4px;
+    }
+
+    .tc-dept-head:hover {
+      background: #ede3fa;
+    }
+
+    .tc-dept-body {
+      display: none;
+      padding: 4px 0 10px 20px;
+    }
+
+    .tc-dept.expanded>.tc-dept-body {
+      display: block;
+    }
+
+    .tc-test-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #1a1a1a;
+      border: 1.5px solid #eee;
+      margin: 4px 0;
+    }
+
+    .tc-test-head:hover {
+      border-color: #c9b8ec;
+      background: #faf8ff;
+    }
+
+    .tc-test-body {
+      display: none;
+      padding: 2px 0 8px 20px;
+    }
+
+    .tc-test.expanded>.tc-test-body {
+      display: block;
+    }
+
+    /* Spreadsheet-style grid — one shared column layout for the
+       header row and every component row underneath it. */
+    .tc-table-scroll {
+      overflow-x: auto;
+      border: 1px solid #ececec;
+      border-radius: 8px;
+    }
+
+    .tc-grid {
+      display: grid;
+      grid-template-columns: minmax(150px, 2fr) 76px 104px 70px 66px 66px 64px 64px 78px 78px 34px;
+      min-width: 880px;
+    }
+
+    .tc-grid-head {
+      background: #fafafa;
+      border-bottom: 1.5px solid #ececec;
+      position: sticky;
+      top: 0;
+    }
+
+    .tc-gcell {
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border-right: 1px solid rgba(0, 0, 0, 0.07);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    }
+
+    .tc-gcell:last-child {
+      border-right: none;
+    }
+
+    .tc-grid-head .tc-gcell {
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #999;
+      font-size: 9.5px;
+      border-bottom: none;
+    }
+
+    .tc-comp-row:hover .tc-gcell {
+      background: #faf8ff;
+    }
+
+    .tc-comp-row:last-child .tc-gcell {
+      border-bottom: none;
+    }
+
+    .tc-gcell-name {
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .tc-gcell-meta {
+      color: #888;
+    }
+
+    .tc-gcell-num {
+      font-family: 'DM Mono', monospace;
+      color: #00695C;
+      justify-content: flex-end;
+    }
+
+    .tc-gcell-num.empty {
+      color: #ddd;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .tc-gcell-edit {
+      padding: 0;
+      justify-content: center;
+      border-right: none;
+    }
+
+    .tc-edit-btn {
+      background: none;
+      border: none;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #b0b0b0;
+      border-radius: 6px;
+      transition: background 0.13s, color 0.13s;
+      flex-shrink: 0;
+    }
+
+    .tc-edit-btn:hover {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .tc-edit-form {
+      grid-column: 1 / -1;
+      background: #f4f1fa;
+      border-radius: 0 0 8px 8px;
+      padding: 12px;
+    }
+
+    .tc-hidden {
+      display: none !important;
+    }
+
+    @media(max-width:640px) {
+      .tc-dept-body {
+        padding-left: 10px;
+      }
+
+      .tc-test-body {
+        padding-left: 10px;
+      }
+    }
+  </style>
   <style>
     *,
     *::before,
@@ -8385,6 +8598,266 @@
     ════════════════════════════════════════════════ */
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMrczonRaHj5ixx8qGBMWVISUNxEsjTuV0FePgdebHUA4ysrtkiwiHNmDIrT0tEs9Qgg/exec';
 
+    // ── Supabase config (Lab Test Builder — tests / components / reference ranges) ──
+    // Fill these in with your project's values: Settings → Data API in the Supabase dashboard.
+    const SUPABASE_URL = 'https://nrdrqwjximjyxkjxwyoj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yZHJxd2p4aW1qeXhranh3eW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU2ODcsImV4cCI6MjA5OTExMTY4N30.jeJ6YYv4-WkFq7EKHqn47BjFRYQa7uR-GqYDFcDCUSU';
+    let _sbClient = null;
+    function sbClient() {
+      if (_sbClient) return _sbClient;
+      if (typeof supabase === 'undefined' || SUPABASE_URL.startsWith('YOUR_')) return null;
+      _sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return _sbClient;
+    }
+
+    /* ════════════════════════════════════════════════
+       PHASE 2 — PATIENTS & ENCOUNTERS (Supabase)
+       ────────────────────────────────────────────────
+       Service layer only. Not yet called from submitReg()/posConfirm()
+       or anywhere else in the UI — this is additive scaffolding so the
+       legacy GAS/Sheets registration flow keeps working untouched until
+       we deliberately wire a specific call site to it.
+
+       Requires the seed data + fn_next_sequence RPC from
+       phase2_patients_encounters_seed.sql to have been run once
+       against the Supabase project.
+    ════════════════════════════════════════════════ */
+
+    // ── Lookup + branch ID cache (category_code/value_code -> uuid) ──
+    let _lookupCache = null;   // { "civil_status:SINGLE": "uuid", ... }
+    let _defaultBranchId = null;
+
+    async function _loadLookupCache() {
+      if (_lookupCache) return _lookupCache;
+      const client = sbClient();
+      if (!client) return {};
+      const { data, error } = await client
+        .from('lookup_values')
+        .select('value_code, id, lookup_categories(category_code)')
+        .eq('active', true);
+      if (error) { console.warn('Lookup cache load failed:', error.message); return {}; }
+      _lookupCache = {};
+      (data || []).forEach(row => {
+        const catCode = row.lookup_categories && row.lookup_categories.category_code;
+        if (catCode) _lookupCache[`${catCode}:${row.value_code}`] = row.id;
+      });
+      return _lookupCache;
+    }
+
+    async function getLookupId(categoryCode, valueCode) {
+      if (!valueCode) return null;
+      const cache = await _loadLookupCache();
+      return cache[`${categoryCode}:${valueCode}`] || null;
+    }
+
+    async function getDefaultBranchId() {
+      if (_defaultBranchId) return _defaultBranchId;
+      const client = sbClient();
+      if (!client) return null;
+      const { data, error } = await client
+        .from('branches').select('id').eq('is_main', true).limit(1).maybeSingle();
+      if (error || !data) { console.warn('Default branch lookup failed:', error && error.message); return null; }
+      _defaultBranchId = data.id;
+      return _defaultBranchId;
+    }
+
+    // ── Sequence-based human-readable numbers (P-2026-00043 etc.) ──
+    async function _nextFormattedNo(sequenceKey, prefix) {
+      const client = sbClient();
+      if (!client) return null;
+      const { data, error } = await client.rpc('fn_next_sequence', { key: sequenceKey });
+      if (error) { console.warn('Sequence RPC failed:', error.message); return null; }
+      const year = new Date().getFullYear();
+      return `${prefix}-${year}-${String(data).padStart(5, '0')}`;
+    }
+
+    // ── Patients ─────────────────────────────────────────────────
+    // patientData: { firstName, middleName, lastName, suffix, sex, birthDate,
+    //                mobileNumber, email, nationality, civilStatusCode, bloodTypeCode }
+    async function ptCreate(patientData) {
+      const client = sbClient();
+      if (!client) throw new Error('Supabase not connected.');
+
+      const [branchId, civilStatusId, bloodTypeId, patientNo] = await Promise.all([
+        getDefaultBranchId(),
+        getLookupId('civil_status', patientData.civilStatusCode),
+        getLookupId('blood_type', patientData.bloodTypeCode),
+        _nextFormattedNo('patient_no', 'P'),
+      ]);
+      if (!patientNo) throw new Error('Could not generate patient number.');
+
+      const row = {
+        branch_id: branchId,
+        patient_no: patientNo,
+        first_name: patientData.firstName,
+        middle_name: patientData.middleName || null,
+        last_name: patientData.lastName,
+        suffix: patientData.suffix || null,
+        sex: patientData.sex,
+        birth_date: patientData.birthDate,
+        civil_status_id: civilStatusId,
+        nationality: patientData.nationality || 'Filipino',
+        mobile_number: patientData.mobileNumber || null,
+        email: patientData.email || null,
+        blood_type_id: bloodTypeId,
+        registered_at: new Date().toISOString(),
+        active: true,
+      };
+      const { data, error } = await client.from('patients').insert(row).select().single();
+      if (error) throw new Error('Patient create failed: ' + error.message);
+      return data;
+    }
+
+    async function ptGetById(patientId) {
+      const client = sbClient();
+      if (!client) return null;
+      const { data, error } = await client.from('patients').select('*').eq('id', patientId).maybeSingle();
+      if (error) { console.warn('ptGetById failed:', error.message); return null; }
+      return data;
+    }
+
+    // Search by name / patient_no / mobile_number (simple ilike OR match)
+    async function ptSearch(query, limit = 20) {
+      const client = sbClient();
+      if (!client || !query || !query.trim()) return [];
+      const q = query.trim();
+      const { data, error } = await client
+        .from('patients')
+        .select('*')
+        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,patient_no.ilike.%${q}%,mobile_number.ilike.%${q}%`)
+        .eq('active', true)
+        .order('registered_at', { ascending: false })
+        .limit(limit);
+      if (error) { console.warn('ptSearch failed:', error.message); return []; }
+      return data || [];
+    }
+
+    async function ptUpdate(patientId, fields) {
+      const client = sbClient();
+      if (!client) throw new Error('Supabase not connected.');
+      const { data, error } = await client.from('patients').update(fields).eq('id', patientId).select().single();
+      if (error) throw new Error('Patient update failed: ' + error.message);
+      return data;
+    }
+
+    // ── Encounters ───────────────────────────────────────────────
+    // Avoid duplicate same-day encounters for a returning patient.
+    async function enGetActiveForPatient(patientId) {
+      const client = sbClient();
+      if (!client) return null;
+      const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+      const { data, error } = await client
+        .from('encounters')
+        .select('*')
+        .eq('patient_id', patientId)
+        .gte('encounter_date', startOfDay.toISOString())
+        .is('checked_out_at', null)
+        .order('encounter_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) { console.warn('enGetActiveForPatient failed:', error.message); return null; }
+      return data;
+    }
+
+    // encData: { patientId, visitTypeCode, chiefComplaint, attendingPhysicianId, referralSourceId }
+    async function enCreate(encData) {
+      const client = sbClient();
+      if (!client) throw new Error('Supabase not connected.');
+
+      const [branchId, visitTypeId, statusId, encounterNo] = await Promise.all([
+        getDefaultBranchId(),
+        getLookupId('visit_type', encData.visitTypeCode || 'WALKIN'),
+        getLookupId('encounter_status', 'CHECKED_IN'),
+        _nextFormattedNo('encounter_no', 'E'),
+      ]);
+      if (!encounterNo) throw new Error('Could not generate encounter number.');
+
+      const row = {
+        branch_id: branchId,
+        patient_id: encData.patientId,
+        encounter_no: encounterNo,
+        visit_type_id: visitTypeId,
+        status_id: statusId,
+        attending_physician_id: encData.attendingPhysicianId || null,
+        referral_source_id: encData.referralSourceId || null,
+        chief_complaint: encData.chiefComplaint || null,
+        encounter_date: new Date().toISOString(),
+        checked_in_at: new Date().toISOString(),
+        active: true,
+      };
+      const { data, error } = await client.from('encounters').insert(row).select().single();
+      if (error) throw new Error('Encounter create failed: ' + error.message);
+      return data;
+    }
+
+    async function enCheckOut(encounterId) {
+      const client = sbClient();
+      if (!client) throw new Error('Supabase not connected.');
+      const completedId = await getLookupId('encounter_status', 'COMPLETED');
+      const { data, error } = await client
+        .from('encounters')
+        .update({ checked_out_at: new Date().toISOString(), status_id: completedId })
+        .eq('id', encounterId).select().single();
+      if (error) throw new Error('Encounter check-out failed: ' + error.message);
+      return data;
+    }
+
+    // Convenience: register-or-reuse a patient + open (or reuse today's) encounter
+    // in one call. This is the function a future submitReg() integration would call.
+    async function ptRegisterWithEncounter(patientData, encMeta) {
+      const patient = await ptCreate(patientData);
+      const encounter = await enCreate({ patientId: patient.id, ...encMeta });
+      return { patient, encounter };
+    }
+
+    // ── Name splitting (auto, since the reg form has a single Name field) ──
+    // "Juan Miguel Dela Cruz Jr." -> first: "Juan", middle: "Miguel Dela", last: "Cruz Jr."
+    // Known limitation: multi-word surnames (e.g. "Dela Cruz") without a middle
+    // name will be mis-split — "Juan Dela Cruz" reads as first: Juan, last: Cruz,
+    // middle: Dela. Acceptable for now; a real fix needs separate form fields.
+    function _splitName(fullName) {
+      const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return { firstName: '', middleName: '', lastName: '' };
+      if (parts.length === 1) return { firstName: parts[0], middleName: '', lastName: '' };
+      if (parts.length === 2) return { firstName: parts[0], middleName: '', lastName: parts[1] };
+      return {
+        firstName: parts[0],
+        lastName: parts[parts.length - 1],
+        middleName: parts.slice(1, -1).join(' '),
+      };
+    }
+
+    // ── Best-effort Supabase dual-write, run alongside the existing GAS/Sheets
+    // registration. Never blocks and never throws into the caller — if Supabase
+    // is unreachable or misconfigured, the legacy flow is completely unaffected.
+    // Stores the result on window._lastSupabaseReg for later phases to use.
+    window._lastSupabaseReg = null;
+    async function _phase2DualWriteRegistration({ name, bday, sex, contact }) {
+      try {
+        if (!sbClient()) return; // Supabase not connected — silently skip
+        const { firstName, middleName, lastName } = _splitName(name);
+        if (!firstName || !lastName) {
+          console.warn('Phase 2 dual-write skipped: could not split name into first/last.', name);
+          return;
+        }
+        const result = await ptRegisterWithEncounter(
+          {
+            firstName, middleName, lastName,
+            sex: sex === 'Male' ? 'M' : sex === 'Female' ? 'F' : null,
+            birthDate: bday || null,
+            mobileNumber: contact || null,
+          },
+          { visitTypeCode: 'WALKIN' }
+        );
+        window._lastSupabaseReg = result;
+        console.log('Phase 2 dual-write ok — patient_no:', result.patient.patient_no,
+          'encounter_no:', result.encounter.encounter_no);
+      } catch (err) {
+        // Best-effort only — never surface this to the user, never block registration.
+        console.warn('Phase 2 dual-write failed (non-fatal, Sheets registration continues):', err.message);
+      }
+    }
+
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDJWTPj0-o-ynMfvubeHOIlu4YV90q7eBo',
       authDomain: 'qdc-front.firebaseapp.com',
@@ -8607,10 +9080,11 @@
 
     function getReferralPriceTier() {
       const v = (document.getElementById('f-referred')?.value || '').toUpperCase();
-      if (/(^|[\s,;])\/?BSA($|[\s,;])/.test(v)) return 'bsa';
+      if (/(^|[\s,;/])BSA($|[\s,;/])/.test(v)) return 'bsa';
       if (/\/OM($|[\s,;/])/.test(v)) return 'om';
-      if (/(^|[\s,;])\/?YAKAP($|[\s,;])/.test(v)) return 'yakap';
-      if (/(^|[\s,;])\/?AMANTE($|[\s,;])/.test(v)) return 'amante';
+      if (/(^|[\s,;/])YAKAP($|[\s,;/])/.test(v)) return 'yakap';
+      if (/(^|[\s,;/])AMANTE($|[\s,;/])/.test(v)) return 'amante';
+      if (/(^|[\s,;/])GOBSOL($|[\s,;/])/.test(v)) return 'gobsol';
       return '';
     }
 
@@ -8628,6 +9102,7 @@
       if (tier === 'om' && typeof p.om === 'number') return p.om;
       if (tier === 'yakap' && typeof p.yakap === 'number') return p.yakap;
       if (tier === 'amante' && typeof p.amante === 'number') return p.amante;
+      if (tier === 'gobsol' && typeof p.gobsol === 'number') return p.gobsol;
       if (priceMode === 's') {
         return (p.s !== null && p.s !== undefined && typeof p.s === 'number') ? p.s : p.r;
       }
@@ -9456,6 +9931,7 @@
                   om: _num(o.om ?? o.g ?? o.qsdom ?? o.qsdOmPrice ?? o.qsd_om_price),
                   yakap: _num(o.yakap ?? o.h ?? o.yakapPrice ?? o.yakap_price),
                   amante: _num(o.amante ?? o.amarPrice ?? o.amante_price),
+                  gobsol: _num(o.gobsol ?? o.j ?? o.gobsolPrice ?? o.gobsol_price),
                 };
                 return [k, norm];
               })
@@ -9885,6 +10361,10 @@
       if (!name || !bday || !age || !sex || !contact || !address || !referred) {
         showToast('Please complete all required patient fields.', 'err'); return;
       }
+
+      // Phase 2: best-effort Supabase dual-write (patients + encounters).
+      // Fire-and-forget — does not delay or affect the existing Sheets flow below.
+      _phase2DualWriteRegistration({ name, bday, sex, contact });
 
       const labTests = [];
       const xrayTests = [];
@@ -14841,6 +15321,11 @@
         max-width: 1100px;
         margin: 0 auto;
         padding: 28px 24px 40px;
+        transition: max-width 0.15s;
+      }
+
+      .et-wrap.et-wrap-wide {
+        max-width: 1800px;
       }
 
       @media(max-width:600px) {
@@ -16478,6 +16963,39 @@
               </svg>
             </div>
           </button>
+          <button class="et-land-card" onclick="etShowSection('lab-catalog')">
+            <div class="et-land-icon" style="background:linear-gradient(135deg,#00695C,#00897B);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4" />
+                <path d="M14 3h7v7" />
+                <path d="M10 14L21 3" />
+              </svg>
+            </div>
+            <div class="et-land-card-title">Lab Test Builder</div>
+            <div class="et-land-card-sub">Manage tests, components &amp; reference ranges (Supabase)</div>
+            <div class="et-land-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </button>
+          <button class="et-land-card" onclick="etShowSection('tree-catalog')">
+            <div class="et-land-icon" style="background:linear-gradient(135deg,#283593,#5C6BC0);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <line x1="6" y1="3" x2="6" y2="15" />
+                <circle cx="18" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <path d="M18 9a9 9 0 0 1-9 9" />
+              </svg>
+            </div>
+            <div class="et-land-card-title">Catalog Tree</div>
+            <div class="et-land-card-sub">Browse Department → Test → Component with values inline</div>
+            <div class="et-land-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </button>
         </div>
       </div><!-- /#et-landing -->
 
@@ -16741,6 +17259,186 @@
           </div>
         </div>
       </div><!-- /#et-panel-add-test -->
+
+      <!-- ══ TAB: LAB TEST BUILDER (Supabase — tests / components / reference ranges) ══ -->
+      <div class="et-panel" id="et-panel-lab-catalog">
+        <button class="et-back-btn" onclick="etShowSection('landing')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to menu
+        </button>
+
+        <div id="lc-config-warning"
+          style="display:none;background:#fff3e0;border:1.5px solid #ffcc80;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#e65100;">
+          <strong>Supabase isn't connected yet.</strong> Set <code>SUPABASE_URL</code> and
+          <code>SUPABASE_ANON_KEY</code> near the top of the script to enable this tab.
+        </div>
+
+        <div class="et-card">
+          <div class="et-card-head">
+            <div class="et-card-icon" style="background:linear-gradient(135deg,#00695C,#00897B);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4" />
+                <path d="M14 3h7v7" />
+                <path d="M10 14L21 3" />
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div class="et-card-title">Lab Test Builder</div>
+              <div class="et-card-sub" id="lc-stats-sub">Loading…</div>
+            </div>
+            <button class="et-btn et-btn-ghost" onclick="lcInit()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;">
+
+          <!-- LEFT: test list -->
+          <div class="et-card" style="flex:1 1 340px;min-width:300px;">
+            <div class="et-card-head">
+              <div class="et-card-icon" style="background:linear-gradient(135deg,#283593,#3949AB);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </div>
+              <div>
+                <div class="et-card-title">Tests</div>
+                <div class="et-card-sub" id="lc-test-count-sub">—</div>
+              </div>
+            </div>
+            <div class="et-card-body">
+              <div class="et-field" style="margin-bottom:8px;">
+                <input type="text" id="lc-test-search" placeholder="Search tests…" autocomplete="off"
+                  oninput="lcRenderTests()" />
+              </div>
+              <div class="et-field">
+                <select id="lc-dept-filter" onchange="lcRenderTests()">
+                  <option value="">All Departments</option>
+                </select>
+              </div>
+              <button class="et-btn et-btn-orange" style="width:100%;margin:10px 0;" onclick="lcToggleAddTestForm()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add New Test
+              </button>
+
+              <div id="lc-add-test-form" style="display:none;background:#fafafa;border:1.5px dashed #ccc;border-radius:10px;padding:12px;margin-bottom:12px;">
+                <div class="et-field">
+                  <label>Department</label>
+                  <select id="lc-new-test-dept" onchange="lcSuggestTestId()"></select>
+                </div>
+                <div class="et-field">
+                  <label>Test ID</label>
+                  <input type="text" id="lc-new-test-id" placeholder="e.g. HEMA-030" autocomplete="off" />
+                  <div class="et-field-hint">Auto-suggested — feel free to edit.</div>
+                </div>
+                <div class="et-field">
+                  <label>Test Name</label>
+                  <input type="text" id="lc-new-test-name" placeholder="e.g. Reticulocyte Count" autocomplete="off" />
+                </div>
+                <div class="et-field" style="display:flex;gap:16px;align-items:center;">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#555;">
+                    <input type="checkbox" id="lc-new-test-hascomp" style="width:auto;" /> Multi-component panel
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#555;">
+                    <input type="checkbox" id="lc-new-test-active" checked style="width:auto;" /> Active
+                  </label>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="et-btn et-btn-primary" style="flex:1;" onclick="lcSaveNewTest()">Save Test</button>
+                  <button class="et-btn et-btn-ghost" onclick="lcToggleAddTestForm()">Cancel</button>
+                </div>
+              </div>
+
+              <div id="lc-test-list">
+                <div class="et-loading">Loading tests…</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: selected test detail (components + reference ranges) -->
+          <div class="et-card" style="flex:2 1 420px;min-width:320px;">
+            <div class="et-card-head" id="lc-detail-head">
+              <div class="et-card-icon" style="background:linear-gradient(135deg,#6F2DBD,#4A0E8F);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+              </div>
+              <div>
+                <div class="et-card-title">Components &amp; Reference Ranges</div>
+                <div class="et-card-sub" id="lc-detail-sub">Select a test on the left</div>
+              </div>
+            </div>
+            <div class="et-card-body" id="lc-detail-body">
+              <div class="et-empty">Select a test on the left to view or edit its components and reference ranges.</div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /#et-panel-lab-catalog -->
+
+      <!-- ══ TAB: CATALOG TREE (Supabase — Department → Test → Component, inline values) ══ -->
+      <div class="et-panel" id="et-panel-tree-catalog">
+        <button class="et-back-btn" onclick="etShowSection('landing')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to menu
+        </button>
+
+        <div id="tc-config-warning"
+          style="display:none;background:#fff3e0;border:1.5px solid #ffcc80;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#e65100;">
+          <strong>Supabase isn't connected yet.</strong> Set <code>SUPABASE_URL</code> and
+          <code>SUPABASE_ANON_KEY</code> near the top of the script to enable this tab.
+        </div>
+
+        <div class="et-card">
+          <div class="et-card-head">
+            <div class="et-card-icon" style="background:linear-gradient(135deg,#283593,#5C6BC0);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                <line x1="6" y1="3" x2="6" y2="15" />
+                <circle cx="18" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <path d="M18 9a9 9 0 0 1-9 9" />
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div class="et-card-title">Catalog Tree</div>
+              <div class="et-card-sub" id="tc-stats-sub">Loading…</div>
+            </div>
+            <button class="et-btn et-btn-ghost" onclick="tcInit(true)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              Refresh
+            </button>
+          </div>
+          <div class="et-card-body">
+            <div class="et-field" style="margin-bottom:0;">
+              <input type="text" id="tc-search" placeholder="Search department, test, or component…" autocomplete="off"
+                oninput="tcFilter()" />
+            </div>
+          </div>
+        </div>
+
+        <div class="et-card" style="margin-top:16px;">
+          <div class="et-card-body" id="tc-tree-root" style="padding:14px 18px;">
+            <div class="et-loading">Loading catalog tree…</div>
+          </div>
+        </div>
+      </div><!-- /#et-panel-tree-catalog -->
 
     </div><!-- /.et-wrap -->
   </div><!-- /#page-add-tests -->
@@ -17647,12 +18345,17 @@
     function etShowSection(section) {
       const isLanding = section === 'landing';
       document.getElementById('et-landing').classList.toggle('active', isLanding);
-      ['catalog', 'add-cat', 'add-test'].forEach(t => {
+      ['catalog', 'add-cat', 'add-test', 'lab-catalog', 'tree-catalog'].forEach(t => {
         document.getElementById('et-panel-' + t).classList.toggle('active', t === section);
       });
-      // Scroll the panel into view smoothly on section change
+      if (section === 'lab-catalog') lcInit();
+      if (section === 'tree-catalog') tcInit();
       const wrap = document.querySelector('#page-add-tests .et-wrap');
-      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (wrap) {
+        wrap.classList.toggle('et-wrap-wide', section === 'tree-catalog');
+        // Scroll the panel into view smoothly on section change
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     // Kept for backward compatibility with any old inline handlers.
@@ -18511,6 +19214,566 @@
         }
       }
     }URL
+  </script>
+
+  <!-- ════════════════════════════════════════════════════════
+       LAB TEST BUILDER — Supabase-backed CRUD for
+       tests / components / reference_ranges
+       (Edit Tests → 4th tab)
+  ════════════════════════════════════════════════════════ -->
+  <script>
+    // ── State ──────────────────────────────────────────────
+    let lcDepartments = [];
+    let lcUnits = [];
+    let lcInputTypes = [];
+    let lcTests = [];
+    let lcSelectedTestId = null;
+    let lcComponents = [];
+    let lcLoaded = false;
+
+    // ── Init (called the first time the tab is opened, and on Refresh) ──
+    async function lcInit() {
+      const client = sbClient();
+      const warn = document.getElementById('lc-config-warning');
+      if (!client) {
+        warn.style.display = 'block';
+        document.getElementById('lc-test-list').innerHTML = '<div class="et-empty">Connect Supabase to load tests.</div>';
+        return;
+      }
+      warn.style.display = 'none';
+
+      try {
+        if (!lcLoaded) {
+          const [depRes, unitRes, itRes] = await Promise.all([
+            client.from('departments').select('*').order('department_name'),
+            client.from('units').select('*').order('unit_code'),
+            client.from('input_types').select('*').order('input_type'),
+          ]);
+          if (depRes.error) throw depRes.error;
+          if (unitRes.error) throw unitRes.error;
+          if (itRes.error) throw itRes.error;
+          lcDepartments = depRes.data || [];
+          lcUnits = unitRes.data || [];
+          lcInputTypes = itRes.data || [];
+          lcPopulateDeptSelects();
+          lcLoaded = true;
+        }
+        await lcLoadTests();
+      } catch (e) {
+        atToast('Supabase error: ' + (e.message || e), 'err');
+      }
+    }
+
+    function lcPopulateDeptSelects() {
+      const filt = document.getElementById('lc-dept-filter');
+      const newSel = document.getElementById('lc-new-test-dept');
+      filt.innerHTML = '<option value="">All Departments</option>' +
+        lcDepartments.map(d => `<option value="${escH(d.department_id)}">${escH(d.department_name)}</option>`).join('');
+      newSel.innerHTML = lcDepartments.map(d => `<option value="${escH(d.department_id)}">${escH(d.department_name)} (${escH(d.department_id)})</option>`).join('');
+      lcSuggestTestId();
+    }
+
+    // ── Load & render tests ─────────────────────────────────
+    async function lcLoadTests() {
+      const client = sbClient();
+      document.getElementById('lc-test-list').innerHTML = '<div class="et-loading">Loading tests…</div>';
+      const { data, error } = await client.from('tests').select('*').order('test_id');
+      if (error) { atToast('Failed to load tests: ' + error.message, 'err'); return; }
+      lcTests = data || [];
+      document.getElementById('lc-stats-sub').textContent =
+        `${lcDepartments.length} departments · ${lcTests.length} tests`;
+      lcRenderTests();
+    }
+
+    function lcRenderTests() {
+      const q = (document.getElementById('lc-test-search').value || '').trim().toUpperCase();
+      const dept = document.getElementById('lc-dept-filter').value;
+      let list = lcTests;
+      if (dept) list = list.filter(t => t.department_id === dept);
+      if (q) list = list.filter(t => t.test_name.toUpperCase().includes(q) || t.test_id.toUpperCase().includes(q));
+
+      document.getElementById('lc-test-count-sub').textContent = `${list.length} of ${lcTests.length} shown`;
+
+      const wrap = document.getElementById('lc-test-list');
+      if (!list.length) {
+        wrap.innerHTML = '<div class="et-empty">No tests match.</div>';
+        return;
+      }
+      wrap.innerHTML = list.map(t => `
+        <div class="lc-test-row ${t.test_id === lcSelectedTestId ? 'sel' : ''}" onclick="lcSelectTest('${escH(t.test_id).replace(/'/g, "\\'")}')">
+          <div style="min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escH(t.test_name)}</div>
+            <div style="font-size:11px;color:#999;">${escH(t.test_id)} · ${escH(t.department_id)}${t.has_components ? ' · panel' : ''}${!t.active ? ' · inactive' : ''}</div>
+          </div>
+          <button class="et-hit-edit" style="flex-shrink:0;" onclick="event.stopPropagation();lcDeleteTest('${escH(t.test_id).replace(/'/g, "\\'")}')">Delete</button>
+        </div>`).join('');
+    }
+
+    function lcToggleAddTestForm() {
+      const f = document.getElementById('lc-add-test-form');
+      f.style.display = f.style.display === 'none' ? 'block' : 'none';
+      if (f.style.display === 'block') lcSuggestTestId();
+    }
+
+    function lcSuggestTestId() {
+      const dept = document.getElementById('lc-new-test-dept').value;
+      if (!dept) return;
+      const nums = lcTests
+        .filter(t => t.department_id === dept)
+        .map(t => parseInt((t.test_id.split('-')[1] || '0'), 10))
+        .filter(n => !isNaN(n));
+      const next = (nums.length ? Math.max(...nums) : 0) + 1;
+      document.getElementById('lc-new-test-id').value = `${dept}-${String(next).padStart(3, '0')}`;
+    }
+
+    async function lcSaveNewTest() {
+      const client = sbClient();
+      const testId = document.getElementById('lc-new-test-id').value.trim().toUpperCase();
+      const name = document.getElementById('lc-new-test-name').value.trim();
+      const dept = document.getElementById('lc-new-test-dept').value;
+      const hasComp = document.getElementById('lc-new-test-hascomp').checked;
+      const active = document.getElementById('lc-new-test-active').checked;
+
+      if (!testId || !name || !dept) {
+        atToast('Test ID, name, and department are required.', 'err');
+        return;
+      }
+      const { error } = await client.from('tests').insert({
+        test_id: testId, test_name: name, department_id: dept,
+        has_components: hasComp, active: active,
+      });
+      if (error) { atToast('Save failed: ' + error.message, 'err'); return; }
+
+      atToast('Test added.', 'ok');
+      document.getElementById('lc-new-test-name').value = '';
+      lcToggleAddTestForm();
+      await lcLoadTests();
+      lcSelectTest(testId);
+    }
+
+    async function lcDeleteTest(testId) {
+      if (!confirm(`Delete test ${testId}? This also deletes its components and reference ranges.`)) return;
+      const client = sbClient();
+      const { error } = await client.from('tests').delete().eq('test_id', testId);
+      if (error) { atToast('Delete failed: ' + error.message, 'err'); return; }
+      atToast('Test deleted.', 'ok');
+      if (lcSelectedTestId === testId) {
+        lcSelectedTestId = null;
+        document.getElementById('lc-detail-sub').textContent = 'Select a test on the left';
+        document.getElementById('lc-detail-body').innerHTML =
+          '<div class="et-empty">Select a test on the left to view or edit its components and reference ranges.</div>';
+      }
+      await lcLoadTests();
+    }
+
+    // ── Select a test → load its components ─────────────────
+    async function lcSelectTest(testId) {
+      lcSelectedTestId = testId;
+      lcRenderTests();
+      const t = lcTests.find(x => x.test_id === testId);
+      document.getElementById('lc-detail-sub').textContent = t ? `${t.test_name} (${t.test_id})` : testId;
+      document.getElementById('lc-detail-body').innerHTML = '<div class="et-loading">Loading components…</div>';
+
+      const client = sbClient();
+      const { data, error } = await client
+        .from('components')
+        .select('*, reference_ranges(*)')
+        .eq('test_id', testId)
+        .order('display_order');
+      if (error) { atToast('Failed to load components: ' + error.message, 'err'); return; }
+      lcComponents = data || [];
+      lcRenderDetail();
+    }
+
+    function lcRenderDetail() {
+      const body = document.getElementById('lc-detail-body');
+      const unitOpts = '<option value="">—</option>' + lcUnits.map(u => `<option value="${escH(u.unit_code)}">${escH(u.unit_code)}</option>`).join('');
+      const inputOpts = lcInputTypes.map(i => `<option value="${escH(i.input_type)}">${escH(i.input_type)}</option>`).join('');
+
+      let html = `
+        <div style="background:#fafafa;border:1.5px dashed #ccc;border-radius:10px;padding:12px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#8D6E63;margin-bottom:8px;">Add Component</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" id="lc-new-comp-name" placeholder="Component name" style="flex:2;min-width:140px;padding:9px 11px;border:1.5px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;" />
+            <select id="lc-new-comp-unit" style="flex:1;min-width:90px;padding:9px 11px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;">${unitOpts}</select>
+            <select id="lc-new-comp-input" style="flex:1;min-width:110px;padding:9px 11px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;">${inputOpts}</select>
+          </div>
+          <button class="et-btn et-btn-orange" style="margin-top:8px;" onclick="lcSaveNewComponent()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Component
+          </button>
+        </div>`;
+
+      if (!lcComponents.length) {
+        html += '<div class="et-empty">No components yet — add the first one above.</div>';
+      } else {
+        html += '<table class="et-cat-table"><thead><tr><th>Component</th><th>Unit</th><th>Input</th><th style="text-align:center;">Range</th><th style="text-align:center;">Del</th></tr></thead><tbody>';
+        lcComponents.forEach(c => {
+          const safeId = c.component_id.replace(/'/g, "\\'");
+          html += `<tr>
+            <td class="et-tname">${escH(c.component_name)}</td>
+            <td>${escH(c.unit_code || '—')}</td>
+            <td>${escH(c.input_type || '—')}</td>
+            <td style="text-align:center;"><button class="et-edit-btn" title="Edit reference range" onclick="lcOpenRangeEditor('${safeId}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button></td>
+            <td style="text-align:center;"><button class="et-hit-edit" onclick="lcDeleteComponent('${safeId}')">Del</button></td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+      }
+
+      html += '<div id="lc-range-editor"></div>';
+      body.innerHTML = html;
+    }
+
+    async function lcSaveNewComponent() {
+      if (!lcSelectedTestId) return;
+      const client = sbClient();
+      const name = document.getElementById('lc-new-comp-name').value.trim();
+      const unit = document.getElementById('lc-new-comp-unit').value || null;
+      const inputType = document.getElementById('lc-new-comp-input').value || null;
+      if (!name) { atToast('Component name is required.', 'err'); return; }
+
+      const nextOrder = lcComponents.length
+        ? Math.max(...lcComponents.map(c => c.display_order || 0)) + 1 : 1;
+      const compId = `${lcSelectedTestId}-C${String(nextOrder).padStart(2, '0')}`;
+
+      const { error } = await client.from('components').insert({
+        component_id: compId, test_id: lcSelectedTestId, component_name: name,
+        unit_code: unit, input_type: inputType, display_order: nextOrder,
+      });
+      if (error) { atToast('Save failed: ' + error.message, 'err'); return; }
+
+      // Create the matching (empty) reference range row, same convention as the imported data.
+      await client.from('reference_ranges').insert({
+        reference_range_id: `${compId}-R01`, component_id: compId, test_id: lcSelectedTestId,
+      });
+
+      atToast('Component added.', 'ok');
+      document.getElementById('lc-new-comp-name').value = '';
+      await lcSelectTest(lcSelectedTestId);
+    }
+
+    async function lcDeleteComponent(componentId) {
+      if (!confirm(`Delete component ${componentId}? This also deletes its reference range.`)) return;
+      const client = sbClient();
+      const { error } = await client.from('components').delete().eq('component_id', componentId);
+      if (error) { atToast('Delete failed: ' + error.message, 'err'); return; }
+      atToast('Component deleted.', 'ok');
+      await lcSelectTest(lcSelectedTestId);
+    }
+
+    // ── Reference range editor (inline, per component) ──────
+    function lcOpenRangeEditor(componentId) {
+      const c = lcComponents.find(x => x.component_id === componentId);
+      if (!c) return;
+      const r = (c.reference_ranges && c.reference_ranges[0]) || {};
+      const editor = document.getElementById('lc-range-editor');
+      editor.innerHTML = `
+        <div style="background:#f4f1fa;border:1.5px solid #ded1f7;border-radius:10px;padding:14px;margin-top:12px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#6F2DBD;margin-bottom:10px;">
+            Reference Range — ${escH(c.component_name)}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;">
+            ${lcRangeField('Sex', 'sex', r.sex, 'text', 'Any / Male / Female')}
+            ${lcRangeField('Min Age', 'min_age', r.min_age, 'number', '')}
+            ${lcRangeField('Max Age', 'max_age', r.max_age, 'number', '')}
+            ${lcRangeField('Low', 'low', r.low, 'number', '')}
+            ${lcRangeField('High', 'high', r.high, 'number', '')}
+            ${lcRangeField('Critical Low', 'critical_low', r.critical_low, 'number', '')}
+            ${lcRangeField('Critical High', 'critical_high', r.critical_high, 'number', '')}
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="et-btn et-btn-primary" onclick="lcSaveRange('${componentId.replace(/'/g, "\\'")}')">Save Range</button>
+            <button class="et-btn et-btn-ghost" onclick="document.getElementById('lc-range-editor').innerHTML=''">Cancel</button>
+          </div>
+        </div>`;
+      editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function lcRangeField(label, id, val, type, placeholder) {
+      const v = (val === null || val === undefined) ? '' : val;
+      return `<div>
+        <div style="font-size:10px;color:#888;margin-bottom:3px;">${escH(label)}</div>
+        <input type="${type}" id="lc-range-${id}" value="${escH(String(v))}" placeholder="${escH(placeholder)}"
+          style="width:100%;padding:8px 9px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;box-sizing:border-box;" />
+      </div>`;
+    }
+
+    async function lcSaveRange(componentId) {
+      const client = sbClient();
+      const ids = ['sex', 'min_age', 'max_age', 'low', 'high', 'critical_low', 'critical_high'];
+      const payload = { component_id: componentId, test_id: lcSelectedTestId };
+      ids.forEach(id => {
+        const el = document.getElementById('lc-range-' + id);
+        const v = el.value.trim();
+        payload[id] = v === '' ? null : (id === 'sex' ? v : parseFloat(v));
+      });
+      payload.reference_range_id = `${componentId}-R01`;
+
+      const { error } = await client.from('reference_ranges')
+        .upsert(payload, { onConflict: 'reference_range_id' });
+      if (error) { atToast('Save failed: ' + error.message, 'err'); return; }
+
+      atToast('Reference range saved.', 'ok');
+      document.getElementById('lc-range-editor').innerHTML = '';
+      await lcSelectTest(lcSelectedTestId);
+    }
+  </script>
+
+  <!-- ════════════════════════════════════════════════════════
+       CATALOG TREE — Department → Test → Component browser,
+       values visible inline; Edit opens fields in-place.
+       (Edit Tests → 5th tab)
+  ════════════════════════════════════════════════════════ -->
+  <script>
+    let tcData = [];          // departments, each with .tests[], each with .components[]
+    let tcLoaded = false;
+    const tcExpandedDepts = new Set();
+    const tcExpandedTests = new Set();
+
+    async function tcInit(force) {
+      const client = sbClient();
+      const warn = document.getElementById('tc-config-warning');
+      if (!client) {
+        warn.style.display = 'block';
+        document.getElementById('tc-tree-root').innerHTML = '<div class="et-empty">Connect Supabase to load the catalog tree.</div>';
+        return;
+      }
+      warn.style.display = 'none';
+
+      if (tcLoaded && !force) { tcRenderTree(); return; }
+
+      document.getElementById('tc-tree-root').innerHTML = '<div class="et-loading">Loading catalog tree…</div>';
+      try {
+        const { data, error } = await client
+          .from('departments')
+          .select('*, tests(*, components(*, reference_ranges(*)))')
+          .order('department_name');
+        if (error) throw error;
+
+        tcData = (data || []).map(d => ({
+          ...d,
+          tests: (d.tests || []).slice().sort((a, b) => a.test_id.localeCompare(b.test_id)).map(t => ({
+            ...t,
+            components: (t.components || []).slice().sort((a, b) => (a.display_order || 0) - (b.display_order || 0)),
+          })),
+        }));
+        tcLoaded = true;
+
+        const testCount = tcData.reduce((s, d) => s + d.tests.length, 0);
+        const compCount = tcData.reduce((s, d) => s + d.tests.reduce((s2, t) => s2 + t.components.length, 0), 0);
+        document.getElementById('tc-stats-sub').textContent =
+          `${tcData.length} departments · ${testCount} tests · ${compCount} components`;
+
+        tcRenderTree();
+      } catch (e) {
+        atToast('Supabase error: ' + (e.message || e), 'err');
+        document.getElementById('tc-tree-root').innerHTML = '<div class="et-empty">Failed to load. Try Refresh.</div>';
+      }
+    }
+
+    // ── Render ───────────────────────────────────────────────
+    function tcRenderTree() {
+      const root = document.getElementById('tc-tree-root');
+      if (!tcData.length) {
+        root.innerHTML = '<div class="et-empty">No departments found.</div>';
+        return;
+      }
+      root.innerHTML = tcData.map(d => tcRenderDept(d)).join('');
+      tcFilter(); // re-apply any active search filter
+    }
+
+    function tcRenderDept(d) {
+      const expanded = tcExpandedDepts.has(d.department_id) ? ' expanded' : '';
+      return `
+        <div class="tc-dept${expanded}" data-dept="${escH(d.department_id)}">
+          <div class="tc-dept-head" onclick="tcToggleDept('${escH(d.department_id).replace(/'/g, "\\'")}')">
+            <svg class="tc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+            ${escH(d.department_name)} <span style="font-weight:500;color:#9c7fd6;">(${d.tests.length} tests)</span>
+          </div>
+          <div class="tc-dept-body">
+            ${d.tests.map(t => tcRenderTest(t)).join('')}
+          </div>
+        </div>`;
+    }
+
+    function tcRenderTest(t) {
+      const expanded = tcExpandedTests.has(t.test_id) ? ' expanded' : '';
+      return `
+        <div class="tc-test${expanded}" data-test="${escH(t.test_id)}" data-testname="${escH(t.test_name).toLowerCase()}">
+          <div class="tc-test-head" onclick="tcToggleTest('${escH(t.test_id).replace(/'/g, "\\'")}')">
+            <svg class="tc-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+            ${escH(t.test_name)} <span style="font-weight:500;color:#bbb;">(${escH(t.test_id)} · ${t.components.length})</span>
+          </div>
+          <div class="tc-test-body">
+            ${t.components.length ? `
+            <div class="tc-table-scroll">
+              ${tcRenderHeaderRow()}
+              ${t.components.map(c => tcRenderCompRow(t, c)).join('')}
+            </div>` : '<div style="color:#ccc;font-size:12px;font-style:italic;padding:6px 10px;">No components.</div>'}
+          </div>
+        </div>`;
+    }
+
+    function tcRenderHeaderRow() {
+      const cols = ['Component', 'Unit', 'Input Type', 'Sex', 'Min Age', 'Max Age', 'Low', 'High', 'Crit. Low', 'Crit. High', ''];
+      return `<div class="tc-grid tc-grid-head">${cols.map(c => `<div class="tc-gcell">${c}</div>`).join('')}</div>`;
+    }
+
+    function tcCellNum(v) {
+      return (v === null || v === undefined || v === '')
+        ? '<div class="tc-gcell tc-gcell-num empty">–</div>'
+        : `<div class="tc-gcell tc-gcell-num">${escH(String(v))}</div>`;
+    }
+
+    function tcRenderCompRow(t, c) {
+      const r = (c.reference_ranges && c.reference_ranges[0]) || {};
+      return `<div class="tc-grid tc-comp-row" id="tc-comp-${escH(c.component_id)}" data-compname="${escH(c.component_name).toLowerCase()}">
+        <div class="tc-gcell tc-gcell-name">${escH(c.component_name)}</div>
+        <div class="tc-gcell tc-gcell-meta">${escH(c.unit_code || '–')}</div>
+        <div class="tc-gcell tc-gcell-meta">${escH(c.input_type || '–')}</div>
+        <div class="tc-gcell tc-gcell-meta">${escH(r.sex || '–')}</div>
+        ${tcCellNum(r.min_age)}
+        ${tcCellNum(r.max_age)}
+        ${tcCellNum(r.low)}
+        ${tcCellNum(r.high)}
+        ${tcCellNum(r.critical_low)}
+        ${tcCellNum(r.critical_high)}
+        <div class="tc-gcell tc-gcell-edit">
+          <button class="tc-edit-btn" title="Edit" onclick="tcEditComponent('${escH(t.test_id).replace(/'/g, "\\'")}','${escH(c.component_id).replace(/'/g, "\\'")}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }
+
+    // ── Expand / collapse ────────────────────────────────────
+    function tcToggleDept(deptId) {
+      const el = document.querySelector(`.tc-dept[data-dept="${CSS.escape(deptId)}"]`);
+      if (!el) return;
+      const isOpen = el.classList.toggle('expanded');
+      isOpen ? tcExpandedDepts.add(deptId) : tcExpandedDepts.delete(deptId);
+    }
+
+    function tcToggleTest(testId) {
+      const el = document.querySelector(`.tc-test[data-test="${CSS.escape(testId)}"]`);
+      if (!el) return;
+      const isOpen = el.classList.toggle('expanded');
+      isOpen ? tcExpandedTests.add(testId) : tcExpandedTests.delete(testId);
+    }
+
+    // ── Search filter (auto-expands matches) ─────────────────
+    function tcFilter() {
+      const q = (document.getElementById('tc-search').value || '').trim().toLowerCase();
+      document.querySelectorAll('.tc-dept').forEach(deptEl => {
+        let deptHasMatch = false;
+        deptEl.querySelectorAll('.tc-test').forEach(testEl => {
+          const testName = testEl.dataset.testname || '';
+          const testId = (testEl.dataset.test || '').toLowerCase();
+          let testHasMatch = !q || testName.includes(q) || testId.includes(q);
+          let rowMatch = false;
+          testEl.querySelectorAll('.tc-comp-row').forEach(rowEl => {
+            const compName = rowEl.dataset.compname || '';
+            const show = !q || testHasMatch || compName.includes(q);
+            rowEl.classList.toggle('tc-hidden', !show);
+            if (show && q) rowMatch = true;
+          });
+          const show = !q || testHasMatch || rowMatch;
+          testEl.classList.toggle('tc-hidden', !show);
+          if (show && q) {
+            testEl.classList.add('expanded');
+            deptHasMatch = true;
+          }
+        });
+        const show = !q || deptHasMatch;
+        deptEl.classList.toggle('tc-hidden', !show);
+        if (show && q) deptEl.classList.add('expanded');
+      });
+    }
+
+    // ── Inline edit ───────────────────────────────────────────
+    function tcFindComp(componentId) {
+      for (const d of tcData) {
+        for (const t of d.tests) {
+          const c = t.components.find(x => x.component_id === componentId);
+          if (c) return { dept: d, test: t, comp: c };
+        }
+      }
+      return null;
+    }
+
+    function tcEditComponent(testId, componentId) {
+      const found = tcFindComp(componentId);
+      if (!found) return;
+      const c = found.comp;
+      const r = (c.reference_ranges && c.reference_ranges[0]) || {};
+      const unitOpts = '<option value="">—</option>' + lcUnits.map(u =>
+        `<option value="${escH(u.unit_code)}"${u.unit_code === c.unit_code ? ' selected' : ''}>${escH(u.unit_code)}</option>`).join('');
+      const inputOpts = lcInputTypes.map(i =>
+        `<option value="${escH(i.input_type)}"${i.input_type === c.input_type ? ' selected' : ''}>${escH(i.input_type)}</option>`).join('');
+
+      const row = document.getElementById('tc-comp-' + componentId);
+      row.outerHTML = `
+        <div class="tc-grid tc-comp-row" id="tc-comp-${escH(componentId)}">
+          <div class="tc-edit-form">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <input type="text" id="tc-e-name-${escH(componentId)}" value="${escH(c.component_name)}" placeholder="Component name"
+                style="flex:2;min-width:140px;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;" />
+              <select id="tc-e-unit-${escH(componentId)}" style="flex:1;min-width:80px;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;">${unitOpts}</select>
+              <select id="tc-e-input-${escH(componentId)}" style="flex:1;min-width:100px;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;">${inputOpts}</select>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;">
+              ${tcField(componentId, 'sex', r.sex, 'text', 'Any/Male/Female')}
+              ${tcField(componentId, 'min_age', r.min_age, 'number', 'Min age')}
+              ${tcField(componentId, 'max_age', r.max_age, 'number', 'Max age')}
+              ${tcField(componentId, 'low', r.low, 'number', 'Low')}
+              ${tcField(componentId, 'high', r.high, 'number', 'High')}
+              ${tcField(componentId, 'critical_low', r.critical_low, 'number', 'Crit. low')}
+              ${tcField(componentId, 'critical_high', r.critical_high, 'number', 'Crit. high')}
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="et-btn et-btn-primary" onclick="tcSaveComponent('${escH(testId).replace(/'/g, "\\'")}','${escH(componentId).replace(/'/g, "\\'")}')">Save</button>
+              <button class="et-btn et-btn-ghost" onclick="tcRenderTree()">Cancel</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function tcField(componentId, id, val, type, placeholder) {
+      const v = (val === null || val === undefined) ? '' : val;
+      return `<input type="${type}" id="tc-e-${id}-${escH(componentId)}" value="${escH(String(v))}" placeholder="${escH(placeholder)}"
+        style="padding:7px 9px;border:1.5px solid #ddd;border-radius:6px;font-size:11.5px;box-sizing:border-box;" />`;
+    }
+
+    async function tcSaveComponent(testId, componentId) {
+      const client = sbClient();
+      const name = document.getElementById(`tc-e-name-${componentId}`).value.trim();
+      const unit = document.getElementById(`tc-e-unit-${componentId}`).value || null;
+      const inputType = document.getElementById(`tc-e-input-${componentId}`).value || null;
+      if (!name) { atToast('Component name is required.', 'err'); return; }
+
+      const { error: compErr } = await client.from('components')
+        .update({ component_name: name, unit_code: unit, input_type: inputType })
+        .eq('component_id', componentId);
+      if (compErr) { atToast('Save failed: ' + compErr.message, 'err'); return; }
+
+      const ids = ['sex', 'min_age', 'max_age', 'low', 'high', 'critical_low', 'critical_high'];
+      const payload = { reference_range_id: `${componentId}-R01`, component_id: componentId, test_id: testId };
+      ids.forEach(id => {
+        const v = document.getElementById(`tc-e-${id}-${componentId}`).value.trim();
+        payload[id] = v === '' ? null : (id === 'sex' ? v : parseFloat(v));
+      });
+      const { error: rangeErr } = await client.from('reference_ranges')
+        .upsert(payload, { onConflict: 'reference_range_id' });
+      if (rangeErr) { atToast('Save failed: ' + rangeErr.message, 'err'); return; }
+
+      atToast('Component saved.', 'ok');
+      await tcInit(true);
+    }
   </script>
 </body>
 
