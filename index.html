@@ -9078,14 +9078,22 @@
       return KEY_ALIAS[up] || up;
     }
 
-    function getReferralPriceTier() {
-      const v = (document.getElementById('f-referred')?.value || '').toUpperCase();
+    /* Shared codename → price-tier resolver.
+       Used by the referral field (registration form) and the
+       Compute Tests codename field so both recognize the same
+       BSA/OM/YAKAP/AMANTE/GOBSOL keywords the sheet stores price columns for. */
+    function resolvePriceTier(text) {
+      const v = (text || '').toUpperCase();
       if (/(^|[\s,;/])BSA($|[\s,;/])/.test(v)) return 'bsa';
       if (/\/OM($|[\s,;/])/.test(v)) return 'om';
       if (/(^|[\s,;/])YAKAP($|[\s,;/])/.test(v)) return 'yakap';
       if (/(^|[\s,;/])AMANTE($|[\s,;/])/.test(v)) return 'amante';
       if (/(^|[\s,;/])GOBSOL($|[\s,;/])/.test(v)) return 'gobsol';
       return '';
+    }
+
+    function getReferralPriceTier() {
+      return resolvePriceTier(document.getElementById('f-referred')?.value || '');
     }
 
     function getPrice(testName) {
@@ -17719,12 +17727,38 @@
         background: #faf7ff;
       }
 
+      .ct-codename-filter {
+        min-width: 170px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #444;
+        border: 1.5px solid #ede8ff;
+        border-radius: 10px;
+        padding: 0 12px;
+        background: #faf7ff;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s;
+      }
+
+      .ct-codename-filter::placeholder {
+        color: #b7aed6;
+        font-weight: 500;
+      }
+
+      .ct-codename-filter.ct-codename-active {
+        border-color: #6F2DBD;
+        background: #f3ecff;
+        color: #6F2DBD;
+      }
+
       @media(max-width:500px) {
         .ct-filters-row {
           flex-direction: column;
         }
 
-        .ct-cat-filter {
+        .ct-cat-filter,
+        .ct-codename-filter {
           width: 100%;
         }
       }
@@ -18086,6 +18120,8 @@
           <select class="ct-cat-filter" id="ct-cat-filter" onchange="ctOnCatFilter()">
             <option value="">All Categories</option>
           </select>
+          <input type="text" class="ct-codename-filter" id="ct-codename-filter"
+            placeholder="Codename (BSA, OM, YAKAP…)" autocomplete="off" oninput="ctOnCodenameChange()" />
         </div>
         <div class="ct-loading" id="ct-loading" style="display:none;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
@@ -18128,7 +18164,7 @@
         </div>
         <div class="ct-totals">
           <div class="ct-total-line">
-            <span>Subtotal (Regular)</span>
+            <span id="ct-subtotal-lbl">Subtotal (Regular)</span>
             <span id="ct-subtotal">₱ 0.00</span>
           </div>
           <div class="ct-total-line disc">
@@ -18379,11 +18415,19 @@
         _etCatalog = {};
         if (d.success && d.categories) {
           Object.entries(d.categories).forEach(([cat, tests]) => {
-            _etCatalog[cat] = tests.map(t => ({
-              name: t,
-              r: (d.prices[t.toUpperCase()] || {}).r ?? null,
-              s: (d.prices[t.toUpperCase()] || {}).s ?? null,
-            }));
+            _etCatalog[cat] = tests.map(t => {
+              const p = d.prices[t.toUpperCase()] || {};
+              return {
+                name: t,
+                r: p.r ?? null,
+                s: p.s ?? null,
+                bsa: p.bsa ?? null,
+                om: p.om ?? null,
+                yakap: p.yakap ?? null,
+                amante: p.amante ?? null,
+                gobsol: p.gobsol ?? null,
+              };
+            });
           });
           // Sync to global state so registration form stays fresh
           PRICES = d.prices || PRICES;
@@ -18393,11 +18437,19 @@
         // Fallback from global PRICES/CATEGORIES
         if (typeof CATEGORIES !== 'undefined' && CATEGORIES.length) {
           CATEGORIES.forEach(cat => {
-            _etCatalog[cat.name] = (cat.tests || []).map(t => ({
-              name: t,
-              r: (PRICES[t.toUpperCase()] || {}).r ?? null,
-              s: (PRICES[t.toUpperCase()] || {}).s ?? null,
-            }));
+            _etCatalog[cat.name] = (cat.tests || []).map(t => {
+              const p = PRICES[t.toUpperCase()] || {};
+              return {
+                name: t,
+                r: p.r ?? null,
+                s: p.s ?? null,
+                bsa: p.bsa ?? null,
+                om: p.om ?? null,
+                yakap: p.yakap ?? null,
+                amante: p.amante ?? null,
+                gobsol: p.gobsol ?? null,
+              };
+            });
           });
         }
       }
@@ -18910,6 +18962,9 @@
     let _ctSearchQ = '';       // live search filter (uppercase)
     let _ctCatFilter = '';     // selected category filter ('' = all)
     let _ctGlobalDiscount = ''; // 'rate|name' from the sheet-fetched DISCOUNTS list, '' = none
+    let _ctCodename = '';      // typed codename (e.g. BSA/OM/YAKAP/AMANTE/GOBSOL) — picks the price list
+
+    const CT_TIER_LABELS = { bsa: 'BSA', om: 'OM', yakap: 'YAKAP', amante: 'AMANTE', gobsol: 'GOBSOL' };
 
     // Discount types available for Compute Tests (per selected test)
     const CT_DISCOUNTS = [
@@ -18974,6 +19029,28 @@
     function ctOnCatFilter() {
       _ctCatFilter = document.getElementById('ct-cat-filter').value;
       ctRenderTiles();
+    }
+
+    // ── Codename field (top of left panel) — same tier keywords as the referral field ──
+    function ctGetPriceTier() {
+      return resolvePriceTier(_ctCodename);
+    }
+
+    function ctOnCodenameChange() {
+      const inp = document.getElementById('ct-codename-filter');
+      _ctCodename = inp.value || '';
+      inp.classList.toggle('ct-codename-active', !!ctGetPriceTier());
+      ctRenderTiles();
+      ctRenderSummary();
+    }
+
+    // ── Resolve the price to use for a catalog test entry, honoring the
+    //    active codename tier when the sheet has a price for it. ──
+    function _ctBasePrice(t) {
+      if (!t) return { base: null, isTier: false };
+      const tier = ctGetPriceTier();
+      if (tier && typeof t[tier] === 'number') return { base: t[tier], isTier: true };
+      return { base: (t.r != null ? t.r : null), isTier: false };
     }
 
     // ── Live search (fast, client-side — filters tiles as you type) ──
@@ -19058,7 +19135,8 @@
           const key = ctKey(cat, t.name);
           const item = _ctSel[key];
           const qtySel = item ? item.qty : 0;
-          const priceStr = (t.r != null && t.r > 0) ? '₱' + Number(t.r).toLocaleString('en-PH', { minimumFractionDigits: 2 }) : '—';
+          const { base: tileBase } = _ctBasePrice(t);
+          const priceStr = (tileBase != null && tileBase > 0) ? '₱' + Number(tileBase).toLocaleString('en-PH', { minimumFractionDigits: 2 }) : '—';
           return `<div class="ct-tile${qtySel ? ' sel' : ''}" id="ct-tile-${slug(key)}"
                 style="background:${tint};color:${col};"
                 onclick="ctToggleTest('${escQ(cat)}','${escQ(t.name)}')">
@@ -19117,10 +19195,14 @@
     // ── Pricing: unit price after the test's own discount selection ──
     function ctUnitPrice(item) {
       const t = _ctFindTest(item.cat, item.test);
-      if (!t || t.r == null || t.r <= 0) return null;
-      if (item.discKey === 'senior' && t.s != null && t.s > 0) return t.s; // actual senior rate if on file
+      if (!t) return null;
+      const { base, isTier } = _ctBasePrice(t);
+      if (base == null || base <= 0) return null;
+      // Actual senior sheet price only applies to the regular list — a codename
+      // tier price (BSA/OM/YAKAP/…) takes precedence, same as the referral field.
+      if (!isTier && item.discKey === 'senior' && t.s != null && t.s > 0) return t.s;
       const d = CT_DISCOUNTS.find(x => x.key === item.discKey) || CT_DISCOUNTS[0];
-      return t.r * (1 - d.rate);
+      return base * (1 - d.rate);
     }
 
     // ── Render right: computation summary ──
@@ -19136,6 +19218,9 @@
       }
 
       const globalLineEl = document.getElementById('ct-global-discount-line');
+      const activeTier = ctGetPriceTier();
+      const subtotalLbl = document.getElementById('ct-subtotal-lbl');
+      if (subtotalLbl) subtotalLbl.textContent = `Subtotal (${activeTier ? CT_TIER_LABELS[activeTier] : 'Regular'})`;
 
       if (!keys.length) {
         scroll.innerHTML = `<div class="ct-empty">
@@ -19153,7 +19238,7 @@
       keys.forEach(key => {
         const item = _ctSel[key];
         const t = _ctFindTest(item.cat, item.test);
-        const reg = (t && t.r != null) ? t.r : null;
+        const { base: reg } = _ctBasePrice(t);
         const unit = ctUnitPrice(item);
         const lineReg = reg != null ? reg * item.qty : 0;
         const line = unit != null ? unit * item.qty : 0;
